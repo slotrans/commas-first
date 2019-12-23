@@ -81,6 +81,7 @@
 # Basic layout
 
 - strip all tokens that are entirely whitespace, since we will be handling spacing and newlines
+    - it _may_ be desirable to preserve whitespace that occurs immediately before a block comment
 
 ## SELECT
 
@@ -134,6 +135,12 @@
 
 - lay out _exactly_ as per group-by expressions
 
+## LIMIT, OFFSET
+
+- left-pad `limit` with one space, print its argument on the same line
+
+- `offset` is the same but with no padding
+
 ## CTEs
 
 - `with` prints at column 1 (no padding), followed by the name, followed by `as`, followed by a line break
@@ -163,6 +170,10 @@
 
 - note that inline views can be nested arbitrarily deep
 
+## Statement terminator
+
+- the trailing semicolon, if present, prints in column 1 on its own line
+
 
 # Special cases
 
@@ -178,4 +189,8 @@
 
 - some functions like `greatest` lex to Token.Keyword despite not being keywords
 
-- `group by` and `order by` lex as two tokens, not one
+- phrases
+    - `group by` and `order by` lex as two tokens, not one
+    - `is not null` lexes as three tokens
+    - basically assume any N-word keyword phrase lexes as N tokens
+    - might be worth modifying the lexer if this turns out to be super annoying
