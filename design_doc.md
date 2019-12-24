@@ -79,6 +79,15 @@
 
 - how to handle the set operators: UNION (ALL), INTERSECT, EXCEPT/MINUS ???
 
+- subqueries (both correlated subqueries and inline views)
+    - initially I started tracking paren depth to differentiate commas-as-function-arg-separators from commas-as-expression-list-separators
+    - being inside parens and encountering SELECT is also significant, and needs to be tracked in order to get indentation correct
+    - problem is subqueries are expressions and can be embedded anywhere, e.g. (foo + (select 1) + bar), and the paren depth needs to be remembered and then restored upon exiting the subquery context (suggests a stack)
+    - for inline views we can set the left margin just by knowing the nesting depth adding padding before every newline
+    - for correlated subqueries that doesn't work because SELECT could be at any arbitrary distance from the left margin and we need to align to it
+        - good news is this generalizes to the inline view case so really we only need to solve *this* problem
+        - bad news is it means knowing how far we are from the left margin at all times
+
 
 # Basic layout
 
