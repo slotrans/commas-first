@@ -49,10 +49,21 @@
     - likely requires explicit handling of window syntax
     - not a critical feature; needing to hand-tweak stuff like this after auto-formatting is OK
 
+- long on() clauses and compound predicates? (similar to long function calls)
+    - detecting this is hard because it requires looking forward an unknown number of tokens of unknown types
+    - probably want to split/align only once the whole expression gets beyond a certain length, which would require accumulating all the tokens before making the layout decision
+    - not a critical feature for basic usefulness but would save a lot of time hand-formatting complex queries
+
+- case expressions (again similar)
+    - should a multi-line layout always be performed, or should it be length-sensitive?
+    - in a multi-line layout, alignment of and/or predicates should match that of `where`
+    - the presence/absence of "else null" should not be meddled with, writing it out can add clarity even though it's the default
+
 - line comments
     - some dialects treat `#` as equivalent to, or a substitute for `--`, do we need to support that? maybe a CLI flag?
     - an important part of formatting is putting line breaks where they belong, but line comments are line-break sensitive (obviously)... are there any scenarios where moving a token to a different line changes whether it's commented?
     - similarly, if we move a comment, specifically a real *comment* rather than disabled code, can that create confusion by distancing it from the code it's commenting on?
+    - enforce a space before `--`?
 
 - block comments
     - a block comment is inherently pre-formatted, we shouldn't change it
