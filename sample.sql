@@ -3,6 +3,8 @@ select x.foo, x.bar,
        greatest(x.baz, x.blip) as BUILTIN_FUNCTION,
        my_udf(x.baz) as SCALAR_UDF,
        (x.baz + x.blip)::int as PG_STYLE_CAST,
+       x.baz::int as ANOTHER_CAST,
+       ( x.blip :: int ) as CAST_IN_PARENS,
        percentile_cont(0.99) within group(order by reponse_time) as WITHIN_GROUP_FUNCTION
 from (
     select foo, bar,

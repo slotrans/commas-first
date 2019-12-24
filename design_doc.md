@@ -77,6 +77,8 @@
 
 - can/should we automatically add `1=1` to the `where` clause if not present?
 
+- how to handle the set operators: UNION (ALL), INTERSECT, EXCEPT/MINUS ???
+
 
 # Basic layout
 
@@ -185,7 +187,7 @@
 
 - `x.foo` lexes to:
     - Token.Name<x>, Token.Literal.Number.Float<.>, Token.Name<foo>
-    - probably need specific handling for the `.` token
+    - may need specific handling for the `.` token
 
 - some functions like `greatest` lex to Token.Keyword despite not being keywords
 
@@ -194,3 +196,28 @@
     - `is not null` lexes as three tokens
     - basically assume any N-word keyword phrase lexes as N tokens
     - might be worth modifying the lexer if this turns out to be super annoying
+
+- `'string literal'` lexes to:
+    - (Token.Literal.String.Single, "'"), (Token.Literal.String.Single, 'string literal'), (Token.Literal.String.Single, "'")
+    - ugh
+
+- `'don''t` lexes to:
+    -  (Token.Literal.String.Single, "'"), (Token.Literal.String.Single, 'don'), (Token.Literal.String.Single, "''"), (Token.Literal.String.Single, 't'), (Token.Literal.String.Single, "'")
+    - blergh
+
+- `$$dollar literal$$` lexes to:
+    - (Token.Literal.String, '$'), (Token.Literal.String.Delimiter, ''), (Token.Literal.String, '$'), (Token.Literal.String, 'dollar literal'), (Token.Literal.String, '$'), (Token.Literal.String.Delimiter, ''), (Token.Literal.String, '$')  
+    - sweet jesus  
+
+
+# Ideas
+
+- is it worth splitting the statement's token stream into chunks based on keyword scope, as the first pass?
+    - with, select, from/join, where, group, having, order, window, limit, offset
+    - does this actually yield simpler sub-problems or does it result in duplication (e.g. of depth tracking)?
+
+- making constants for the keywords / keyword phrases seems to be working very well -- e.g. SELECT = (Token.Keyword, 'select') -- but the tests,
+especially for phrases, are wordy and depend on the phrase length being tested
+    - is it worth making a class for this, where an instance corresponds to a word/phrase and knows how to test for itself given a token list?
+    - the recursive call still needs to specify how many tokens are consumed so maybe it doesn't help much
+
