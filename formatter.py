@@ -157,8 +157,12 @@ def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth, line_leng
                     subquery_paren_depth -= 1
 
             formatted_subquery = do_format_recursive(subquery_tokens, Scope.INITIAL, paren_depth=0, subquery_depth=subquery_depth+1, line_length=0)
-            print(f'formatted_subquery={formatted_subquery}', file=sys.stderr)
-            fragment = '(' + formatted_subquery + ')'
+            formatted_and_aligned_subquery = formatted_subquery.replace('\n', ('\n' + ' ' * line_length)) # this is how we bump the margin over           
+            fragment = '('
+            fragment += formatted_and_aligned_subquery
+            fragment += '\n'
+            fragment += (' ' * (line_length - 1))
+            fragment += ') '
             return fragment + do_format_recursive(tokenlist[(len(subquery_tokens)+2):], scope, paren_depth, subquery_depth, line_length)
 
 
