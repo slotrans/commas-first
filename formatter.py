@@ -146,7 +146,7 @@ def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth, line_leng
             subquery_paren_depth = 0
             for i_token in tokenlist[1:]:
                 if i_token == RIGHT_PAREN and subquery_paren_depth == 0:
-                    # we started at 0 so -1 means we've consumed the subquery's closing paren
+                    # must be the subquery's closing paren
                     break
 
                 subquery_tokens.append(i_token)
