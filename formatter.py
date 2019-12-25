@@ -51,7 +51,7 @@ def is_only_whitespace(token):
     return (ttype == Token.Text and ALL_WHITESPACE.match(value))
 
 
-def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth):
+def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth, line_length):
     token_count = len(tokenlist)
     print(f'token_count={token_count} scope={scope}, parenD={paren_depth}, subqueryD={subquery_depth} / ', end='', file=sys.stderr)
     if token_count == 0:
@@ -73,76 +73,121 @@ def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth):
     two_tokens = tokenlist[0:2] if token_count >= 2 else []
     three_tokens = tokenlist[0:3] if token_count >= 3 else []    
 
-    margin = (subquery_depth * 8 * ' ')
-    print(f'margin={len(margin)}', file=sys.stderr)
+    #margin = (subquery_depth * 8 * ' ')
+    #print(f'margin={len(margin)}', file=sys.stderr)
 
     # SELECT
     if token == SELECT: 
-        return 'select ' + do_format_recursive(tokenlist[1:], Scope.SELECT, paren_depth, subquery_depth)
+        fragment = 'select '
+        return fragment + do_format_recursive(tokenlist[1:], Scope.SELECT, paren_depth, subquery_depth, len(fragment))
 
     # FROM
     elif token == FROM and scope is Scope.SELECT and paren_depth == 0:
-        return margin + '\n  from ' + do_format_recursive(tokenlist[1:], Scope.FROM, paren_depth, subquery_depth)
+        fragment = '\n  from '
+        return fragment + do_format_recursive(tokenlist[1:], Scope.FROM, paren_depth, subquery_depth, len(fragment))
 
     # JOIN
     elif token == JOIN:
-        return margin + '\n  join ' + do_format_recursive(tokenlist[1:], Scope.FROM, paren_depth, subquery_depth)
+        fragment = '\n  join '
+        return fragment + do_format_recursive(tokenlist[1:], Scope.FROM, paren_depth, subquery_depth, len(fragment))
 
     # LEFT JOIN
     elif two_tokens == LEFT_JOIN:
-        return margin + '\n  left join ' + do_format_recursive(tokenlist[2:], Scope.FROM, paren_depth, subquery_depth)
+        fragment = '\n  left join '
+        return fragment + do_format_recursive(tokenlist[2:], Scope.FROM, paren_depth, subquery_depth, len(fragment))
 
     # LEFT OUTER JOIN
     elif three_tokens == LEFT_OUTER_JOIN:
         # strip the useless "outer"
-        return margin + '\n  left join ' + do_format_recursive(tokenlist[3:], Scope.FROM, paren_depth, subquery_depth)
+        fragment = '\n  left join '
+        return fragment + do_format_recursive(tokenlist[3:], Scope.FROM, paren_depth, subquery_depth, len(fragment))
 
     # RIGHT JOIN
     elif two_tokens == RIGHT_JOIN:
-        return margin + '\n  right join ' + do_format_recursive(tokenlist[2:], Scope.FROM, paren_depth, subquery_depth)
+        fragment = '\n  right join '
+        return fragment + do_format_recursive(tokenlist[2:], Scope.FROM, paren_depth, subquery_depth, len(fragment))
 
     # RIGHT OUTER JOIN
     elif three_tokens == RIGHT_OUTER_JOIN:
         # strip the useless "outer"
-        return margin + '\n  right join ' + do_format_recursive(tokenlist[3:], Scope.FROM, paren_depth, subquery_depth)
+        fragment = '\n  right join '
+        return fragment + do_format_recursive(tokenlist[3:], Scope.FROM, paren_depth, subquery_depth, len(fragment))
 
     # WHERE
     elif token == WHERE:
-        return margin + '\n where ' + do_format_recursive(tokenlist[1:], Scope.WHERE, paren_depth, subquery_depth)
+        fragment = '\n where '
+        return fragment + do_format_recursive(tokenlist[1:], Scope.WHERE, paren_depth, subquery_depth, len(fragment))
 
     # GROUP BY
     elif two_tokens == GROUP_BY:
-        return margin + '\n group by ' + do_format_recursive(tokenlist[2:], Scope.GROUP_BY, paren_depth, subquery_depth)
+        fragment = '\n group by '
+        return fragment + do_format_recursive(tokenlist[2:], Scope.GROUP_BY, paren_depth, subquery_depth, len(fragment))
 
     # HAVING
     elif token == HAVING:
-        return margin + '\nhaving ' + do_format_recursive(tokenlist[1:], Scope.HAVING, paren_depth, subquery_depth)
+        fragment = '\nhaving '
+        return fragment + do_format_recursive(tokenlist[1:], Scope.HAVING, paren_depth, subquery_depth, len(fragment))
 
     # ORDER BY
     # unless we're in select scope, where "order by" can appear in certain function calls
     elif two_tokens == ORDER_BY and scope is not Scope.SELECT:
-        return margin + '\n order by ' + do_format_recursive(tokenlist[2:], Scope.ORDER_BY, paren_depth, subquery_depth)
+        fragment = '\n order by '
+        return fragment + do_format_recursive(tokenlist[2:], Scope.ORDER_BY, paren_depth, subquery_depth, len(fragment))
 
     # left/opening paren
     elif token == LEFT_PAREN:
-        return '(' + do_format_recursive(tokenlist[1:], scope, paren_depth + 1, subquery_depth)
+        #fragment = '('
+        #return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth + 1, subquery_depth, line_length+len(fragment))
+        if next_token != SELECT:
+            fragment = '('
+            return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth + 1, subquery_depth, line_length+len(fragment))
+        else: # we are entering a subquery
+            subquery_tokens = []
+            subquery_paren_depth = 0
+            for i_token in tokenlist[1:]:
+                if i_token == RIGHT_PAREN and subquery_paren_depth == 0:
+                    # we started at 0 so -1 means we've consumed the subquery's closing paren
+                    break
+
+                subquery_tokens.append(i_token)
+
+                if i_token == LEFT_PAREN:
+                    subquery_paren_depth += 1
+                elif i_token == RIGHT_PAREN:
+                    subquery_paren_depth -= 1
+
+            formatted_subquery = do_format_recursive(subquery_tokens, Scope.INITIAL, paren_depth=0, subquery_depth=subquery_depth+1, line_length=0)
+            print(f'formatted_subquery={formatted_subquery}', file=sys.stderr)
+            fragment = '(' + formatted_subquery + ')'
+            return fragment + do_format_recursive(tokenlist[(len(subquery_tokens)+2):], scope, paren_depth, subquery_depth, line_length)
+
 
     # right/closing paren
     elif token == RIGHT_PAREN:
-        return ') ' + do_format_recursive(tokenlist[1:], scope, paren_depth - 1, subquery_depth)
+        fragment = ') '
+        return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth - 1, subquery_depth, line_length+len(fragment))
+        #if not (paren_depth == 0 and subquery_depth > 0):
+        #    fragment = ') '
+        #    return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth - 1, subquery_depth, line_length+len(fragment))
+        #else: # we are exiting a subquery
+        #    fragment = ') '
+        #    return fragment
 
     # COMMA
     # if paren_depth > 0 it means we are inside some expression's parens and this comma must be part of a function call,
     # whereas if paren_depth == 0 then this comma is an expression separator
     elif token == COMMA:
         if paren_depth == 0:
-            return margin + '\n     , ' + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth)
+            fragment = '\n     , '
+            return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth, len(fragment))
         else:
-            return ', ' + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth)
+            fragment = ', '
+            return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth, line_length+len(fragment))
 
     # "and" alignment for where clause
     elif scope is Scope.WHERE and token == AND:
-        return margin + '\n   and ' + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth)
+        fragment = '\n   and '
+        return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth, len(fragment))
 
     # basic string literals
     elif token == SINGLE_QUOTE:
@@ -152,7 +197,8 @@ def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth):
                 tokens_consumed.append(v)
             else:
                 break
-        return ''.join(tokens_consumed) + ' ' + do_format_recursive(tokenlist[len(tokens_consumed):], scope, paren_depth, subquery_depth)
+        fragment = ''.join(tokens_consumed) + ' '
+        return fragment + do_format_recursive(tokenlist[len(tokens_consumed):], scope, paren_depth, subquery_depth, line_length+len(fragment))
 
     # semicolon
     elif token == SEMICOLON and token_count == 1:
@@ -164,11 +210,13 @@ def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth):
           and any(next_ttype in t for t in (Token.Text, Token.Name, Token.Keyword, Token.Literal.Number.Float, Token.Operator))
           and next_value != '.'
          ):
-        return value + ' ' + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth)
+        fragment = value + ' '
+        return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth, line_length+len(fragment))
 
     # default
     else:
-        return value + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth)
+        fragment = value
+        return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth, line_length+len(fragment))
 
 
 def post_process(text):
@@ -186,7 +234,13 @@ if __name__ == '__main__':
     print(f'count={len(tokens)}', file=sys.stderr)
     print(tokens, file=sys.stderr)
 
-    formatted_code = do_format_recursive(tokens, Scope.INITIAL, 0, 0)
+    formatted_code = do_format_recursive(
+        tokenlist=tokens, 
+        scope=Scope.INITIAL, 
+        paren_depth=0, 
+        subquery_depth=0,
+        line_length=0,
+    )
 
     post_processed_code = post_process(formatted_code)
 

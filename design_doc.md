@@ -241,3 +241,12 @@ especially for phrases, are wordy and depend on the phrase length being tested
     - is it worth making a class for this, where an instance corresponds to a word/phrase and knows how to test for itself given a token list?
     - the recursive call still needs to specify how many tokens are consumed so maybe it doesn't help much
 
+- would it be worth re-building the initial token list as namedtuples just to better enable both referring to a token as a unit and referring to its type or value?
+
+- random thought: is it worth doing an initial paren-matching pass?
+    - this would give us a quick short-circuit, and hopefully the ability to give a good error message, if the input has unbalanced parens
+    - for good input, we would replace the stream of 2-tuple (type, value) tokens with 3-tuples of (type, value, [reference to matching paren])
+    - then instead of turning the 3-tuple tokens into strings, we turn them into 5-tuples of (type, value, [matching paren], line, indent)
+    - ugh maybe they need to be mutable objects instead of tuples...
+    - in any case the methodology is to say, i have a closing paren, bump it to the next line and set its indentation equal to the matching opening paren
+    - then once you have a list of these tuples/objects, the actual layout step is to just map them to their indicated X (line) and Y (indent) positions
