@@ -250,3 +250,14 @@ especially for phrases, are wordy and depend on the phrase length being tested
     - ugh maybe they need to be mutable objects instead of tuples...
     - in any case the methodology is to say, i have a closing paren, bump it to the next line and set its indentation equal to the matching opening paren
     - then once you have a list of these tuples/objects, the actual layout step is to just map them to their indicated X (line) and Y (indent) positions
+
+- quick thought on long compound expressions: it might be simpler to just always do the break-and-align style formatting, then check the length of the result and if shorter than [threshold], unwind it by collapsing whitespace
+
+- I initially switched to a recursive solution becuase I couldn't see how to consume multiple tokens in an iterative fashion, but I figured it out. I don't know why it wasn't obvious to me before... perhaps I've gotten so accustomed to using only for-each style loops or while-true loops that my brain just wasn't prepared for it. Anyway, in the recursive pattern we can consume N tokens by calling the next function with `tokenlist[N:]` as the input argument. The iterative isomorphism is to use an index variable with a while loop, and to advance the index variable by N (instead of always by 1 as a for-each loop does).
+
+- The main use case I was pursuing with this program is the initial reformatting of ugly queries handed to me by others. There is a different use case though, which is handling the tedious reformatting necessitated by certain changes made while working on a query. 
+    - For example, if you have `and foo.bar in (select ...)`, and the subquery has line breaks and nice alignment, then you change `foo.bar` to `flerb.baz`, the subquery needs to be re-aligned because the first line is now 2 characters further right.
+    - Or if you have `join some_table on(...)`, and the on() clause is compound and nicely aligned, and you replace `some_table` with `some.longer_identifier`, the on() clause needs to be re-aligned.
+    - So it would be great if you could pass your in-progress query back through the formatter after making one of these kinds of changes...
+    - ...but they key is that when you do that, it's not acceptable for the formatter to re-arrange stuff you may have laid out by hand. Typically this is stuff like long select-clause expressions doing string concatenation or arithmetic, multi-level nested function calls, or particularly elaborate `case` expressions. Because these live in the land of "stuff that a formatting algorithm can't anticipate", the author's layout needs to be respected.
+    - Conclusion: in order to support this use case, the formatter needs to be *less* opinionated about how select-clause expressions are laid out, and in particular probably needs to preserve certain whitespace in the input (likely any whitespace not related to indenting expression-separator commas).
