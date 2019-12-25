@@ -6,6 +6,9 @@ select x.foo
      , (x.baz + x.blip)::int as PG_STYLE_CAST
      , x.baz::int as ANOTHER_CAST
      , percentile_cont(0.99) within group(order by reponse_time) as WITHIN_GROUP_FUNCTION
+     , (select max(created)
+          from some_other_table
+       ) as CORRELATED_SUBQUERY  
   from (
         select foo
              , bar
@@ -13,12 +16,22 @@ select x.foo
              , blip
              , dense_rank(foo) over(order by bar) as A_WINDOW_FUNCTION
           from my_cool_table --line comment
-/*from
-    a_lame_view  block comment */
+        /*from
+            a_lame_view  block comment */
          where foo >= bar
            and (blip is not null or baz != 0)
            and foo != 'string literal'
        ) x
  where 1=1
+   and x.baz is not null
+   and (   x.baz > 0 
+        or x.blip > 0 
+        or x.baz < 0
+       )
+   and x.whatever in (select s.whatever 
+                        from source_of_whatever s 
+                       where 1=1 
+                         and s.whatever is not null
+                     )
  order by x.foo
 ; 
