@@ -99,6 +99,10 @@
         - good news is this generalizes to the inline view case so really we only need to solve *this* problem
         - bad news is it means knowing how far we are from the left margin at all times
 
+- how to enforce the use of parens with ON/USING?
+    - e.g. `on x.foo = y.foo` should always be `on(x.foo = y.foo)` even though the syntax does not require this
+    - inserting parens requires knowing the boundaries of expressions
+
 
 # Basic layout
 

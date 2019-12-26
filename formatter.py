@@ -65,16 +65,13 @@ def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth, line_leng
 
     token = tokenlist[0]
     ttype, value = token
-    print(f'{ttype}<{value}> / ', end='', file=sys.stderr)
+    print(f'{ttype}<{value}> / ', file=sys.stderr)
     
     next_token = tokenlist[1] if token_count >= 2 else (Token, '') # bogus token that should always be not-equal to anything
     next_ttype, next_value = next_token
 
     two_tokens = tokenlist[0:2] if token_count >= 2 else []
     three_tokens = tokenlist[0:3] if token_count >= 3 else []    
-
-    #margin = (subquery_depth * 8 * ' ')
-    #print(f'margin={len(margin)}', file=sys.stderr)
 
     # SELECT
     if token == SELECT: 
@@ -223,7 +220,22 @@ def do_format_recursive(tokenlist, scope, paren_depth, subquery_depth, line_leng
         return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, subquery_depth, line_length+len(fragment))
 
 
-def post_process(text):
+def pre_process_tokens(tokenlist):
+    out = []
+    for t in tokenlist:
+        ttype, value = t
+        if is_only_whitespace(t):
+            continue
+
+        if ttype is Token.Keyword:
+            value = value.lower()
+
+        out.append( (ttype, value) )
+
+    return out
+
+
+def post_process_text(text):
     return text
     # collapse extra space around :: operator e.g. 'foo :: int' -> 'foo::int'
     # collapse extra space inside closing parens e.g. ' )' -> ')'        
@@ -233,7 +245,7 @@ if __name__ == '__main__':
     unformatted_code = sys.stdin.read()
 
     lexer = get_lexer_by_name("postgres", stripall=True)
-    tokens = list([t for t in lexer.get_tokens(unformatted_code) if not is_only_whitespace(t)])
+    tokens = pre_process_tokens(lexer.get_tokens(unformatted_code))
 
     print(f'count={len(tokens)}', file=sys.stderr)
     print(tokens, file=sys.stderr)
@@ -246,6 +258,6 @@ if __name__ == '__main__':
         line_length=0,
     )
 
-    post_processed_code = post_process(formatted_code)
+    post_processed_code = post_process_text(formatted_code)
 
     print(post_processed_code)
