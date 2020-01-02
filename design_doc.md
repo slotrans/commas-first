@@ -42,6 +42,8 @@
     - backtick-quoting?
     - Snowflake's flatten() uses an arrow operator (-> or =>, not sure), not necessary to lay this out smartly but can we at least avoid choking on it?
     - Oracle's `(+)` operator? meh probably not
+    - Postgres' array constructor: `array[1,2,3]`
+        - and array subscript syntax: `foo[1]` or `bar[2][3]`
 
 - very long function calls: splitting/aligning
     - sometimes seen with window functions?
@@ -265,3 +267,19 @@ especially for phrases, are wordy and depend on the phrase length being tested
     - So it would be great if you could pass your in-progress query back through the formatter after making one of these kinds of changes...
     - ...but they key is that when you do that, it's not acceptable for the formatter to re-arrange stuff you may have laid out by hand. Typically this is stuff like long select-clause expressions doing string concatenation or arithmetic, multi-level nested function calls, or particularly elaborate `case` expressions. Because these live in the land of "stuff that a formatting algorithm can't anticipate", the author's layout needs to be respected.
     - Conclusion: in order to support this use case, the formatter needs to be *less* opinionated about how select-clause expressions are laid out, and in particular probably needs to preserve certain whitespace in the input (likely any whitespace not related to indenting expression-separator commas).
+
+### 2020-01-01
+- Really starting to think it's time to modify the lexer
+    - it would be much simpler if things we need to _treat_ as a single token -- group by, 1.5, 'blergh', >=, x.foo -- actually lexed as a single token rather than a series
+    - some of these phrases may need to be assembled in a pre-processing pass over the lexer output, rather than in the lexer itself, we'll see
+    - also Pygments' postgres lexer marks some things as Keyword which are not keywords, like "greatest", and I would prefer to be able to consistently differentiate between identifiers and true keywords
+
+- Need to write some code that understands expressions
+    - doesn't need to be perfect, ok to allow plausible-looking but invalid constructs
+    - doesn't need to understand enough to _evaluate_ expressions, really just know where they begin and end, and the nesting level
+    - may want to look up the formal expression grammar
+    - probably need a whitelist of binary operators: + - / * = <> != >= <= > < || 
+        - maybe also >> << ->> & | ^
+    - unary operators???
+    - don't need a list of functions, assume any identifier used as such -- `foo(1, 2)` -- is a function call
+    
