@@ -24,6 +24,8 @@ LIMIT = (Token.Keyword, 'limit')
 OFFSET = (Token.Keyword, 'offset')
 AND = (Token.Keyword, 'and')
 OR = (Token.Keyword, 'or')
+ON = (Token.Keyword, 'on')
+USING = (Token.Keyword, 'using')
 
 # punctuation etc
 LEFT_PAREN = (Token.Punctuation, '(')
@@ -43,6 +45,7 @@ class Scope(enum.Enum):
     HAVING = 'HAVING'
     ORDER_BY = 'ORDER_BY'
     WINDOW = 'WINDOW'
+    JOIN_PREDICATE = 'JOIN_PREDICATE'
 
 
 ALL_WHITESPACE = re.compile(r'^\s+$')
@@ -110,6 +113,11 @@ def do_format_recursive(tokenlist, scope, paren_depth, line_length):
         # strip the useless "outer"
         fragment = '\n  right join '
         return fragment + do_format_recursive(tokenlist[3:], Scope.FROM, paren_depth, len(fragment))
+
+    # ON / USING
+    elif token in (ON, USING):
+        fragment = value + ' '
+        return fragment + do_format_recursive(tokenlist[1:], Scope.JOIN_PREDICATE, paren_depth, line_length+len(fragment))
 
     # WHERE
     elif token == WHERE:
@@ -204,8 +212,8 @@ def do_format_recursive(tokenlist, scope, paren_depth, line_length):
     # spacing between most ordinary tokens
     elif (    any(ttype in t for t in (Token.Text, Token.Name, Token.Keyword, Token.Literal.Number.Float, Token.Operator))
           and value != '.'
-          and any(next_ttype in t for t in (Token.Text, Token.Name, Token.Keyword, Token.Literal.Number.Float, Token.Operator))
-          and next_value != '.'
+          and any(next_ttype in t for t in (Token.Text, Token.Name, Token.Keyword, Token.Literal.Number.Float, Token.Operator, Token.Punctuation))
+          and next_value not in ( '.', ')' )
          ):
         fragment = value + ' '
         return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, line_length+len(fragment))
