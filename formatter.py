@@ -240,7 +240,10 @@ def pre_process_tokens(tokenlist):
 
 
 def post_process_text(text):
+    # no-op for now
     return text
+
+    #TODO:
     # collapse extra space around :: operator e.g. 'foo :: int' -> 'foo::int'
     # collapse extra space inside closing parens e.g. ' )' -> ')'        
 
@@ -264,3 +267,4 @@ if __name__ == '__main__':
     post_processed_code = post_process_text(formatted_code)
 
     print(post_processed_code)
+    sys.exit(0)
