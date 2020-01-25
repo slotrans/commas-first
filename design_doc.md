@@ -118,8 +118,10 @@
 - if present, `distinct` (or `all`) immediately follows `select` and pushes the first select expression to the next line
 
 - for each select expression
-    - for the first, left-pad with 7 spaces
-    - for all subsequent, left-pad with 5 spaces, a comma, and another space (`     , `), aligning the comma under the `t` in `select`
+    - for the first:
+        - if DISTINCT or ALL, bump to next line and left-pad with 7 spaces
+        - otherwise immediately follow `select` plus a space
+    - for all subsequent, add a newline then left-pad with 5 spaces, a comma, and another space (`     , `), aligning the comma under the `t` in `select`
         - note the comma is present as Token.Puncutation<,> and will need to be consumed; this token marks the boundary between expressions
     - print to the end of the line, including `as` and the alias if present
 
@@ -278,6 +280,7 @@ especially for phrases, are wordy and depend on the phrase length being tested
     - doesn't need to be perfect, ok to allow plausible-looking but invalid constructs
     - doesn't need to understand enough to _evaluate_ expressions, really just know where they begin and end, and the nesting level
     - may want to look up the formal expression grammar
+        - https://github.com/ronsavage/SQL
     - probably need a whitelist of binary operators: + - / * = <> != >= <= > < || 
         - maybe also >> << ->> & | ^
     - unary operators???
