@@ -105,6 +105,8 @@
     - e.g. `on x.foo = y.foo` should always be `on(x.foo = y.foo)` even though the syntax does not require this
     - inserting parens requires knowing the boundaries of expressions
 
+- tabs to spaces conversion?
+
 
 # Basic layout
 
