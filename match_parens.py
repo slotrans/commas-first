@@ -7,7 +7,7 @@ import enum
 import pygments
 from pygments.lexers import get_lexer_by_name
 from pygments.token import Token
-from colorama import Fore, Style
+import colorama
 
 
 class MyTokenType(enum.Enum):
@@ -72,13 +72,13 @@ def cursor_motion(init_x: int, init_y: int, instr: str): # Tuple(int, int)
 
 
 def generate_color():
-    yield Fore.RED
-    yield Fore.GREEN
-    yield Fore.YELLOW
-    yield Fore.BLUE
-    yield Fore.MAGENTA
-    yield Fore.CYAN
-    yield Fore.WHITE
+    yield colorama.Fore.RED
+    yield colorama.Fore.GREEN
+    yield colorama.Fore.YELLOW
+    yield colorama.Fore.CYAN
+    yield colorama.Fore.MAGENTA
+    yield colorama.Fore.BLUE
+    yield colorama.Fore.WHITE
 
 
 if __name__ == '__main__':
@@ -121,6 +121,9 @@ if __name__ == '__main__':
 
     print('-------------------------------------------------------------------')
 
+    colorama.init(autoreset=True)
+
     for x in out:
         color_escape = x.color if x.color else ''
-        print(f'{color_escape}{x.string_value}{Style.RESET_ALL}', end='')
+        print(f'{color_escape}{x.string_value}', end='')
+    print()
