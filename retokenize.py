@@ -9,6 +9,11 @@ from pygments.token import Token
 LEFT_OUTER_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')]
 RIGHT_OUTER_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')]
 
+THREE_WORD_PHRASES = [
+    LEFT_OUTER_JOIN, 
+    RIGHT_OUTER_JOIN,
+]
+
 CROSS_JOIN = [(Token.Keyword, 'cross'), (Token.Keyword, 'join')]
 LEFT_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'join')]
 RIGHT_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'join')]
@@ -16,6 +21,18 @@ GROUP_BY = [(Token.Keyword, 'group'), (Token.Keyword, 'by')]
 ORDER_BY = [(Token.Keyword, 'order'), (Token.Keyword, 'by')]
 PARTITION_BY = [(Token.Keyword, 'partition'), (Token.Keyword, 'by')]
 WITHIN_GROUP = [(Token.Keyword, 'within'), (Token.Keyword, 'group')]
+
+TWO_WORD_PHRASES = [
+    CROSS_JOIN,
+    LEFT_JOIN,
+    RIGHT_JOIN,
+    GROUP_BY,
+    ORDER_BY,
+    PARTITION_BY,
+    WITHIN_GROUP,
+]
+
+SINGLE_QUOTE = (Token.Literal.String.Single, "'")
 
 
 ALL_WHITESPACE = re.compile(r'^\s+$')
@@ -44,6 +61,18 @@ def merge_tokens(token_phrase):
     return (Token.Keyword, text)
 
 
+def assemble_quoted_literal(tokens):
+    length = len(tokens)
+    j = 1 # not zero! we already know the 0th token is a single quote
+    while j < length:
+        if tokens[j] == SINGLE_QUOTE:
+            phrase = tokens[0:j+1]
+            quoted_literal = ''.join([t[1] for t in phrase])
+            return ((Token.Literal.String.Single, quoted_literal), j+1)
+        j += 1
+    return None, None
+
+
 def retokenize(tokens):
     out = []
 
@@ -52,46 +81,25 @@ def retokenize(tokens):
     while i < length:
         if i+2 < length: # 3-token phrases
             phrase = tokens[i:i+3]
-            if phrase == LEFT_OUTER_JOIN:
-                out.append(merge_tokens(phrase))
-                i += 3
-                continue
-            elif phrase == RIGHT_OUTER_JOIN:
+            if phrase in THREE_WORD_PHRASES:
                 out.append(merge_tokens(phrase))
                 i += 3
                 continue
         
         if i+1 < length: # 2-token phrases
             phrase = tokens[i:i+2]
-            if phrase == CROSS_JOIN:
-                out.append(merge_tokens(phrase))
-                i += 2
-                continue
-            elif phrase == LEFT_JOIN:
-                out.append(merge_tokens(phrase))
-                i += 2
-                continue
-            elif phrase == RIGHT_JOIN:
-                out.append(merge_tokens(phrase))
-                i += 2
-                continue
-            elif phrase == GROUP_BY:
-                out.append(merge_tokens(phrase))
-                i += 2
-                continue
-            elif phrase == ORDER_BY:
-                out.append(merge_tokens(phrase))
-                i += 2
-                continue
-            elif phrase == PARTITION_BY:
-                out.append(merge_tokens(phrase))
-                i += 2
-                continue
-            elif phrase == WITHIN_GROUP:
+            if phrase in TWO_WORD_PHRASES:
                 out.append(merge_tokens(phrase))
                 i += 2
                 continue
         
+        if tokens[i] == SINGLE_QUOTE:
+            quoted_literal, tokens_consumed = assemble_quoted_literal(tokens[i:])
+            if quoted_literal:
+                out.append(quoted_literal)
+                i += tokens_consumed
+                continue
+
         out.append(tokens[i])
         i += 1
 
