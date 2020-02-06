@@ -8,7 +8,7 @@ select x.foo, x.bar,
 
        percentile_cont(0.99) within group(order by reponse_time) as WITHIN_GROUP_FUNCTION,
 (select max(created)
-from some_other_table) as Correlated_Subquery       
+from some_other_table) as Correlated_Subquery
 from (
     select foo, bar,
       baz,
@@ -23,6 +23,8 @@ from (
         (blip is not null or baz != 0)
       and foo != 'string literal'
 ) x
+join another_table y 
+  on x.foo=y.foo and y.flerb is not null
 where 1 = 1
 and   x.baz is not null
  and (x.baz > 0 

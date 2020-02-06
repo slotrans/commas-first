@@ -22,6 +22,7 @@ select x.foo
            and (blip is not null or baz != 0)
            and foo != 'string literal'
        ) x
+  join another_table y on(x.foo=y.foo and y.flerb is not null)
  where 1=1
    and x.baz is not null
    and (   x.baz > 0 
