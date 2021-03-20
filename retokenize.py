@@ -70,7 +70,7 @@ def assemble_quoted_literal(tokens):
             quoted_literal = ''.join([t[1] for t in phrase])
             return ((Token.Literal.String.Single, quoted_literal), j+1)
         j += 1
-    return None, None
+    return (None, None)
 
 
 def retokenize(tokens):
