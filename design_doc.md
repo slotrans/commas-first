@@ -84,11 +84,14 @@
     - also possible: right-aligntment of column aliases
     - I prefer aliases to be capitalized (when not double-quoted), but it may be desirable to make this switchable
 
-- should the `outer` keyword be automatically stripped from `left outer join`?   
+- should the `outer` keyword be automatically stripped from `left outer join`?
+    - yes
 
 - how to lay out `cross join`? 
 
 - can/should we automatically add `1=1` to the `where` clause if not present?
+    - desirable.
+    - also desirable: adding `where 1=1` when no `where` clause is present at all
 
 - how to handle the set operators: UNION (ALL), INTERSECT, EXCEPT/MINUS ???
 
@@ -106,6 +109,7 @@
     - inserting parens requires knowing the boundaries of expressions
 
 - tabs to spaces conversion?
+    - actually i think we get this for free because we discard all input whitespace
 
 
 # Basic layout
