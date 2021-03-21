@@ -287,6 +287,7 @@ especially for phrases, are wordy and depend on the phrase length being tested
     - doesn't need to understand enough to _evaluate_ expressions, really just know where they begin and end, and the nesting level
     - may want to look up the formal expression grammar
         - https://github.com/ronsavage/SQL
+        - https://www.jooq.org/doc/latest/manual/sql-building/sql-parser/sql-parser-grammar/
     - probably need a whitelist of binary operators: + - / * = <> != >= <= > < || 
         - maybe also >> << ->> & | ^
     - unary operators???
