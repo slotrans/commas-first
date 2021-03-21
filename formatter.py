@@ -26,6 +26,11 @@ AND = (Token.Keyword, 'and')
 OR = (Token.Keyword, 'or')
 ON = (Token.Keyword, 'on')
 USING = (Token.Keyword, 'using')
+UNION_ALL = [(Token.Keyword, 'union'), (Token.Keyword, 'all')]
+UNION = (Token.Keyword, 'union')
+INTERSECT = (Token.Keyword, 'intersect')
+MINUS = (Token.Name, 'minus') # PG lexer doesn't consider this a keyword
+EXCEPT = (Token.Keyword, 'except')
 
 # punctuation etc
 LEFT_PAREN = (Token.Punctuation, '(')
@@ -139,6 +144,16 @@ def do_format_recursive(tokenlist, scope, paren_depth, line_length):
     elif two_tokens == ORDER_BY and scope is not Scope.SELECT:
         fragment = '\n order by '
         return fragment + do_format_recursive(tokenlist[2:], Scope.ORDER_BY, paren_depth, len(fragment))
+
+    # UNION ALL
+    elif two_tokens == UNION_ALL:
+        fragment = '\nunion all\n'
+        return fragment + do_format_recursive(tokenlist[2:], scope, paren_depth, len(fragment))
+
+    # UNION, INTERSECT, MINUS, EXCEPT
+    elif token in (UNION, INTERSECT, MINUS, EXCEPT):
+        fragment = '\n' + value + '\n'
+        return fragment + do_format_recursive(tokenlist[1:], scope, paren_depth, len(fragment))
 
     # left/opening paren
     elif token == LEFT_PAREN:
