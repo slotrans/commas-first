@@ -75,15 +75,15 @@ def do_format_recursive(tokenlist, scope, paren_depth, line_length):
     token = tokenlist[0]
     ttype, value = token
     print(f'{ttype}<{value}> / ', file=sys.stderr)
-    
+
     next_token = tokenlist[1] if token_count >= 2 else (Token, '') # bogus token that should always be not-equal to anything
     next_ttype, next_value = next_token
 
     two_tokens = tokenlist[0:2] if token_count >= 2 else []
-    three_tokens = tokenlist[0:3] if token_count >= 3 else []    
+    three_tokens = tokenlist[0:3] if token_count >= 3 else []
 
     # SELECT
-    if token == SELECT: 
+    if token == SELECT:
         fragment = 'select '
         return fragment + do_format_recursive(tokenlist[1:], Scope.SELECT, paren_depth, len(fragment))
 
@@ -176,7 +176,7 @@ def do_format_recursive(tokenlist, scope, paren_depth, line_length):
                     subquery_paren_depth -= 1
 
             formatted_subquery = do_format_recursive(subquery_tokens, Scope.INITIAL, paren_depth=0, line_length=0)
-            formatted_and_aligned_subquery = formatted_subquery.replace('\n', ('\n' + ' ' * line_length)) # this is how we bump the margin over           
+            formatted_and_aligned_subquery = formatted_subquery.replace('\n', ('\n' + ' ' * line_length)) # this is how we bump the margin over
             fragment = '('
             fragment += formatted_and_aligned_subquery
             fragment += '\n'
@@ -211,7 +211,7 @@ def do_format_recursive(tokenlist, scope, paren_depth, line_length):
 
     # basic string literals
     elif token == SINGLE_QUOTE:
-        tokens_consumed = ["'"]        
+        tokens_consumed = ["'"]
         for t, v in tokenlist[1:]:
             if t is Token.Literal.String.Single:
                 tokens_consumed.append(v)
@@ -260,7 +260,7 @@ def post_process_text(text):
 
     #TODO:
     # collapse extra space around :: operator e.g. 'foo :: int' -> 'foo::int'
-    # collapse extra space inside closing parens e.g. ' )' -> ')'        
+    # collapse extra space inside closing parens e.g. ' )' -> ')'
 
 
 if __name__ == '__main__':
@@ -273,9 +273,9 @@ if __name__ == '__main__':
     print(tokens, file=sys.stderr)
 
     formatted_code = do_format_recursive(
-        tokenlist=tokens, 
-        scope=Scope.INITIAL, 
-        paren_depth=0, 
+        tokenlist=tokens,
+        scope=Scope.INITIAL,
+        paren_depth=0,
         line_length=0,
     )
 

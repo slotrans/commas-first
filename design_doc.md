@@ -87,7 +87,7 @@
 - should the `outer` keyword be automatically stripped from `left outer join`?
     - yes
 
-- how to lay out `cross join`? 
+- how to lay out `cross join`?
 
 - can/should we automatically add `1=1` to the `where` clause if not present?
     - desirable.
@@ -183,7 +183,7 @@
 
 - then a single left paren in column 1
 
-- the contents of a CTE will be a `select` statement (TODO: support INSERT/UPDATE/DELETE in CTEs, which are a thing in Postgres), which will be laid out exactly as if it were not inside a CTE, except that the left margin will be moved over by N spaces 
+- the contents of a CTE will be a `select` statement (TODO: support INSERT/UPDATE/DELETE in CTEs, which are a thing in Postgres), which will be laid out exactly as if it were not inside a CTE, except that the left margin will be moved over by N spaces
     - N has typically been 2 or 4, I'm not sure which I prefer, and it should be easy to specify this as a CLI argument
     - all absolute positioning described here (e.g. "left pad with 2 spaces") is *relative to this margin*
 
@@ -240,8 +240,8 @@
     - blergh
 
 - `$$dollar literal$$` lexes to:
-    - (Token.Literal.String, '$'), (Token.Literal.String.Delimiter, ''), (Token.Literal.String, '$'), (Token.Literal.String, 'dollar literal'), (Token.Literal.String, '$'), (Token.Literal.String.Delimiter, ''), (Token.Literal.String, '$')  
-    - sweet jesus  
+    - (Token.Literal.String, '$'), (Token.Literal.String.Delimiter, ''), (Token.Literal.String, '$'), (Token.Literal.String, 'dollar literal'), (Token.Literal.String, '$'), (Token.Literal.String.Delimiter, ''), (Token.Literal.String, '$')
+    - sweet jesus
 
 
 # Ideas
@@ -269,7 +269,7 @@ especially for phrases, are wordy and depend on the phrase length being tested
 
 - I initially switched to a recursive solution becuase I couldn't see how to consume multiple tokens in an iterative fashion, but I figured it out. I don't know why it wasn't obvious to me before... perhaps I've gotten so accustomed to using only for-each style loops or while-true loops that my brain just wasn't prepared for it. Anyway, in the recursive pattern we can consume N tokens by calling the next function with `tokenlist[N:]` as the input argument. The iterative isomorphism is to use an index variable with a while loop, and to advance the index variable by N (instead of always by 1 as a for-each loop does).
 
-- The main use case I was pursuing with this program is the initial reformatting of ugly queries handed to me by others. There is a different use case though, which is handling the tedious reformatting necessitated by certain changes made while working on a query. 
+- The main use case I was pursuing with this program is the initial reformatting of ugly queries handed to me by others. There is a different use case though, which is handling the tedious reformatting necessitated by certain changes made while working on a query.
     - For example, if you have `and foo.bar in (select ...)`, and the subquery has line breaks and nice alignment, then you change `foo.bar` to `flerb.baz`, the subquery needs to be re-aligned because the first line is now 2 characters further right.
     - Or if you have `join some_table on(...)`, and the on() clause is compound and nicely aligned, and you replace `some_table` with `some.longer_identifier`, the on() clause needs to be re-aligned.
     - So it would be great if you could pass your in-progress query back through the formatter after making one of these kinds of changes...
@@ -288,8 +288,7 @@ especially for phrases, are wordy and depend on the phrase length being tested
     - may want to look up the formal expression grammar
         - https://github.com/ronsavage/SQL
         - https://www.jooq.org/doc/latest/manual/sql-building/sql-parser/sql-parser-grammar/
-    - probably need a whitelist of binary operators: + - / * = <> != >= <= > < || 
+    - probably need a whitelist of binary operators: + - / * = <> != >= <= > < ||
         - maybe also >> << ->> & | ^
     - unary operators???
     - don't need a list of functions, assume any identifier used as such -- `foo(1, 2)` -- is a function call
-    

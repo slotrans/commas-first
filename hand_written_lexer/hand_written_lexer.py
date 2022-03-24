@@ -95,12 +95,12 @@ def get_token(stream):
 
 def tokenize(stream):
     tokens = []
-    
+
     while len(stream) > 0:
         tok = get_token(stream)
         tokens.append(tok)
         stream = stream[len(tok):]
-    
+
     return tokens
 
 

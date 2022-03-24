@@ -11,7 +11,7 @@ RIGHT_OUTER_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'outer'), (Token.K
 IS_NOT_NULL = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'null')]
 
 THREE_WORD_PHRASES = [
-    LEFT_OUTER_JOIN, 
+    LEFT_OUTER_JOIN,
     RIGHT_OUTER_JOIN,
     IS_NOT_NULL,
 ]
@@ -68,7 +68,7 @@ def merge_keyphrase(token_phrase):
 
 def merge_identifier(token_phrase):
     text = ''.join(t[1] for t in token_phrase)
-    return (Token.Name, text)    
+    return (Token.Name, text)
 
 
 def assemble_quoted_literal(tokens):
@@ -97,7 +97,7 @@ def assemble_quoted_name(tokens):
 
 
 def try_qualified_identifier(tokens):
-    first_type, first_value = tokens[0]    
+    first_type, first_value = tokens[0]
     second_type, second_value = tokens[1]
     third_type, third_value = tokens[2]
 
@@ -111,8 +111,8 @@ def try_qualified_identifier(tokens):
         return None
 
 
-def try_double_qualified_identifier(tokens):        
-    first_type, first_value = tokens[0]    
+def try_double_qualified_identifier(tokens):
+    first_type, first_value = tokens[0]
     second_type, second_value = tokens[1]
     third_type, third_value = tokens[2]
     fourth_type, fourth_value = tokens[3]
@@ -183,7 +183,7 @@ def retokenize2(tokens):
                     out.append(qualified_identifier)
                     i += 3
                     continue
-        
+
         if i+1 < length: # 2-token phrases
             phrase = tokens[i:i+2]
             if phrase in TWO_WORD_PHRASES:

@@ -100,7 +100,7 @@ if __name__ == '__main__':
             line = current_line,
             column = current_column,
             matching_token = None,
-        )      
+        )
         # for left/open parens: after constructing the object put it on a stack
         if '(' == itoken.string_value:
             itoken.color = next(color_picker)

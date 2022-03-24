@@ -35,7 +35,7 @@ Many of the exotic 2- and 3-character operators are Postgres-specific.
 
 ## Goal
 
-Remember that the goal here is not parsing valid SQL so that it can be executed. We only need to recognize enough of its structure to lay its text out methodically. 
+Remember that the goal here is not parsing valid SQL so that it can be executed. We only need to recognize enough of its structure to lay its text out methodically.
 
 The SQL that we are operating on may have syntax errors. It may also have unusal or vendor-specific syntax fragments that are unknown to us. There are two competing goals when handling SQL that is invalid or not understood:
 - We would like to identify and surface errors
@@ -97,7 +97,7 @@ I suspect that there is value in creating wrappers for certain sequences, which 
 - parenthesized expressions
 - ON clause expressions
 
-In particular... 
+In particular...
 
 Laying out parenthesized expressions such as...
 (a.email not like '%test%' or a.email is null)
