@@ -292,3 +292,51 @@ especially for phrases, are wordy and depend on the phrase length being tested
         - maybe also >> << ->> & | ^
     - unary operators???
     - don't need a list of functions, assume any identifier used as such -- `foo(1, 2)` -- is a function call
+
+
+### 2022-03-24
+- Theme: new design built around breaking the problem into smaller parts
+
+- Use our own token class
+    - decouple from Pygments
+    - carry the data we think is important
+    - divide tokens into types for our purposes, not Pygments' purposes
+    - start by translating Pygments' output into a stream of our tokens
+    - later, could replace that with our own lexer if desired
+
+- `Query` class (or maybe `Statement`?) to wrap a whole statement's worth of tokens
+    - not directly though, break them into clauses
+    - give `Query` and each `FooClause` class a `.render()` method
+        - a `Query` renders by concatenating the output of all its clauses' rendered output
+        - a clause renders by laying out its tokens, this can work because any given clause can be laid out (relative to the left margin) without knowledge of the details of any other clause
+    - instances of `Query` might be nested, e.g. inline views, scalar subqueries
+        - this works because nested queries can be rendered without knowledge of their nesting context
+        - outer query rendering just needs to keep track of the margin
+
+- take more care with comments
+    - current state of `formatter.py` gets line comments wrong somehow (at least that's what I remember from the last time I used it on real, gnarly queries found in the wild)
+    - Pygments returns line comments as a unit, from the comment marker through the terminating newline, e.g. "--this is a comment\n", which is exactly what we want
+    - whitespace (or anything, really) can be added _to the left_ of the comment marker, but nothing inside the comment can be re-arranged
+    - in theory, line comments can be re-ordered with respect to other tokens, but we probably shouldn't!!
+
+    - not quite clear what to do with block comments, probably reproduce them exactly as they're input, maybe ok to bump their left margin
+
+- expressions
+    - default behavior should be to _refrain_ from reformatting expressions
+    - take each element of the `select` clause, place it after its comma with the proper left margin, but otherwise leave it alone
+
+    - advantage 1: less work!
+    - advantage 2: preserves hand-formatting of odd cases, and gives flexiblity to do different layouts of `case` etc.
+
+    - can later add a CLI flag to enable expression formatting, and maybe an additional one for a simple each-expression-on-one-line mode
+
+- token types
+    - fewer are needed than previously thought
+    - there's no practical difference between an identifier, quoted identifier, function name, string literal, numeric literal, or operator: these are all just strings that need to be printed exactly as they are
+        - I guess there's _some_ difference in that identifiers, functions, and word-operators (and, or, not, etc.) are not typically case-sensitive and could be coerced to lower or upper case as per preference
+        - whereas quoted identifiers, string literals, and comments cannot be manipulated at all
+        - even still, lower/upper-casing could be done earlier, at the token assembly step, which would re-simplify and let us treat *all* of these things simply as "words"
+        - arguably, even punctuation can be treated this way, e.g. ">=" is just a word that happens to be made of non-alphanum characters, but follows the same rules
+
+- random notes
+    - Pygments supports escaped literals (E'Bob\'s') and unicode-escaped identifiers (U&"d\0061t\+000061") but doesn't support hex literals (x'FF'), binary literals (B'1001'), or unicode-escaped literals (U&'...'), see https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-CONSTANTS, and https://github.com/pygments/pygments/blob/master/pygments/lexers/sql.py (search for Affix), might be worth submitting a PR?

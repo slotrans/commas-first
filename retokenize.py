@@ -5,16 +5,42 @@ import pygments
 from pygments.lexers import get_lexer_by_name
 from pygments.token import Token
 
+from sftoken import SFToken
+
+
+IS_NOT_DISTINCT_FROM = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'distinct'), (Token.Keyword, 'from')]
+
+FOUR_WORD_PHRASES = [
+    IS_NOT_DISTINCT_FROM,
+]
+FOUR_WORD_PHRASE_STARTERS = [x[0] for x in FOUR_WORD_PHRASES]
+
 
 LEFT_OUTER_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')]
 RIGHT_OUTER_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')]
 IS_NOT_NULL = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'null')]
+IS_DISTINCT_FROM = [(Token.Keyword, 'is'), (Token.Keyword, 'distinct'), (Token.Keyword, 'from')]
+NOT_BETWEEN_SYMMETRIC = [(Token.Keyword, 'not'), (Token.Keyword, 'between'), (Token.Keyword, 'symmetric')]
+AT_TIME_ZONE = [(Token.Keyword, 'at'), (Token.Name.Builtin, 'time'), (Token.Keyword, 'zone')]
 
 THREE_WORD_PHRASES = [
     LEFT_OUTER_JOIN,
     RIGHT_OUTER_JOIN,
     IS_NOT_NULL,
+    IS_DISTINCT_FROM,
+    NOT_BETWEEN_SYMMETRIC,
+    AT_TIME_ZONE,
 ]
+THREE_WORD_PHRASE_STARTERS = [x[0] for x in THREE_WORD_PHRASES]
+
+#THREE_WORD_PHRASE_MAP = {
+#    ((Token.Keyword, 'left'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')):        (Token.Keyword, 'left outer join'),
+#    ((Token.Keyword, 'right'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')):       (Token.Keyword, 'right outer join'),
+#    ((Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'null')):            (Token.Keyword, 'is not null'),
+#    ((Token.Keyword, 'is'), (Token.Keyword, 'distinct'), (Token.Keyword, 'from')):       (Token.Keyword, 'is distinct from'),
+#    ((Token.Keyword, 'not'), (Token.Keyword, 'between'), (Token.Keyword, 'symmetric')):  (Token.Keyword, 'not between symmetric'),
+#    ((Token.Keyword, 'at'), (Token.Name.Builtin, 'time'), (Token.Keyword, 'zone')):      (Token.Keyword, 'at time zone'),
+#}
 
 CROSS_JOIN = [(Token.Keyword, 'cross'), (Token.Keyword, 'join')]
 LEFT_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'join')]
@@ -24,6 +50,9 @@ ORDER_BY = [(Token.Keyword, 'order'), (Token.Keyword, 'by')]
 PARTITION_BY = [(Token.Keyword, 'partition'), (Token.Keyword, 'by')]
 WITHIN_GROUP = [(Token.Keyword, 'within'), (Token.Keyword, 'group')]
 IS_NULL = [(Token.Keyword, 'is'), (Token.Keyword, 'null')]
+NOT_BETWEEN = [(Token.Keyword, 'not'), (Token.Keyword, 'between')]
+BETWEEN_SYMMETRIC = [(Token.Keyword, 'between'), (Token.Keyword, 'symmetric')]
+
 
 TWO_WORD_PHRASES = [
     CROSS_JOIN,
@@ -33,26 +62,43 @@ TWO_WORD_PHRASES = [
     ORDER_BY,
     PARTITION_BY,
     WITHIN_GROUP,
-    IS_NULL
+    IS_NULL,
+    NOT_BETWEEN,
+    BETWEEN_SYMMETRIC,
 ]
+TWO_WORD_PHRASE_STARTERS = [x[0] for x in TWO_WORD_PHRASES]
+
+#TWO_WORD_PHRASE_MAP = {
+#    ((Token.Keyword, 'cross'), (Token.Keyword, 'join')):         (Token.Keyword, 'cross join'),
+#    ((Token.Keyword, 'left'), (Token.Keyword, 'join')):          (Token.Keyword, 'left join'),
+#    ((Token.Keyword, 'right'), (Token.Keyword, 'join')):         (Token.Keyword, 'right join'),
+#    ((Token.Keyword, 'group'), (Token.Keyword, 'by')):           (Token.Keyword, 'group by'),
+#    ((Token.Keyword, 'order'), (Token.Keyword, 'by')):           (Token.Keyword, 'order by'),
+#    ((Token.Keyword, 'partition'), (Token.Keyword, 'by')):       (Token.Keyword, 'partition by'),
+#    ((Token.Keyword, 'within'), (Token.Keyword, 'group')):       (Token.Keyword, 'within group'),
+#    ((Token.Keyword, 'is'), (Token.Keyword, 'null')):            (Token.Keyword, 'is null'),
+#    ((Token.Keyword, 'not'), (Token.Keyword, 'between')):        (Token.Keyword, 'not between'),
+#    ((Token.Keyword, 'between'), (Token.Keyword, 'symmetric')):  (Token.Keyword, 'between symmetric'),
+#}
+
 
 SINGLE_QUOTE = (Token.Literal.String.Single, "'")
 DOUBLE_QUOTE = (Token.Literal.String.Name, '"')
+BACKTICK_QUOTE = (Token.Operator, '`')
+DOLLAR_QUOTE = (Token.Literal.String, '$')
+DOT = (Token.Literal.Number.Float, '.')
 
 
-ALL_WHITESPACE = re.compile(r'^\s+$')
-def is_only_whitespace(token):
-    ttype, value = token
-    return (ttype == Token.Text and ALL_WHITESPACE.match(value))
-
+### FIRST PASS FUNCTIONS
 
 def pre_process_tokens(tokenlist):
     out = []
     for t in tokenlist:
         ttype, value = t
-        if is_only_whitespace(t):
-            continue
 
+        # This makes dealing with keyphrases much easier, and I prefer lower-case keywords anyway.
+        # If we want to support uppercasing keywords or passing them through unmodified, this would have to be removed
+        # and get_key_phrase() refactored to do case-insensitive comaparisons.
         if ttype is Token.Keyword:
             value = value.lower()
 
@@ -61,19 +107,12 @@ def pre_process_tokens(tokenlist):
     return out
 
 
-def merge_keyphrase(token_phrase):
-    text = ' '.join([t[1] for t in token_phrase])
-    return (Token.Keyword, text)
-
-
-def merge_identifier(token_phrase):
-    text = ''.join(t[1] for t in token_phrase)
-    return (Token.Name, text)
-
-
-def assemble_quoted_literal(tokens):
+def get_single_quoted_literal(tokens):
     length = len(tokens)
-    j = 1 # not zero! we already know the 0th token is a single quote
+    if length < 3 or tokens[0] != SINGLE_QUOTE:
+        return (None, None)
+
+    j = 1 # we already know the 0th token is a single quote
     while j < length:
         if tokens[j] == SINGLE_QUOTE:
             phrase = tokens[0:j+1]
@@ -81,55 +120,131 @@ def assemble_quoted_literal(tokens):
             return ((Token.Literal.String.Single, quoted_literal), j+1)
         else:
             j += 1
+
     return (None, None)
 
 
-def assemble_quoted_name(tokens):
+def get_dollar_quoted_literal(tokens):
     length = len(tokens)
-    j = 1 # not zero! we already know the 0th token is a single quote
+    if length < 7:
+        return (None, None)
+    if not (tokens[0] == DOLLAR_QUOTE and tokens[1][0] is Token.Literal.String.Delimiter and tokens[2] == DOLLAR_QUOTE):
+        return (None, None)
+
+    delimiter = tokens[1]
+    j = 3 # we already know the first 3 tokens are $, delimiter, $
+    while j+2 < length:
+        if tokens[j:j+3] == [DOLLAR_QUOTE, delimiter, DOLLAR_QUOTE]:
+            phrase = tokens[0:j+3]
+            quoted_literal = ''.join([t[1] for t in phrase])
+            return ((Token.Literal.String, quoted_literal), j+3)
+        else:
+            j += 1
+
+    return (None, None)
+
+
+def get_quoted_name(tokens):
+    length = len(tokens)
+    if length < 3 or tokens[0] not in (DOUBLE_QUOTE, BACKTICK_QUOTE):
+        return (None, None)
+
+    quote_token = tokens[0]
+    j = 1 # we already know the 0th token is quote_token
     while j < length:
-        if tokens[j] == DOUBLE_QUOTE:
+        if tokens[j] == quote_token:
             phrase = tokens[0:j+1]
             quoted_name = ''.join([t[1] for t in phrase])
-            return ((Token.Name, quoted_name), j+1)
+            return ((Token.Literal.String.Name, quoted_name), j+1)
         j += 1
+
     return (None, None)
 
 
-def try_qualified_identifier(tokens):
-    first_type, first_value = tokens[0]
-    second_type, second_value = tokens[1]
-    third_type, third_value = tokens[2]
+# these three functions could be written as a single generic function,
+# but this is clearer and easier to get right
 
-    if (    first_type is Token.Name
-        and second_type is Token.Literal.Number.Float
-        and second_value == '.'
-        and third_type is Token.Name
-       ):
-        return merge_identifier(tokens)
-    else:
-        return None
+def get_two_word_key_phrase(tokens):
+    length = len(tokens)
+    tokens_in_phrase = 3
+    if length < tokens_in_phrase:
+        return (None, None)
+
+    for phrase in TWO_WORD_PHRASES:
+        if (    tokens[0] == phrase[0]
+            and tokens[1][0] is Token.Text.Whitespace
+            and tokens[2] == phrase[1]
+           ):
+            assembled_phrase = ' '.join([t[1] for t in phrase])
+            return ((Token.Keyword, assembled_phrase), tokens_in_phrase)
+
+    return (None, None)
 
 
-def try_double_qualified_identifier(tokens):
-    first_type, first_value = tokens[0]
-    second_type, second_value = tokens[1]
-    third_type, third_value = tokens[2]
-    fourth_type, fourth_value = tokens[3]
-    fifth_type, fifth_value = tokens[4]
+def get_three_word_key_phrase(tokens):
+    length = len(tokens)
+    tokens_in_phrase = 5
+    if length < tokens_in_phrase:
+        return (None, None)
 
-    if (    first_type is Token.Name
-        and second_type is Token.Literal.Number.Float
-        and second_value == '.'
-        and third_type is Token.Name
-        and fourth_type is Token.Literal.Number.Float
-        and fourth_value == '.'
-        and fifth_type is Token.Name
-       ):
-        return merge_identifier(tokens)
-    else:
-        return None
+    for phrase in THREE_WORD_PHRASES:
+        if (    tokens[0] == phrase[0]
+            and tokens[1][0] is Token.Text.Whitespace
+            and tokens[2] == phrase[1]
+            and tokens[3][0] is Token.Text.Whitespace
+            and tokens[4] == phrase[2]
+           ):
+            assembled_phrase = ' '.join([t[1] for t in phrase])
+            return ((Token.Keyword, assembled_phrase), tokens_in_phrase)
 
+    return (None, None)
+
+
+def get_four_word_key_phrase(tokens):
+    length = len(tokens)
+    tokens_in_phrase = 7
+    if length < tokens_in_phrase:
+        return (None, None)
+
+    for phrase in FOUR_WORD_PHRASES:
+        if (    tokens[0] == phrase[0]
+            and tokens[1][0] is Token.Text.Whitespace
+            and tokens[2] == phrase[1]
+            and tokens[3][0] is Token.Text.Whitespace
+            and tokens[4] == phrase[2]
+            and tokens[5][0] is Token.Text.Whitespace
+            and tokens[6] == phrase[3]
+           ):
+            assembled_phrase = ' '.join([t[1] for t in phrase])
+            return ((Token.Keyword, assembled_phrase), tokens_in_phrase)
+
+    return (None, None)
+
+
+### SECOND PASS FUNCTIONS
+
+def get_qualified_identifier(tokens):
+    """
+    Consumes a series of dot-separated names, of any length.
+    Only foo.bar and foo.bar.baz are typically found in SQL, but 1) there are weird dialects out there,
+    and 2) we wish to be sloppy rather than strict in our parsing.
+    """
+    length = len(tokens)
+    if length < 3 or tokens[0][0] not in (Token.Name, Token.Literal.String.Name):
+        return (None, None)
+
+    consumed = [tokens[0]]
+    j = 1
+    while j+1 < length and tokens[j] == DOT and tokens[j+1][0] in (Token.Name, Token.Literal.String.Name):
+        consumed.append(tokens[j])
+        consumed.append(tokens[j+1])
+        j += 2
+
+    assembled_token = (Token.Name, ''.join([t[1] for t in consumed]))
+    return (assembled_token, len(consumed))
+
+
+### DRIVER FUNCTIONS
 
 def retokenize1(tokens):
     out = []
@@ -137,20 +252,52 @@ def retokenize1(tokens):
     i = 0
     length = len(tokens)
     while i < length:
+        # single-quoted string literals
+        #TODO: support affixed literals E'...', B'...', U&'...', x'...'
         if tokens[i] == SINGLE_QUOTE:
-            quoted_literal, tokens_consumed = assemble_quoted_literal(tokens[i:])
+            quoted_literal, tokens_consumed = get_single_quoted_literal(tokens[i:])
             if quoted_literal:
                 out.append(quoted_literal)
                 i += tokens_consumed
                 continue
 
-        if tokens[i] == DOUBLE_QUOTE:
-            quoted_name, tokens_consumed = assemble_quoted_name(tokens[i:])
+        # dollar-quoted string literals
+        if tokens[i] == DOLLAR_QUOTE:
+            quoted_literal, tokens_consumed = get_dollar_quoted_literal(tokens[i:])
+            if quoted_literal:
+                out.append(quoted_literal)
+                i += tokens_consumed
+                continue
+
+        # double-quoted/backtick-quoted identifiers
+        if tokens[i] in (DOUBLE_QUOTE, BACKTICK_QUOTE):
+            quoted_name, tokens_consumed = get_quoted_name(tokens[i:])
             if quoted_name:
                 out.append(quoted_name)
                 i += tokens_consumed
                 continue
 
+        # multi-keyword phrases
+        keyphrase = None
+        if i+3 < length and tokens[i] in (FOUR_WORD_PHRASE_STARTERS):
+            keyphrase, tokens_consumed = get_four_word_key_phrase(tokens[i:])
+        elif i+2 < length and tokens[i] in (THREE_WORD_PHRASE_STARTERS):
+            keyphrase, tokens_consumed = get_three_word_key_phrase(tokens[i:])
+        elif i+1 < length and tokens[i] in (TWO_WORD_PHRASE_STARTERS):
+            keyphrase, tokens_consumed = get_three_word_key_phrase(tokens[i:])
+
+        if keyphrase:
+            out.append(keyphrase)
+            i += tokens_consumed
+            continue
+
+        # whitespace
+        if tokens[i][0] is Token.Text.Whitespace:
+            #TODO: convert tabs to spaces
+            #TODO: split newlines apart from other whitespace
+            pass
+
+        # everything else passes through unmodified
         out.append(tokens[i])
         i += 1
 
@@ -165,7 +312,7 @@ def retokenize2(tokens):
     while i < length:
         if i+4 < length: # double-qualified identifiers
             phrase = tokens[i:i+5]
-            double_qualified_identifier = try_double_qualified_identifier(phrase)
+            double_qualified_identifier = get_double_qualified_identifier(phrase)
             if double_qualified_identifier:
                 out.append(double_qualified_identifier)
                 i += 5
@@ -178,7 +325,7 @@ def retokenize2(tokens):
                 i += 3
                 continue
             else:
-                qualified_identifier = try_qualified_identifier(phrase)
+                qualified_identifier = get_qualified_identifier(phrase)
                 if qualified_identifier:
                     out.append(qualified_identifier)
                     i += 3
