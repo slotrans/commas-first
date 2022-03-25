@@ -143,10 +143,13 @@ def test_four_word_key_phrases():
         assert expected_consumed == actual_consumed
 
 
+#TODO: whitespace tests
+
+
 ### SECOND PASS
 
 def test_qualified_identifier_one_dot():
-    tokens = list(lexer.get_tokens("foo.bar")) # [(Token.Name, 'foo'), (Token.Literal.Number.Float, '.'), (Token.Name, 'bar')]
+    tokens = retokenize.retokenize1(list(lexer.get_tokens("foo.bar"))) # [(Token.Name, 'foo'), (Token.Literal.Number.Float, '.'), (Token.Name, 'bar')]
     actual_token, actual_consumed = retokenize.get_qualified_identifier(tokens)
     expected_token = (Token.Name, "foo.bar")
     expected_consumed = 3
@@ -155,7 +158,7 @@ def test_qualified_identifier_one_dot():
 
 
 def test_qualified_identifier_two_dots():
-    tokens = list(lexer.get_tokens("foo.bar.baz")) # [(Token.Name, 'foo'), (Token.Literal.Number.Float, '.'), (Token.Name, 'bar'), (Token.Literal.Number.Float, '.'), (Token.Name, 'baz')]
+    tokens = retokenize.retokenize1(list(lexer.get_tokens("foo.bar.baz"))) # [(Token.Name, 'foo'), (Token.Literal.Number.Float, '.'), (Token.Name, 'bar'), (Token.Literal.Number.Float, '.'), (Token.Name, 'baz')]
     actual_token, actual_consumed = retokenize.get_qualified_identifier(tokens)
     expected_token = (Token.Name, "foo.bar.baz")
     expected_consumed = 5
@@ -164,7 +167,7 @@ def test_qualified_identifier_two_dots():
 
 
 def test_qualified_identifier_three_dots():
-    tokens = list(lexer.get_tokens("foo.bar.baz.idk")) # [(Token.Name, 'foo'), (Token.Literal.Number.Float, '.'), (Token.Name, 'bar'), (Token.Literal.Number.Float, '.'), (Token.Name, 'baz'), (Token.Literal.Number.Float, '.'), (Token.Name, 'idk')]
+    tokens = retokenize.retokenize1(list(lexer.get_tokens("foo.bar.baz.idk"))) # [(Token.Name, 'foo'), (Token.Literal.Number.Float, '.'), (Token.Name, 'bar'), (Token.Literal.Number.Float, '.'), (Token.Name, 'baz'), (Token.Literal.Number.Float, '.'), (Token.Name, 'idk')]
     actual_token, actual_consumed = retokenize.get_qualified_identifier(tokens)
     expected_token = (Token.Name, "foo.bar.baz.idk")
     expected_consumed = 7
@@ -172,4 +175,19 @@ def test_qualified_identifier_three_dots():
     assert expected_consumed == actual_consumed
 
 
-#def test_qualified_identifier_with_quotes_one_dot():
+def test_qualified_identifier_with_quotes_one_dot():
+    tokens = retokenize.retokenize1(list(lexer.get_tokens('"Alice"."Bob"'))) # [(Token.Name, '"Alice"'), (Token.Literal.Number.Float, '.'), (Token.Name, '"Bob"')]
+    actual_token, actual_consumed = retokenize.get_qualified_identifier(tokens)
+    expected_token = (Token.Name, '"Alice"."Bob"')
+    expected_consumed = 3
+    assert expected_token == actual_token
+    assert expected_consumed == actual_consumed
+
+
+def test_qualified_identifier_with_quotes_two_dots():
+    tokens = retokenize.retokenize1(list(lexer.get_tokens('"Alice"."Bob"."Cindy"'))) # [(Token.Name, '"Alice"'), (Token.Literal.Number.Float, '.'), (Token.Name, '"Bob"'), (Token.Literal.Number.Float, '.'), (Token.Name, '"Cindy"')]
+    actual_token, actual_consumed = retokenize.get_qualified_identifier(tokens)
+    expected_token = (Token.Name, '"Alice"."Bob"."Cindy"')
+    expected_consumed = 5
+    assert expected_token == actual_token
+    assert expected_consumed == actual_consumed

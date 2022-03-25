@@ -310,6 +310,8 @@ def retokenize2(tokens):
     i = 0
     length = len(tokens)
     while i < length:
+        #TODO: this is all old, and needs to be replaced with just(?) a search for qualified identifiers
+
         if i+4 < length: # double-qualified identifiers
             phrase = tokens[i:i+5]
             double_qualified_identifier = get_double_qualified_identifier(phrase)
