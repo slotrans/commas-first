@@ -90,6 +90,32 @@ def test_broken_backtick_quoted_identifier():
     assert expected_consumed == actual_consumed
 
 
+def test_block_comment():
+    tokens = list(lexer.get_tokens('/* blergh */')) # [(Token.Comment.Multiline, '/*'), (Token.Comment.Multiline, ' blergh '), (Token.Comment.Multiline, '*/')]
+    actual_token, actual_consumed = retokenize.get_block_comment(tokens)
+    expected_token = (Token.Comment.Multiline, '/* blergh */')
+    expected_consumed = 3
+    assert expected_token == actual_token
+    assert expected_consumed == actual_consumed
+
+
+def test_nested_block_comment():
+    tokens = list(lexer.get_tokens('/* /* blergh */ */')) # [(Token.Comment.Multiline, '/*'), (Token.Comment.Multiline, ' '), (Token.Comment.Multiline, '/*'), (Token.Comment.Multiline, ' blergh '), (Token.Comment.Multiline, '*/'), (Token.Comment.Multiline, ' '), (Token.Comment.Multiline, '*/'), (Token.Text.Whitespace, '\n')]
+    actual_token, actual_consumed = retokenize.get_block_comment(tokens)
+    expected_token = (Token.Comment.Multiline, '/* /* blergh */ */')
+    expected_consumed = 7
+    assert expected_token == actual_token
+    assert expected_consumed == actual_consumed
+
+
+def test_broken_block_comment():
+    tokens = list(lexer.get_tokens('/* blergh')) # [(Token.Comment.Multiline, '/*'), (Token.Comment.Multiline, ' blergh ')]
+    actual_token, actual_consumed = retokenize.get_block_comment(tokens)
+    expected_token, expected_consumed = (None, None)
+    assert expected_token == actual_token
+    assert expected_consumed == actual_consumed
+
+
 def test_two_word_key_phrases():
     phrases = [
         'cross join',

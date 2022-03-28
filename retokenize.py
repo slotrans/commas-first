@@ -45,6 +45,8 @@ THREE_WORD_PHRASE_STARTERS = [x[0] for x in THREE_WORD_PHRASES]
 CROSS_JOIN = [(Token.Keyword, 'cross'), (Token.Keyword, 'join')]
 LEFT_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'join')]
 RIGHT_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'join')]
+NATURAL_JOIN = [(Token.Keyword, 'natural'), (Token.Keyword, 'join')]
+LATERAL_JOIN = [(Token.Keyword, 'lateral'), (Token.Keyword, 'join')]
 GROUP_BY = [(Token.Keyword, 'group'), (Token.Keyword, 'by')]
 ORDER_BY = [(Token.Keyword, 'order'), (Token.Keyword, 'by')]
 PARTITION_BY = [(Token.Keyword, 'partition'), (Token.Keyword, 'by')]
@@ -58,6 +60,8 @@ TWO_WORD_PHRASES = [
     CROSS_JOIN,
     LEFT_JOIN,
     RIGHT_JOIN,
+    NATURAL_JOIN,
+    LATERAL_JOIN,
     GROUP_BY,
     ORDER_BY,
     PARTITION_BY,
@@ -87,6 +91,8 @@ DOUBLE_QUOTE = (Token.Literal.String.Name, '"')
 BACKTICK_QUOTE = (Token.Operator, '`')
 DOLLAR_QUOTE = (Token.Literal.String, '$')
 DOT = (Token.Literal.Number.Float, '.')
+BLOCK_COMMENT_OPEN = (Token.Comment.Multiline, '/*')
+BLOCK_COMMENT_CLOSE = (Token.Comment.Multiline, '*/')
 
 
 ### FIRST PASS FUNCTIONS
@@ -156,6 +162,30 @@ def get_quoted_name(tokens):
             phrase = tokens[0:j+1]
             quoted_name = ''.join([t[1] for t in phrase])
             return ((Token.Literal.String.Name, quoted_name), j+1)
+        j += 1
+
+    return (None, None)
+
+
+def get_block_comment(tokens):
+    length = len(tokens)
+    if length < 2:
+        return (None, None)
+
+    j = 1
+    nested_depth = 0
+    while j < length:
+        if tokens[j] == BLOCK_COMMENT_OPEN:
+            nested_depth += 1
+        elif tokens[j] == BLOCK_COMMENT_CLOSE:
+            if nested_depth == 0:
+                phrase = tokens[0:j+1]
+                assembled_comment = ''.join([t[1] for t in phrase])
+                return ((Token.Comment.Multiline, assembled_comment), j+1)
+            else:
+                nested_depth -= 1
+        elif tokens[j][0] is not Token.Comment.Multiline:
+            break
         j += 1
 
     return (None, None)
