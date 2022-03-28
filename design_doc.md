@@ -340,3 +340,20 @@ especially for phrases, are wordy and depend on the phrase length being tested
 
 - random notes
     - Pygments supports escaped literals (E'Bob\'s') and unicode-escaped identifiers (U&"d\0061t\+000061") but doesn't support hex literals (x'FF'), binary literals (B'1001'), or unicode-escaped literals (U&'...'), see https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-CONSTANTS, and https://github.com/pygments/pygments/blob/master/pygments/lexers/sql.py (search for Affix), might be worth submitting a PR?
+        - actually it looks like they're trying to support U&'...' but it didn't work when I tested it
+
+    - since we're rendering each clause separately and concatenating the results, it's OK if one clause has broken syntax
+
+    - optionally run as a simple web service on a local port, which would give a clear place to print warnings and debug messages (like "likely syntax error at ...")
+
+    - upon reflection, collapsing quoted and/or qualified identifiers into a single token isn't _exactly_ necessary, since for the time being our expression formatter is "pass it through", and in other cases where we might encounter an identifier, like `from "foo"."bar"`, we can just print out what we're given, maybe replacing newlines with spaces or other light tweaks
+        - it doesn't _hurt_ though and it's mostly written already
+        - also helps find syntax errors in `from` clause
+
+    - `from` is a bit tricky...
+        - (in any case, a `from` item can be a paren-wrapped subquery, which would be handled recursively)
+        - SQL-92 is `from foo, bar, baz`, or `from foo a, bar b, baz c`, or `from foo as a, bar as b, baz as c`, or any mix of those
+        - SQL-99 is `from foo join bar on(...) join baz on (...)`, or aliased variants as above. Also `join` might be `inner join`, `left join`, `left outer join`, `right join`, `right outer join`, `cross join`, `natural join` (ugh), or `lateral join`, all of which can be mixed. Also `on` could be `using`, and these can be mixed.
+        - Can 92 and 99 be mixed?!?! Like `from foo, bar join baz on (...)` or `from foo join bar on(...), baz`?
+            - even if this is invalid syntax we may want to best-effort support it so users get a readable result
+        - upon encountering a syntax error, it may be best to render the part that makes sense and spit out the rest either as-input or on-one-line, and log a warning
