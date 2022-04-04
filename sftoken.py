@@ -1,6 +1,7 @@
 import re
 import enum
 from dataclasses import dataclass
+from types import SimpleNamespace
 
 from pygments.token import Token
 
@@ -63,6 +64,40 @@ class SFToken:
             else:
                 return (self.kind, self.value) == (other.kind, other.value)
         return NotImplemented
+
+
+Keywords = SimpleNamespace(
+    ALL      = SFToken(SFTokenKind.WORD, "all"),
+    AND      = SFToken(SFTokenKind.WORD, "and"),
+    CROSS    = SFToken(SFTokenKind.WORD, "cross"),
+    DISTINCT = SFToken(SFTokenKind.WORD, "distinct"),
+    FROM     = SFToken(SFTokenKind.WORD, "from"),
+    INNER    = SFToken(SFTokenKind.WORD, "inner"),
+    JOIN     = SFToken(SFTokenKind.WORD, "join"),
+    LATERAL  = SFToken(SFTokenKind.WORD, "lateral"),
+    LEFT     = SFToken(SFTokenKind.WORD, "left"),
+    NATURAL  = SFToken(SFTokenKind.WORD, "natural"),
+    NOT      = SFToken(SFTokenKind.WORD, "not"),
+    ON       = SFToken(SFTokenKind.WORD, "on"),
+    OR       = SFToken(SFTokenKind.WORD, "or"),
+    OUTER    = SFToken(SFTokenKind.WORD, "outer"),
+    RIGHT    = SFToken(SFTokenKind.WORD, "right"),
+    SELECT   = SFToken(SFTokenKind.WORD, "select"),
+    USING    = SFToken(SFTokenKind.WORD, "using"),
+    WHERE    = SFToken(SFTokenKind.WORD, "where"),
+)
+
+Symbols = SimpleNamespace(
+    COMMA       = SFToken(SFTokenKind.SYMBOL, ","),
+    DOT         = SFToken(SFTokenKind.SYMBOL, "."),
+    LEFT_PAREN  = SFToken(SFTokenKind.SYMBOL, "("),
+    RIGHT_PAREN = SFToken(SFTokenKind.SYMBOL, ")"),
+)
+
+Whitespace = SimpleNamespace(
+    NEWLINE   = SFToken(SFTokenKind.NEWLINE, "\n"),
+    ONE_SPACE = SFToken(SFTokenKind.SPACES, " "),
+)
 
 
 def sftokens_from_pygments_tokens(tokens):
