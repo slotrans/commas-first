@@ -60,6 +60,14 @@ def collapse_whitespace(tokens):
     return out
 
 
+def trim_trailing_whitespace(tokens):
+    i = len(tokens) - 1
+    while i >= 0 and tokens[i].is_whitespace:
+        i -= 1
+
+    return tokens[0:i+1]
+
+
 class Statement:
     def __init__(self, tokens):
         #self.with_clause = WithClause(...)
@@ -107,7 +115,7 @@ class SelectClause:
             raise ValueError("tokens must be non-empty")
 
         if tokens[0] != Keywords.SELECT:
-            raise ValueError("SelectClause must begin with \"select\" keyword")
+            raise ValueError("SelectClause must begin with \"SELECT\" keyword")
 
         return True
 
@@ -192,19 +200,98 @@ class SelectClause:
 
 
 class FromClause:
+    __slots__ = (
+        "input_tokens",
+    )    
+
     def __init__(self, tokens):
-        self.tokens = tokens
+        self.input_tokens = tokens
 
     def render(self):
         pass
 
 
 class WhereClause:
+    __slots__ = (
+        "input_tokens",
+        "delimiters",
+        "expressions",
+    )    
+
     def __init__(self, tokens):
-        self.tokens = tokens
+        WhereClause._validate(tokens)
+
+        self.input_tokens = tokens
+
+        self.delimiters, self.expressions = self._parse(tokens)
+
+
+    @staticmethod
+    def _validate(tokens):
+        if not tokens:
+            raise ValueError("tokens must be non-empty")
+
+        if tokens[0] != Keywords.WHERE:
+            raise ValueError("WhereClause must begin with \"WHERE\" keyword")
+
+        return True
+
+
+    def _parse(self, tokens):
+        i = 1
+        delimiters = [Keywords.WHERE]
+        expressions = []
+        paren_depth = 0
+        buffer = []
+        while i < len(tokens):
+            if tokens[i] in (Keywords.AND, Keywords.OR) and paren_depth == 0:
+                delimiters.append(tokens[i])
+                expressions.append(Expression(trim_trailing_whitespace(buffer)))
+                buffer = []
+            else:
+                if tokens[i] == Symbols.LEFT_PAREN:
+                    paren_depth += 1
+                elif tokens[i] == Symbols.RIGHT_PAREN:
+                    #TODO: detect unbalanced parens
+                    paren_depth -= 1
+                #TODO: detect and handle paren-wrapped subqueries
+                buffer.append(tokens[i])
+
+            i += 1
+        # one final expression, empty in the weird/broken case where the final token was AND or OR
+        if len(buffer) > 0 or len(delimiters) > len(expressions): 
+            expressions.append(Expression(trim_trailing_whitespace(buffer)))
+
+        assert len(delimiters) == len(expressions)
+
+        return (delimiters, expressions)
+
 
     def render(self):
-        pass
+        parts = []
+        i = 0
+        while i < len(self.delimiters):
+            delimiter = self.delimiters[i]
+            expression = self.expressions[i]
+
+            if i > 0:
+                parts.append("\n")
+
+            if delimiter == Keywords.WHERE:
+                parts.append(" where")
+            elif delimiter == Keywords.AND:
+                parts.append("   and")
+            elif delimiter == Keywords.OR:
+                parts.append("    or")
+            else:
+                raise ValueError(f"invalid WhereClause delimiter: {delimiter}")
+
+            parts.append(expression.render())
+
+            i += 1
+
+        out = "".join(parts)
+        return out
 
 
 class Expression:
