@@ -142,6 +142,7 @@ def test_three_word_key_phrases():
     phrases = [
         'left outer join',
         'right outer join',
+        'full outer join',
         'is not null',
         'is distinct from',
         'not between symmetric',
