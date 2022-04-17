@@ -357,3 +357,11 @@ especially for phrases, are wordy and depend on the phrase length being tested
         - Can 92 and 99 be mixed?!?! Like `from foo, bar join baz on (...)` or `from foo join bar on(...), baz`?
             - even if this is invalid syntax we may want to best-effort support it so users get a readable result
         - upon encountering a syntax error, it may be best to render the part that makes sense and spit out the rest either as-input or on-one-line, and log a warning
+
+### 2022-04-17
+- An idea I'd had earlier but not written down is for `render()` to take an argument, called "margin" or "bump" or something like that, which indicates how far from the zero left margin to move its output over.
+    - I wasn't sure whether the margin argument should apply to _all_ lines emitted or just "lines after the first"
+    - After writing a couple of clauses, I'm leaning towards 1) this argument is a good idea and 2) it should apply to "lines after the first"
+    - As a clause renderer moves through its contents adding lines, there's a very easy place/time to add additional spaces
+    - The difficulty may actually be on the _calling_ side... For example if a `SelectClause` is rendering and somewhere in one of its expressions is a scalar subquery, you would call `subquery.render(margin=M)` but what is M? Either something needs to keep track of the current X position of the (virtual) cursor, or just before calling a lower-level `render()` method you would need to somehow measure the distance back to the margin.
+    
