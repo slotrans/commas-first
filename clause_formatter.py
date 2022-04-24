@@ -202,13 +202,96 @@ class SelectClause:
 class FromClause:
     __slots__ = (
         "input_tokens",
+        "delimiters",
+        "expressions", # using Expression here might not be ideal, but we'll see
     )    
+    JOIN_DELIMITERS = set([
+        Keywords.CROSS_JOIN,
+        Keywords.FROM,
+        Keywords.INNER_JOIN,
+        Keywords.JOIN,
+        Keywords.LATERAL_JOIN,
+        Keywords.LEFT_JOIN,
+        Keywords.LEFT_OUTER_JOIN,
+        Keywords.NATURAL_JOIN,
+        Keywords.RIGHT_JOIN,
+        Keywords.RIGHT_OUTER_JOIN,
+        Symbols.COMMA,
+    ])
 
     def __init__(self, tokens):
+        FromClause._validate(tokens)
+
         self.input_tokens = tokens
 
+        self.delimiters, self.expressions = self._parse(tokens)
+
+
+    @staticmethod
+    def _validate(tokens):
+        if not tokens:
+            raise ValueError("tokens must be non-empty")
+
+        if tokens[0] != Keywords.FROM:
+            raise ValueError("FromClause must begin with \"FROM\" keyword")
+
+        return True
+
+
+    def _parse(self, tokens):
+        i = 1 # we already know token 0 is "FROM"
+        delimiters = [Keywords.FROM]
+        expressions = []
+        paren_depth = 0
+        buffer = []
+        while i < len(tokens):
+            if paren_depth == 0 and tokens[i] in FromClause.JOIN_DELIMITERS:
+                delimiters.append(tokens[i])
+                expressions.append(Expression(trim_trailing_whitespace(buffer)))
+                buffer = []
+            else:
+                if tokens[i] == Symbols.LEFT_PAREN:
+                    paren_depth += 1
+                elif tokens[i] == Symbols.RIGHT_PAREN:
+                    #TODO: detect unbalanced parens
+                    paren_depth -= 1
+                #TODO: detect and handle paren-wrapped subqueries
+                buffer.append(tokens[i])
+            i += 1
+        # one final expression, empty in the weird/broken case where the final token was JOIN or etc
+        if len(buffer) > 0 or len(delimiters) > len(expressions): 
+            expressions.append(Expression(trim_trailing_whitespace(buffer)))
+
+        assert len(delimiters) == len(expressions)
+
+        return (delimiters, expressions)
+        # this whole method is obviously VERY similar to how WhereClause._parse() works,
+        # so there's some refactoring potential here
+
+
     def render(self):
-        pass
+        parts = []
+        i = 0
+        while i < len(self.delimiters):
+            delimiter = self.delimiters[i]
+            expression = self.expressions[i]
+
+            if i > 0:
+                parts.append("\n")
+
+            if delimiter == Symbols.COMMA:
+                parts.append("     ,")
+            elif delimiter in FromClause.JOIN_DELIMITERS:
+                parts.append(f"  {delimiter.value}")
+            else:
+                raise ValueError(f"invalid FromClause delimiter: {delimiter}")
+
+            parts.append(expression.render())
+
+            i += 1
+
+        out = "".join(parts)
+        return out
 
 
 class WhereClause:
@@ -238,7 +321,7 @@ class WhereClause:
 
 
     def _parse(self, tokens):
-        i = 1
+        i = 1 # we already know token 0 is "WHERE"
         delimiters = [Keywords.WHERE]
         expressions = []
         paren_depth = 0

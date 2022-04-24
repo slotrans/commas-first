@@ -351,15 +351,17 @@ class TestFromClause:
 
 
     def test_render_sql99_one_complex_join_already_formatted(self):
-        #from foo
-        #join bar on(    foo.x = bar.x 
-        #            and foo.y = bar.y
-        #           )
+        #  from foo
+        #  join bar on(    foo.x = bar.x 
+        #              and foo.y = bar.y
+        #             )
         clause = FromClause(tokens=[
+            #SFToken(SFTokenKind.SPACES, "  "), # those leading spaces are there, but won't be passed into the construction of a WhereClause
             SFToken(SFTokenKind.WORD, "from"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "foo"),
             SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "  "),
             SFToken(SFTokenKind.WORD, "join"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "bar"),
@@ -373,7 +375,7 @@ class TestFromClause:
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "bar.x"),
             SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "            "),
+            SFToken(SFTokenKind.SPACES, "              "),
             SFToken(SFTokenKind.WORD, "and"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "foo.y"),
@@ -382,7 +384,7 @@ class TestFromClause:
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "bar.y"),
             SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "           "),
+            SFToken(SFTokenKind.SPACES, "             "),
             SFToken(SFTokenKind.SYMBOL, ")"),
         ])
 
