@@ -171,7 +171,7 @@ class SelectClause:
 
     def render(self):
         if not self.qualifier and not self.expressions:
-            return "select\n"
+            return "select"
 
         parts = ["select"]
 
