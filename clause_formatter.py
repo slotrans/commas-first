@@ -94,6 +94,83 @@ class WithClause:
         pass
 
 
+class BasicClause:
+    __slots__ = (
+        "input_tokens",
+        "delimiters",
+        "expressions",
+    )
+    STARTING_DELIMITER = None    
+    OTHER_DELIMITERS = set()
+    PADDING = 6
+
+    def __init__(self, tokens):
+        self._validate(tokens)
+
+        self.input_tokens = tokens
+
+        self.delimiters, self.expressions = self._parse(tokens)
+
+
+    def _validate(self, tokens):
+        if not tokens:
+            raise ValueError("tokens must be non-empty")
+
+        if tokens[0] != self.STARTING_DELIMITER:
+            raise ValueError(f"{self.__class__} must begin with \"{self.STARTING_DELIMITER.value}\" keyword")
+
+        return True
+
+
+    def _parse(self, tokens):
+        i = 1 # we already know token 0 is the starting delimiter
+        delimiters = [self.STARTING_DELIMITER]
+        expressions = []
+        paren_depth = 0
+        buffer = []
+        while i < len(tokens):
+            if paren_depth == 0 and tokens[i] in self.OTHER_DELIMITERS:
+                delimiters.append(tokens[i])
+                expressions.append(Expression(trim_trailing_whitespace(buffer)))
+                buffer = []
+            else:
+                if tokens[i] == Symbols.LEFT_PAREN:
+                    paren_depth += 1
+                elif tokens[i] == Symbols.RIGHT_PAREN:
+                    #TODO: detect unbalanced parens
+                    paren_depth -= 1
+                #TODO: detect and handle paren-wrapped subqueries
+                buffer.append(tokens[i])
+            i += 1
+        # one final expression, empty in the weird/broken case where the final token was JOIN or etc
+        if len(buffer) > 0 or len(delimiters) > len(expressions): 
+            expressions.append(Expression(trim_trailing_whitespace(buffer)))
+
+        assert len(delimiters) == len(expressions)
+
+        return (delimiters, expressions)
+
+
+    def _render_delimiter(self, delimiter):
+        return delimiter.value.rjust(self.PADDING)
+
+
+    def render(self):
+        parts = []
+        i = 0
+        while i < len(self.delimiters):
+            if i > 0:
+                parts.append("\n")
+
+            parts.append(self._render_delimiter(self.delimiters[i]))
+            parts.append(self.expressions[i].render())
+
+            i += 1
+
+        out = "".join(parts)
+        return out    
+
+
 class SelectClause:
     __slots__ = (
         "input_tokens",
@@ -199,15 +276,10 @@ class SelectClause:
         return out
 
 
-class FromClause:
-    __slots__ = (
-        "input_tokens",
-        "delimiters",
-        "expressions", # using Expression here might not be ideal, but we'll see
-    )    
-    JOIN_DELIMITERS = set([
+class FromClause(BasicClause):
+    STARTING_DELIMITER = Keywords.FROM
+    OTHER_DELIMITERS = set([
         Keywords.CROSS_JOIN,
-        Keywords.FROM,
         Keywords.INNER_JOIN,
         Keywords.JOIN,
         Keywords.LATERAL_JOIN,
@@ -218,163 +290,22 @@ class FromClause:
         Keywords.RIGHT_OUTER_JOIN,
         Symbols.COMMA,
     ])
+    PADDING = 6
 
-    def __init__(self, tokens):
-        FromClause._validate(tokens)
-
-        self.input_tokens = tokens
-
-        self.delimiters, self.expressions = self._parse(tokens)
-
-
-    @staticmethod
-    def _validate(tokens):
-        if not tokens:
-            raise ValueError("tokens must be non-empty")
-
-        if tokens[0] != Keywords.FROM:
-            raise ValueError("FromClause must begin with \"FROM\" keyword")
-
-        return True
+    def _render_delimiter(self, delimiter):
+        if delimiter == Symbols.COMMA:
+            return super()._render_delimiter(delimiter)
+        else:
+            return f"  {delimiter.value}"
 
 
-    def _parse(self, tokens):
-        i = 1 # we already know token 0 is "FROM"
-        delimiters = [Keywords.FROM]
-        expressions = []
-        paren_depth = 0
-        buffer = []
-        while i < len(tokens):
-            if paren_depth == 0 and tokens[i] in FromClause.JOIN_DELIMITERS:
-                delimiters.append(tokens[i])
-                expressions.append(Expression(trim_trailing_whitespace(buffer)))
-                buffer = []
-            else:
-                if tokens[i] == Symbols.LEFT_PAREN:
-                    paren_depth += 1
-                elif tokens[i] == Symbols.RIGHT_PAREN:
-                    #TODO: detect unbalanced parens
-                    paren_depth -= 1
-                #TODO: detect and handle paren-wrapped subqueries
-                buffer.append(tokens[i])
-            i += 1
-        # one final expression, empty in the weird/broken case where the final token was JOIN or etc
-        if len(buffer) > 0 or len(delimiters) > len(expressions): 
-            expressions.append(Expression(trim_trailing_whitespace(buffer)))
-
-        assert len(delimiters) == len(expressions)
-
-        return (delimiters, expressions)
-        # this whole method is obviously VERY similar to how WhereClause._parse() works,
-        # so there's some refactoring potential here
-
-
-    def render(self):
-        parts = []
-        i = 0
-        while i < len(self.delimiters):
-            delimiter = self.delimiters[i]
-            expression = self.expressions[i]
-
-            if i > 0:
-                parts.append("\n")
-
-            if delimiter == Symbols.COMMA:
-                parts.append("     ,")
-            elif delimiter in FromClause.JOIN_DELIMITERS:
-                parts.append(f"  {delimiter.value}")
-            else:
-                raise ValueError(f"invalid FromClause delimiter: {delimiter}")
-
-            parts.append(expression.render())
-
-            i += 1
-
-        out = "".join(parts)
-        return out
-
-
-class WhereClause:
-    __slots__ = (
-        "input_tokens",
-        "delimiters",
-        "expressions",
-    )    
-
-    def __init__(self, tokens):
-        WhereClause._validate(tokens)
-
-        self.input_tokens = tokens
-
-        self.delimiters, self.expressions = self._parse(tokens)
-
-
-    @staticmethod
-    def _validate(tokens):
-        if not tokens:
-            raise ValueError("tokens must be non-empty")
-
-        if tokens[0] != Keywords.WHERE:
-            raise ValueError("WhereClause must begin with \"WHERE\" keyword")
-
-        return True
-
-
-    def _parse(self, tokens):
-        i = 1 # we already know token 0 is "WHERE"
-        delimiters = [Keywords.WHERE]
-        expressions = []
-        paren_depth = 0
-        buffer = []
-        while i < len(tokens):
-            if tokens[i] in (Keywords.AND, Keywords.OR) and paren_depth == 0:
-                delimiters.append(tokens[i])
-                expressions.append(Expression(trim_trailing_whitespace(buffer)))
-                buffer = []
-            else:
-                if tokens[i] == Symbols.LEFT_PAREN:
-                    paren_depth += 1
-                elif tokens[i] == Symbols.RIGHT_PAREN:
-                    #TODO: detect unbalanced parens
-                    paren_depth -= 1
-                #TODO: detect and handle paren-wrapped subqueries
-                buffer.append(tokens[i])
-
-            i += 1
-        # one final expression, empty in the weird/broken case where the final token was AND or OR
-        if len(buffer) > 0 or len(delimiters) > len(expressions): 
-            expressions.append(Expression(trim_trailing_whitespace(buffer)))
-
-        assert len(delimiters) == len(expressions)
-
-        return (delimiters, expressions)
-
-
-    def render(self):
-        parts = []
-        i = 0
-        while i < len(self.delimiters):
-            delimiter = self.delimiters[i]
-            expression = self.expressions[i]
-
-            if i > 0:
-                parts.append("\n")
-
-            if delimiter == Keywords.WHERE:
-                parts.append(" where")
-            elif delimiter == Keywords.AND:
-                parts.append("   and")
-            elif delimiter == Keywords.OR:
-                parts.append("    or")
-            else:
-                raise ValueError(f"invalid WhereClause delimiter: {delimiter}")
-
-            parts.append(expression.render())
-
-            i += 1
-
-        out = "".join(parts)
-        return out
+class WhereClause(BasicClause):
+    STARTING_DELIMITER = Keywords.WHERE
+    OTHER_DELIMITERS = set([
+        Keywords.AND, 
+        Keywords.OR,
+    ])
+    PADDING = 6
 
 
 class Expression:

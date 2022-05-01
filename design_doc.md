@@ -364,4 +364,37 @@ especially for phrases, are wordy and depend on the phrase length being tested
     - After writing a couple of clauses, I'm leaning towards 1) this argument is a good idea and 2) it should apply to "lines after the first"
     - As a clause renderer moves through its contents adding lines, there's a very easy place/time to add additional spaces
     - The difficulty may actually be on the _calling_ side... For example if a `SelectClause` is rendering and somewhere in one of its expressions is a scalar subquery, you would call `subquery.render(margin=M)` but what is M? Either something needs to keep track of the current X position of the (virtual) cursor, or just before calling a lower-level `render()` method you would need to somehow measure the distance back to the margin.
-    
+
+### 2022-05-01
+- After writing SelectClause, WhereClause, and FromClause, I'm now realizing there's a common pattern that probably allows all or most clauses to derive from a common base, or even just be instances of a single class. The insight is that a query is laid out in two columns separated by a space, with "delimiters" on the left and "expressions" on the right:
+```
+select x.foo
+     , y.bar
+     , x.foo / y.bar as RATIO
+  from blergh x
+  join flerb y on(x.id = y.blergh_id)
+ where 1=1 
+   and y.bar > 0
+
+^^^^^^----------- "delimiters"
+
+       ^^^^^^---- "expressions"
+
+      ^---------- separating column of spaces
+```
+    - Some caveats:
+        - what I'm calling "delimiters" obviously aren't _literally_ delimiters, except for the basic comma used in `select`/`group by`/`order by`... `join` and `and` are only _metaphorically_ delimiters, but it works for our purposes here
+        - similarly what I'm calling "expressions" includes many things that are not
+            - a SELECT clause "expression" includes its alias, if any
+            - a FROM clause "expression" includes identifiers, subqueries, `on`/`using`, etc
+            - WHERE clause expressions actually are (sub-)expressions though
+        - the column of spaces shifts over a little for `group by`/`order by`, and isn't well-behaved at all for FROM clause delimiters other than straight `join`
+        - the SELECT clause has an optional qualifier -- ALL, DISTINCT, or DISTINCT ON(...) -- which goes between the first "delimiter" (`select`) and the first "expression"
+            - GROUP BY may have a similar behavior with `rollup`/`cube` but that's pretty rare
+    - All that varies amongst the different clauses is
+        - the clause-beginning keyword, which is also the first delimiter
+        - the set of tokens that can act as a delimiter
+        - the amount of left padding: most clauses are padded to 6 but `group by`/`order by` are padded to 8
+    - This would _drastically_ reduce the amount of layout code within the current design
+    - One oddball is the WITH clause, which though it follows the pattern of having a sequence of "delimiters" (`with` and comma) and a sequence of "expressions", they are not laid out in the usual two-column fashion. This clause may require its own implementation.
+    - The LIMIT and OFFSET clauses are a special case where there is only ever one delimiter and one expression
