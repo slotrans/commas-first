@@ -2,7 +2,7 @@ import pytest
 
 from sftoken import SFToken, SFTokenKind
 from clause_formatter import trim_trailing_whitespace
-from clause_formatter import SelectClause, FromClause, WhereClause
+from clause_formatter import SelectClause, FromClause, WhereClause, GroupByClause, OrderByClause
 
 
 class TestTrimTrailingWhitespace:
@@ -484,6 +484,126 @@ class TestWhereClause:
             "   and (   something\n"
             "        or another_thing\n"
             "       )"
+        )
+        actual = clause.render()
+
+        print(actual)
+        assert expected == actual
+
+
+class TestGroupByClause:
+    def test_creation_fails_on_empty_input(self):
+        with pytest.raises(ValueError):
+            GroupByClause(tokens=[])
+
+        with pytest.raises(ValueError):
+            GroupByClause(tokens=None)
+
+
+    def test_render_zero_expressions(self):
+        clause = GroupByClause(tokens=[SFToken(SFTokenKind.WORD, "group by")])
+
+        expected = "group by"
+        actual = clause.render()
+
+        assert expected == actual
+
+
+    def test_render_single_expression(self):
+        # "group by foo"
+        clause = GroupByClause(tokens=[
+            SFToken(SFTokenKind.WORD, "group by"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+        ])
+
+        expected = (
+            "group by foo"
+        )
+        actual = clause.render()
+
+        print(actual)
+        assert expected == actual 
+
+
+    def test_render_simple_expressions(self):
+        # "group by foo, bar, baz"
+        clause = GroupByClause(tokens=[
+            SFToken(SFTokenKind.WORD, "group by"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "group by foo\n"
+            "       , bar\n"
+            "       , baz"
+        )
+        actual = clause.render()
+
+        print(actual)
+        assert expected == actual    
+
+
+class TestOrderByClause:
+    def test_creation_fails_on_empty_input(self):
+        with pytest.raises(ValueError):
+            OrderByClause(tokens=[])
+
+        with pytest.raises(ValueError):
+            OrderByClause(tokens=None)
+
+
+    def test_render_zero_expressions(self):
+        clause = OrderByClause(tokens=[SFToken(SFTokenKind.WORD, "order by")])
+
+        expected = "order by"
+        actual = clause.render()
+
+        assert expected == actual
+
+
+    def test_render_single_expression(self):
+        # "order by foo"
+        clause = OrderByClause(tokens=[
+            SFToken(SFTokenKind.WORD, "order by"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+        ])
+
+        expected = (
+            "order by foo"
+        )
+        actual = clause.render()
+
+        print(actual)
+        assert expected == actual 
+
+
+    def test_render_simple_expressions(self):
+        # "order by foo, bar, baz"
+        clause = OrderByClause(tokens=[
+            SFToken(SFTokenKind.WORD, "order by"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "order by foo\n"
+            "       , bar\n"
+            "       , baz"
         )
         actual = clause.render()
 

@@ -308,6 +308,18 @@ class WhereClause(BasicClause):
     PADDING = 6
 
 
+class GroupByClause(BasicClause):
+    STARTING_DELIMITER = Keywords.GROUP_BY
+    OTHER_DELIMITERS = set([Symbols.COMMA])
+    PADDING = 8
+
+
+class OrderByClause(BasicClause):
+    STARTING_DELIMITER = Keywords.ORDER_BY
+    OTHER_DELIMITERS = set([Symbols.COMMA])
+    PADDING = 8
+
+
 class Expression:
     def __init__(self, tokens):
         self.tokens = tokens
