@@ -113,7 +113,7 @@ class BasicClause:
         "delimiters",
         "expressions",
     )
-    STARTING_DELIMITER = None    
+    STARTING_DELIMITER = None
     OTHER_DELIMITERS = set()
     PADDING = 6
 
@@ -156,7 +156,7 @@ class BasicClause:
                 buffer.append(tokens[i])
             i += 1
         # one final expression, empty in the weird/broken case where the final token was JOIN or etc
-        if len(buffer) > 0 or len(delimiters) > len(expressions): 
+        if len(buffer) > 0 or len(delimiters) > len(expressions):
             expressions.append(Expression(trim_trailing_whitespace(buffer)))
 
         assert len(delimiters) == len(expressions)
@@ -181,7 +181,7 @@ class BasicClause:
             i += 1
 
         out = "".join(parts)
-        return out    
+        return out
 
 
 class SelectClause:
@@ -315,7 +315,7 @@ class FromClause(BasicClause):
 class WhereClause(BasicClause):
     STARTING_DELIMITER = Keywords.WHERE
     OTHER_DELIMITERS = set([
-        Keywords.AND, 
+        Keywords.AND,
         Keywords.OR,
     ])
     PADDING = 6
