@@ -68,6 +68,20 @@ def trim_trailing_whitespace(tokens):
     return tokens[0:i+1]
 
 
+class Expression:
+    def __init__(self, tokens):
+        self.tokens = tokens
+
+    def starts_with_whitespace(self):
+        return len(self.tokens) > 0 and self.tokens[0].is_whitespace
+
+    def is_empty(self):
+        return len(self.tokens) == 0
+
+    def render(self):
+        return "".join([t.value for t in self.tokens])
+
+
 class Statement:
     def __init__(self, tokens):
         #self.with_clause = WithClause(...)
@@ -78,8 +92,7 @@ class Statement:
         #self.having_clause = HavingClause(...)
         #self.window_clause = WindowClause(...)
         #self.order_by_clause = OrderByClause(...)
-        #self.limit_clause = LimitClause(...)
-        #self.offset_clause = OffsetClause(...)
+        #self.limit_offset_clause = LimitOffsetClause(...)
         pass
 
     def render(self):
@@ -320,12 +333,73 @@ class OrderByClause(BasicClause):
     PADDING = 8
 
 
-class Expression:
-    def __init__(self, tokens):
-        self.tokens = tokens
+class LimitOffsetClause:
+    __slots__ = (
+        "input_tokens",
+        "limit_expression",
+        "offset_expression",
+        "limit_first",
+    )
 
-    def starts_with_whitespace(self):
-        return len(self.tokens) > 0 and self.tokens[0].is_whitespace
+    def __init__(self, tokens):
+        self._validate(tokens)
+
+        self.input_tokens = tokens
+
+        self.limit_expression, self.offset_expression, self.limit_first = self._parse(tokens)
+
+
+    def _validate(self, tokens):
+        if not tokens:
+            raise ValueError("tokens must be non-empty")
+
+        if tokens[0] not in (Keywords.LIMIT, Keywords.OFFSET):
+            raise ValueError("LimitOffsetClause must begin with \"LIMIT\" or \"OFFSET\" keyword")
+
+        return True
+
+
+    def _parse(self, tokens):
+        limit_buffer = []
+        offset_buffer = []
+
+        if tokens[0] == Keywords.LIMIT:
+            limit_first = True
+        else:
+            limit_first = False
+
+        i = 0
+        while i < len(tokens):
+            if tokens[i] == Keywords.LIMIT:
+                target_buffer = limit_buffer
+            elif tokens[i] == Keywords.OFFSET:
+                target_buffer = offset_buffer
+            target_buffer.append(tokens[i])
+            i += 1
+
+        limit_expression = Expression(trim_trailing_whitespace(limit_buffer))
+        offset_expression = Expression(trim_trailing_whitespace(offset_buffer))
+
+        return limit_expression, offset_expression, limit_first
+
 
     def render(self):
-        return "".join([t.value for t in self.tokens])
+        parts = []
+        
+        if self.limit_first:
+            parts.append(" ")
+            parts.append(self.limit_expression.render())
+            if not self.offset_expression.is_empty():
+                parts.append("\n")
+                parts.append(self.offset_expression.render())
+        else:
+            parts.append(self.offset_expression.render())
+            if not self.limit_expression.is_empty():
+                parts.append("\n")
+                parts.append(" ")
+                parts.append(self.limit_expression.render())
+
+        out = "".join(parts)
+        return out
+
+
