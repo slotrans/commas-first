@@ -398,3 +398,4 @@ select x.foo
     - This would _drastically_ reduce the amount of layout code within the current design
     - One oddball is the WITH clause, which though it follows the pattern of having a sequence of "delimiters" (`with` and comma) and a sequence of "expressions", they are not laid out in the usual two-column fashion. This clause may require its own implementation.
     - The LIMIT and OFFSET clauses are a special case where there is only ever one delimiter and one expression
+        - turns out limit/offset can also be written offset/limit... that's way more annoying that it sounds, and my implementation of it is gross, but probably good enough
