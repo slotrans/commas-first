@@ -1,3 +1,4 @@
+import enum
 
 from sftoken import SFToken, SFTokenKind, Keywords, Symbols, Whitespace
 
@@ -82,21 +83,94 @@ class Expression:
         return "".join([t.value for t in self.tokens])
 
 
+class ClauseScope(enum.IntEnum):
+    INITIAL = 1
+    #WITH = 2 #NYI
+    SELECT = 3
+    FROM = 4
+    WHERE = 5
+    GROUP_BY = 6
+    #HAVING = 7 #NYI
+    #WINDOW = 8 #NYI
+    ORDER_BY = 9
+    LIMIT_OFFSET = 10
+
+
 class Statement:
+    __slots__ = (
+        "input_tokens",
+        #"with_clause", #NYI
+        "select_clause",
+        "from_clause",
+        "where_clause",
+        "group_by_clause",
+        #"having_clause", #NYI
+        #"window_clause", #NYI
+        "order_by_clause",
+        "limit_offset_clause",
+    )
+
     def __init__(self, tokens):
-        #self.with_clause = WithClause(...)
-        #self.select_clause = SelectClause(...)
-        #self.from_clause = FromClause(...)
-        #self.where_clause = WhereClause(...)
-        #self.group_by_clause = GroupByClause(...)
-        #self.having_clause = HavingClause(...)
-        #self.window_clause = WindowClause(...)
-        #self.order_by_clause = OrderByClause(...)
-        #self.limit_offset_clause = LimitOffsetClause(...)
-        pass
+        self.input_tokens = tokens
+
+        # maybe better to initialize these to some kind of dummy value that we can call .render() on
+        # instead of None?
+        #self.with_clause = None
+        self.select_clause = None
+        self.from_clause = None
+        self.where_clause = None
+        self.group_by_clause = None
+        #self.having_clause = None
+        #self.window_clause = None
+        self.order_by_clause = None
+        self.limit_offset_clause = None
+
+        clause_map = self._parse(tokens)
+        for scope, obj in clause_map.items():
+            #if scope is ClauseScope.WITH:
+            #    self.with_clause = obj
+            if scope is ClauseScope.SELECT:
+                self.select_clause = obj
+            elif scope is ClauseScope.FROM:
+                self.from_clause = obj
+            elif scope is ClauseScope.WHERE:
+                self.where_clause = obj
+            elif scope is ClauseScope.GROUP_BY:
+                self.group_by_clause = obj
+            #elif scope is ClauseScope.HAVING:
+            #    self.having_clause = obj
+            #elif scope is ClauseScope.WINDOW:
+            #    self.window_clause = obj
+            elif scope is ClauseScope.ORDER_BY:
+                self.order_by_clause = obj
+            elif scope is ClauseScope.LIMIT_OFFSET:
+                self.limit_offset_clause = obj
+            else:
+                raise ValueError(f"Invalid clause scope {scope}")
+
+
+    def _parse(self, tokens):
+        clause_map = {}
+
+        current_scope = ClauseScope.INITIAL
+        # do stuff
+
+        return clause_map
+
 
     def render(self):
-        pass
+        out = "".join([
+            #self.with_clause.render() if self.with_clause else "",
+            self.select_clause.render() if self.select_clause else "",
+            self.from_clause.render() if self.from_clause else "",
+            self.where_clause.render() if self.where_clause else "",
+            self.group_by_clause.render() if self.group_by_clause else "",
+            #self.having_clause.render() if self.having_clause else "",
+            #self.window_clause.render() if self.window_clause else "",
+            self.order_by_clause.render() if self.order_by_clause else "",
+            self.limit_offset_clause.render() if self.limit_offset_clause else "",
+        ])
+        return out
 
 
 class WithClause:
