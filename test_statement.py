@@ -15,6 +15,7 @@ class TestStatement:
         expected = "select"
         actual = statement.render()
 
+        print(actual)
         assert expected == actual
 
 
@@ -28,6 +29,7 @@ class TestStatement:
         expected = "select 1"
         actual = statement.render()
 
+        print(actual)
         assert expected == actual
 
 
@@ -52,6 +54,7 @@ class TestStatement:
         )
         actual = statement.render()
 
+        print(actual)
         assert expected == actual
 
 
@@ -95,6 +98,7 @@ class TestStatement:
         )
         actual = statement.render()
 
+        print(actual)
         assert expected == actual
 
 
@@ -131,6 +135,7 @@ class TestStatement:
         )
         actual = statement.render()
 
+        print(actual)
         assert expected == actual
 
 
@@ -169,6 +174,7 @@ class TestStatement:
         )
         actual = statement.render()
 
+        print(actual)
         assert expected == actual
 
 
@@ -184,6 +190,7 @@ class TestStatement:
             SFToken(SFTokenKind.WORD, "table1"),
             SFToken(SFTokenKind.SPACES, "  "),
             SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "1"),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.WORD, "1"),
@@ -201,4 +208,25 @@ class TestStatement:
         )
         actual = statement.render()
 
+        print(actual)
         assert expected == actual
+
+
+    def test_select_where_from_raises_error(self):
+        with pytest.raises(ValueError):
+            # select  foo  where 1=1  from table1
+            statement = Statement(tokens=[
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, "  "),
+                SFToken(SFTokenKind.WORD, "foo"),
+                SFToken(SFTokenKind.SPACES, "  "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SPACES, "  "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, "  "),
+                SFToken(SFTokenKind.WORD, "table1"),
+            ])
+
