@@ -19,6 +19,7 @@ def get_paren_block(tokens):
 
     depth = 0
     block = []
+    block_found = False
     for t in tokens:
         if t == Symbols.LEFT_PAREN:
             depth += 1
@@ -27,9 +28,13 @@ def get_paren_block(tokens):
         block.append(t)
 
         if t == Symbols.RIGHT_PAREN and depth == 0:
+            block_found = True
             break
 
-    return block
+    if block_found:
+        return block
+    else:
+        return None
 
 
 def collapse_whitespace(tokens):
