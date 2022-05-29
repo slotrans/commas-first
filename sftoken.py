@@ -56,6 +56,14 @@ class SFToken:
         return True
 
 
+    def starts_with_whitespace(self):
+        return self.is_whitespace
+        
+
+    def render(self):
+        return self.value
+
+
     def __eq__(self, other):
         # no need to include `is_whitespace` in the comparison since it is derived
         if self.__class__ is other.__class__:

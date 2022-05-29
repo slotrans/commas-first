@@ -399,3 +399,11 @@ select x.foo
     - One oddball is the WITH clause, which though it follows the pattern of having a sequence of "delimiters" (`with` and comma) and a sequence of "expressions", they are not laid out in the usual two-column fashion. This clause may require its own implementation.
     - The LIMIT and OFFSET clauses are a special case where there is only ever one delimiter and one expression
         - turns out limit/offset can also be written offset/limit... that's way more annoying that it sounds, and my implementation of it is gross, but probably good enough
+
+### 2022-05-29
+- SFToken, Expression, and Statement now all provide `is_whitespace`, `starts_with_whitespace()`, and `render()`, which adds some flexibility around what can be placed where. It's honestly a little hard to keep track of without type information, but whatever. It may make sense to define one or more mixin classes, or an abstract base class, to make the terms of the interface(s) clearer.
+- A question around paren-wrapped subqueries is whether the parens should be part of the Statement or not.
+    - logically they should be because they are "part" of that syntactic element and need to be carried with it
+    - but Statement requires that `select` be the first token, so it would need to be re-worked a bit
+    - layout-wise, it _may_ be easier to get the parens in the right spot if they're _not_ part of the Statement... hard to say for sure though until I actually implement margin bumping
+    

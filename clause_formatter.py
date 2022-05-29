@@ -75,19 +75,24 @@ def trim_trailing_whitespace(tokens):
 
 
 class Expression:
-    def __init__(self, tokens):
-        self.tokens = tokens
+    def __init__(self, elements):
+        self.elements = elements
 
     def starts_with_whitespace(self):
-        return len(self.tokens) > 0 and self.tokens[0].is_whitespace
+        return len(self.elements) > 0 and self.elements[0].is_whitespace
+
+    @property
+    def is_whitespace(self):
+        return all([e.is_whitespace for e in self.elements])
 
     def is_empty(self):
-        return len(self.tokens) == 0
+        return len(self.elements) == 0
 
     def render(self):
-        return "".join([t.value for t in self.tokens])
+        return "".join([e.render() for e in self.elements])
 
 
+# TODO
 class WithClause:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -135,6 +140,17 @@ class BasicClause:
                 delimiters.append(tokens[i])
                 expressions.append(Expression(trim_trailing_whitespace(buffer)))
                 buffer = []
+            elif tokens[i] == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
+                subquery_tokens = get_paren_block(tokens[i:])
+                if subquery_tokens is None:
+                    # unbalanced parens
+                    pass
+                else:
+                    buffer.append(Symbols.LEFT_PAREN)
+                    buffer.append(Statement(subquery_tokens[1:-1]))
+                    buffer.append(Symbols.RIGHT_PAREN)
+                    i += len(subquery_tokens)
+                    continue
             else:
                 if tokens[i] == Symbols.LEFT_PAREN:
                     paren_depth += 1
@@ -475,6 +491,15 @@ class Statement:
         clause_map[current_scope] = clause_class(buffer)
 
         return clause_map
+
+
+    def starts_with_whitespace(self):
+        return False
+
+
+    @property
+    def is_whitespace(self):
+        return False
 
 
     def render(self):
