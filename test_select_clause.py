@@ -192,6 +192,78 @@ class TestSelectClause:
         assert expected == actual
 
 
+    def test_hand_formatted_case(self):
+        #select foo
+        #     , case when bar
+        #            then 1
+        #            when baz
+        #            then 2
+        #            else 3
+        #             end as BLERGH
+        #     , stuff
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "case"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "            "),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "            "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "            "),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "            "),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "             "),
+            SFToken(SFTokenKind.WORD, "end"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "BLERGH"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "stuff"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , case when bar\n"
+            "            then 1\n"
+            "            when baz\n"
+            "            then 2\n"
+            "            else 3\n"
+            "             end as BLERGH\n"
+            "     , stuff"
+        )
+        actual = clause.render()
+
+        print(actual)
+        assert expected == actual
+
+
     def test_multiple_expressions_per_line(self):
         #select
         #    foo, bar,
