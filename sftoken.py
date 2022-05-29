@@ -50,7 +50,7 @@ class SFToken:
     def _validate(kind, value):
         if kind == SFTokenKind.NEWLINE and value != "\n":
             raise ValueError("NEWLINE tokens can only have the value '\\n'")
-        elif kind == SFTokenKind.SPACES and any([c != " " for c in value]):
+        elif kind == SFTokenKind.SPACES and (value == "" or any([c != " " for c in value])):
             raise ValueError("SPACES tokens must consist only of space characters")
 
         return True
@@ -58,9 +58,9 @@ class SFToken:
 
     def starts_with_whitespace(self):
         return self.is_whitespace
-        
 
-    def render(self):
+
+    def render(self, indent):
         return self.value
 
 

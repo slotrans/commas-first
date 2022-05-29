@@ -52,3 +52,6 @@ def test_spaces_validation():
 
     with pytest.raises(ValueError):
         SFToken(SFTokenKind.SPACES, "\t")
+
+    with pytest.raises(ValueError):
+        SFToken(SFTokenKind.SPACES, "")
