@@ -19,7 +19,25 @@ class TestWhereClause:
         ])
 
         expected = " where 1=1"
-        actual = clause.render()
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_one_equals_one_indented(self):
+        # "where 1=1"
+        clause = WhereClause(tokens=[
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "1"),
+        ])
+
+        # first line, so indent has no effect
+        expected = " where 1=1"
+        actual = clause.render(indent=4)
 
         print(actual)
         assert expected == actual
@@ -39,7 +57,7 @@ class TestWhereClause:
         ])
 
         expected = " where 1 = 1"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -69,7 +87,37 @@ class TestWhereClause:
             " where foo.abc = bar.abc\n"
             "   and foo.xyz = bar.xyz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_two_expressions_ANDed_indented(self):
+        # "where foo.abc = bar.abc and foo.xyz = bar.xyz"
+        clause = WhereClause(tokens=[
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.abc"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.abc"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.xyz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.xyz"),
+        ])
+
+        expected = (
+            " where foo.abc = bar.abc\n"
+            "       and foo.xyz = bar.xyz"
+        )
+        actual = clause.render(indent=4)
 
         print(actual)
         assert expected == actual
@@ -120,7 +168,7 @@ class TestWhereClause:
             "   and  foo.ab =  bar.ab\n"
             "   and foo.abc = bar.abc"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -161,7 +209,7 @@ class TestWhereClause:
             "        or another_thing\n"
             "       )"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -209,7 +257,7 @@ class TestWhereClause:
             "                   where 1=1\n"
             "                 )"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual

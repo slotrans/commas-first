@@ -88,8 +88,20 @@ class Expression:
     def is_empty(self):
         return len(self.elements) == 0
 
-    def render(self):
-        return "".join([e.render() for e in self.elements])
+    def render(self, indent):
+        #return "".join([e.render(indent) for e in self.elements])
+        out = ""
+        effective_indent = indent
+        for e in self.elements:
+            fragment = e.render(effective_indent)
+            out += fragment
+            effective_indent += len(fragment)
+            if e == Whitespace.NEWLINE:
+                #PONDER: what if we made the newline itself responsible for adding the indent, in render()?
+                out += " " * indent
+                effective_indent = indent
+
+        return out
 
 
 # TODO
@@ -173,15 +185,24 @@ class BasicClause:
         return delimiter.value.rjust(self.PADDING)
 
 
-    def render(self):
+    def render(self, indent):
         parts = []
         i = 0
+        effective_indent = indent
         while i < len(self.delimiters):
             if i > 0:
                 parts.append("\n")
+                parts.append(" " * indent)
+                effective_indent = indent
 
-            parts.append(self._render_delimiter(self.delimiters[i]))
-            parts.append(self.expressions[i].render())
+            #parts.append(self._render_delimiter(self.delimiters[i]))
+            #parts.append(self.expressions[i].render(indent))
+
+            fragment = self._render_delimiter(self.delimiters[i])
+            effective_indent += len(fragment)
+            parts.append(fragment)
+
+            parts.append(self.expressions[i].render(effective_indent))
 
             i += 1
 
@@ -264,7 +285,7 @@ class SelectClause:
         return (qualifier, expressions)
 
 
-    def render(self):
+    def render(self, indent):
         if not self.qualifier and not self.expressions:
             return "select"
 
@@ -280,15 +301,17 @@ class SelectClause:
         for i, expr in enumerate(self.expressions):
             if i == 0:
                 parts.append(" ")
-                parts.append(expr.render())
+                parts.append(expr.render(indent))
             else:
-                parts.append("\n     ,")
+                parts.append("\n")
+                parts.append(" " * indent)
+                parts.append("     ,")
                 # If the expression is like [" ", "foo"] then print it as-is, preserving any oddball spacing it might have.
                 # OTOH in cases like "select foo,bar,baz", we need to add a space to get to a good baseline.
                 # This might need to change if expression rendering gets smarter.
                 if not expr.starts_with_whitespace:
                     parts.append(" ")
-                parts.append(expr.render())
+                parts.append(expr.render(indent))
 
         out = "".join(parts)
         return out
@@ -329,13 +352,13 @@ class WhereClause(BasicClause):
 class GroupByClause(BasicClause):
     STARTING_DELIMITER = Keywords.GROUP_BY
     OTHER_DELIMITERS = set([Symbols.COMMA])
-    PADDING = 8
+    PADDING = 9
 
 
 class OrderByClause(BasicClause):
     STARTING_DELIMITER = Keywords.ORDER_BY
     OTHER_DELIMITERS = set([Symbols.COMMA])
-    PADDING = 8
+    PADDING = 9
 
 
 class LimitOffsetClause:
@@ -388,21 +411,23 @@ class LimitOffsetClause:
         return limit_expression, offset_expression, limit_first
 
 
-    def render(self):
+    def render(self, indent):
         parts = []
         
         if self.limit_first:
+            parts.append(" " * indent)
             parts.append(" ")
-            parts.append(self.limit_expression.render())
+            parts.append(self.limit_expression.render(indent))
             if not self.offset_expression.is_empty():
                 parts.append("\n")
-                parts.append(self.offset_expression.render())
+                parts.append(self.offset_expression.render(indent))
         else:
-            parts.append(self.offset_expression.render())
+            parts.append(self.offset_expression.render(indent))
             if not self.limit_expression.is_empty():
                 parts.append("\n")
+                parts.append(" " * indent)
                 parts.append(" ")
-                parts.append(self.limit_expression.render())
+                parts.append(self.limit_expression.render(indent))
 
         out = "".join(parts)
         return out
@@ -419,6 +444,7 @@ class ClauseScope(enum.IntEnum):
     #WINDOW = 8 #NYI
     ORDER_BY = 9
     LIMIT_OFFSET = 10
+    #TERMINATOR = 11 #NYI (semicolon)
 
 
 KEYWORD_SCOPE_MAP = {
@@ -468,13 +494,31 @@ class Statement:
         buffer = []
         while i < len(tokens):
             tok = tokens[i]
+
+            # subqueries are not valid in all scopes but we'll punt on that for now
+            if tok == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
+                subquery_tokens = get_paren_block(tokens[i:])
+                if subquery_tokens is None:
+                    # unbalanced parens
+                    pass
+                else:
+                    buffer.append(Symbols.LEFT_PAREN)
+                    buffer.append(Statement(subquery_tokens[1:-1]))
+                    buffer.append(Symbols.RIGHT_PAREN)
+                    i += len(subquery_tokens)
+                    continue                 
+
             potential_new_scope = KEYWORD_SCOPE_MAP.get(tok, None)
             if potential_new_scope:
                 if current_scope is ClauseScope.INITIAL:
                     buffer.append(tok)
                     current_scope = potential_new_scope
+                elif potential_new_scope == current_scope and current_scope == ClauseScope.LIMIT_OFFSET:
+                    # LIMIT/OFFSET is a weird clause because OFFSET/LIMIT is also valid, so any time
+                    # both keywords are used, we'll hit this case. It's normal.
+                    buffer.append(tok)
                 elif potential_new_scope <= current_scope:
-                    raise ValueError("unexpected token {tok} in scope {current_scope}")
+                    raise ValueError(f"unexpected token {tok} in scope {current_scope}")
                 else:
                     clause_class = SCOPE_CLAUSE_MAP[current_scope]
                     clause_map[current_scope] = clause_class(buffer)
@@ -502,7 +546,14 @@ class Statement:
         return False
 
 
-    def render(self):
+    def render(self, indent):
         # the ClauseScope keys are numbered in order so sorted() does exactly what we want
-        out = "\n".join([v.render() for k,v in sorted(self.clause_map.items())])
+        clauses_in_order = sorted(self.clause_map.items())
+
+        # Each clause uses `indent` to bump over lines after the first (first line is the caller's responsibility).
+        # This bit bumps over the first lines too, for every clause except the first, which makes the Statement
+        # as a whole match the behavior of clauses.
+        clause_joiner = "\n" + (" " * indent)
+
+        out = clause_joiner.join([v.render(indent) for k,v in clauses_in_order])
         return out

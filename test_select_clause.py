@@ -18,7 +18,7 @@ class TestSelectClause:
         clause = SelectClause(tokens=[SFToken(SFTokenKind.WORD, "select")])
 
         expected = "select"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -42,7 +42,33 @@ class TestSelectClause:
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_simple_expressions_no_qualifier_indented(self):
+        # "select foo, bar, baz"
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            ####
+                "select foo\n"
+            "         , bar\n"
+            "         , baz"
+        )
+        actual = clause.render(indent=4)
 
         print(actual)
         assert expected == actual
@@ -73,7 +99,7 @@ class TestSelectClause:
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -101,7 +127,7 @@ class TestSelectClause:
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -134,7 +160,7 @@ class TestSelectClause:
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -149,7 +175,7 @@ class TestSelectClause:
         ])
 
         expected = "select distinct\n"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -186,7 +212,7 @@ class TestSelectClause:
             "     ,  l30\n"
             "     , l182"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -258,7 +284,7 @@ class TestSelectClause:
             "             end as BLERGH\n"
             "     , stuff"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -301,7 +327,7 @@ class TestSelectClause:
             "     , l91\n"
             "     , stuff"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual

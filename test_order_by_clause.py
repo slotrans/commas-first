@@ -17,8 +17,8 @@ class TestOrderByClause:
     def test_render_zero_expressions(self):
         clause = OrderByClause(tokens=[SFToken(SFTokenKind.WORD, "order by")])
 
-        expected = "order by"
-        actual = clause.render()
+        expected = " order by"
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -32,9 +32,9 @@ class TestOrderByClause:
         ])
 
         expected = (
-            "order by foo"
+            " order by foo"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual 
@@ -55,11 +55,11 @@ class TestOrderByClause:
         ])
 
         expected = (
-            "order by foo\n"
-            "       , bar\n"
-            "       , baz"
+            " order by foo\n"
+            "        , bar\n"
+            "        , baz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual

@@ -18,7 +18,7 @@ class TestLimitOffsetClause:
         clause = LimitOffsetClause(tokens=[SFToken(SFTokenKind.WORD, "limit")])
 
         expected = " limit"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -27,7 +27,7 @@ class TestLimitOffsetClause:
         clause = LimitOffsetClause(tokens=[SFToken(SFTokenKind.WORD, "offset")])
 
         expected = "offset"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -40,7 +40,7 @@ class TestLimitOffsetClause:
         ])
 
         expected = " limit 5"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -53,7 +53,7 @@ class TestLimitOffsetClause:
         ])
 
         expected = "offset 5"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -73,7 +73,7 @@ class TestLimitOffsetClause:
             " limit 1\n"
             "offset 2"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -93,7 +93,7 @@ class TestLimitOffsetClause:
             "offset 2\n"
             " limit 1"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -122,6 +122,6 @@ class TestLimitOffsetClause:
             " limit foo bar baz\n"
             "offset 2 + 3"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         assert expected == actual

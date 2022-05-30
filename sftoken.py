@@ -61,6 +61,7 @@ class SFToken:
 
 
     def render(self, indent):
+        # indent has no effect at the token level
         return self.value
 
 

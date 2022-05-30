@@ -17,8 +17,8 @@ class TestGroupByClause:
     def test_render_zero_expressions(self):
         clause = GroupByClause(tokens=[SFToken(SFTokenKind.WORD, "group by")])
 
-        expected = "group by"
-        actual = clause.render()
+        expected = " group by"
+        actual = clause.render(indent=0)
 
         assert expected == actual
 
@@ -32,9 +32,9 @@ class TestGroupByClause:
         ])
 
         expected = (
-            "group by foo"
+            " group by foo"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual 
@@ -55,11 +55,11 @@ class TestGroupByClause:
         ])
 
         expected = (
-            "group by foo\n"
-            "       , bar\n"
-            "       , baz"
+            " group by foo\n"
+            "        , bar\n"
+            "        , baz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual    

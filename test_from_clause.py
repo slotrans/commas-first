@@ -19,7 +19,7 @@ class TestFromClause:
         ])
 
         expected = "  from foo"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -40,7 +40,7 @@ class TestFromClause:
         ])
 
         expected = "  from generate_series(0, 9)"
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -65,7 +65,7 @@ class TestFromClause:
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -96,7 +96,7 @@ class TestFromClause:
             "  from foo\n"
             "  join bar on(foo.x = bar.x)"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -123,7 +123,7 @@ class TestFromClause:
             "  from foo\n"
             "  join bar using(x)"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -163,7 +163,7 @@ class TestFromClause:
             "  from foo\n"
             "  join bar on(foo.x = bar.x and foo.y = bar.y)"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
@@ -213,7 +213,7 @@ class TestFromClause:
             "              and foo.y = bar.y\n"
             "             )"
         )
-        actual = clause.render()
+        actual = clause.render(indent=0)
 
         print(actual)
         assert expected == actual
