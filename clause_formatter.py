@@ -74,6 +74,15 @@ def trim_trailing_whitespace(tokens):
     return tokens[0:i+1]
 
 
+def is_parenthesized_subquery(elements):
+    return (
+            len(elements) >= 3
+        and elements[0] == Symbols.LEFT_PAREN
+        and isinstance(elements[1], Statement)
+        and elements[2] == Symbols.RIGHT_PAREN
+    )
+
+
 class Expression:
     def __init__(self, elements):
         self.elements = elements
@@ -92,7 +101,9 @@ class Expression:
         #return "".join([e.render(indent) for e in self.elements])
         out = ""
         effective_indent = indent
-        for e in self.elements:
+        i = 0
+        while i < len(self.elements):
+            e = self.elements[i]
             fragment = e.render(effective_indent)
             out += fragment
             effective_indent += len(fragment)
@@ -100,6 +111,16 @@ class Expression:
                 #PONDER: what if we made the newline itself responsible for adding the indent, in render()?
                 out += " " * indent
                 effective_indent = indent
+            elif e == Symbols.LEFT_PAREN and is_parenthesized_subquery(self.elements[i:i+3]):
+                paren_indent = effective_indent - 1
+                out += self.elements[i+1].render(effective_indent)
+                out += "\n"
+                out += " " * paren_indent
+                out += ")"
+                i += 3
+                continue
+
+            i += 1
 
         return out
 
