@@ -80,6 +80,7 @@ Keywords = SimpleNamespace(
     AND              = SFToken(SFTokenKind.WORD, "and"),
     CROSS_JOIN       = SFToken(SFTokenKind.WORD, "cross join"),
     DISTINCT         = SFToken(SFTokenKind.WORD, "distinct"),
+    DISTINCT_ON      = SFToken(SFTokenKind.WORD, "distinct on"),
     FROM             = SFToken(SFTokenKind.WORD, "from"),
     GROUP_BY         = SFToken(SFTokenKind.WORD, "group by"),
     INNER_JOIN       = SFToken(SFTokenKind.WORD, "inner join"),
