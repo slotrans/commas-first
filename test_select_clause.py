@@ -2,6 +2,7 @@ import pytest
 
 from sftoken import SFToken
 from sftoken import SFTokenKind
+from sftoken import Whitespace
 from clause_formatter import SelectClause
 
 
@@ -41,6 +42,207 @@ class TestSelectClause:
             "select foo\n"
             "     , bar\n"
             "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_simple_expressions_line_comment_no_qualifier(self):
+        #select foo
+        #     , bar
+        #     --LINE COMMENT
+        #     , baz
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--LINE COMMENT\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "     --LINE COMMENT\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_simple_expressions_block_comment_no_qualifier(self):
+        #select foo
+        #     , bar
+        #     /* BLOCK
+        #        COMMENT */
+        #     , baz
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.BLOCK_COMMENT, "/* BLOCK\n        COMMENT */"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "     /* BLOCK\n"
+            "        COMMENT */\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_complex_expressions_no_qualifier(self):
+        #select foo
+        #     , coalesce(bar, 0)
+        #     , case when active
+        #            then 1
+        #            else 0
+        #             end as ACTIVE_INT
+        #     , lag(blergh,1) over(partition by foo order by bar) as PREV_BLERGH
+        #     , (   beep > 0
+        #        or boop > 0
+        #       ) as BEEP_BOOP
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "coalesce"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "case"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "active"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "            "),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "            "),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "             "),
+            SFToken(SFTokenKind.WORD, "end"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "ACTIVE_INT"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "lag"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "blergh"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "over"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "partition"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "by"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "order"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "by"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "PREV_BLERGH"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "beep"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ">"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "        "),
+            SFToken(SFTokenKind.WORD, "or"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "boop"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ">"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "       "),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "BEEP_BOOP"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , coalesce(bar, 0)\n"
+            "     , case when active\n"
+            "            then 1\n"
+            "            else 0\n"
+            "             end as ACTIVE_INT\n"
+            "     , lag(blergh,1) over(partition by foo order by bar) as PREV_BLERGH\n"
+            "     , (   beep > 0\n"
+            "        or boop > 0\n"
+            "       ) as BEEP_BOOP"
         )
         actual = clause.render(indent=0)
 
@@ -133,14 +335,40 @@ class TestSelectClause:
         assert expected == actual
 
 
+    def test_render_simple_expressions_all_qualifier(self):
+        # "select all foo, bar, baz"
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "all"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "select all\n"
+            "       foo\n"
+            "     , bar\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
     def test_render_simple_expressions_distinct_on_qualifier(self):
         # "select distinct on(foo) foo, bar, baz"
         clause = SelectClause(tokens=[
             SFToken(SFTokenKind.WORD, "select"),
             SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "distinct"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.WORD, "distinct on"),
             SFToken(SFTokenKind.SYMBOL, "("),
             SFToken(SFTokenKind.WORD, "foo"),
             SFToken(SFTokenKind.SYMBOL, ")"),
@@ -174,9 +402,25 @@ class TestSelectClause:
             SFToken(SFTokenKind.WORD, "distinct"),
         ])
 
-        expected = "select distinct\n"
+        expected = "select distinct"
         actual = clause.render(indent=0)
 
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_qualifier_only2(self):
+        # "select all"
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "all"),
+        ])
+
+        expected = "select all"
+        actual = clause.render(indent=0)
+
+        print(actual)
         assert expected == actual
 
 
@@ -303,7 +547,7 @@ class TestSelectClause:
             SFToken(SFTokenKind.SYMBOL, ","),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ","),            
+            SFToken(SFTokenKind.SYMBOL, ","),
             SFToken(SFTokenKind.NEWLINE, "\n"),
             SFToken(SFTokenKind.SPACES, "    "),
             SFToken(SFTokenKind.WORD, "l7"),

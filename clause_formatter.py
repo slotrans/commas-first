@@ -10,6 +10,13 @@ def next_real_token(tokens):
     return None
 
 
+def next_real_token_and_position(tokens):
+    for i, t in enumerate(tokens):
+        if not t.is_whitespace:
+            return (t, i)
+    return (None, None)
+
+
 def get_paren_block(tokens):
     if len(tokens) == 0:
         raise ValueError("tokens must be non-empty")
@@ -234,20 +241,23 @@ class BasicClause:
 class SelectClause:
     __slots__ = (
         "input_tokens",
-        "qualifier",
+        "delimiters",
         "expressions",
+        "qualifier",
     )
+    STARTING_DELIMITER = Keywords.SELECT
+    OTHER_DELIMITERS = set([Symbols.COMMA])
+    PADDING = 6
 
     def __init__(self, tokens):
-        SelectClause._validate(tokens)
+        self._validate(tokens)
 
         self.input_tokens = tokens
 
-        self.qualifier, self.expressions = self._parse(tokens[1:])
+        self.delimiters, self.expressions, self.qualifier = self._parse(tokens[1:])
 
 
-    @staticmethod
-    def _validate(tokens):
+    def _validate(self, tokens):
         if not tokens:
             raise ValueError("tokens must be non-empty")
 
@@ -258,29 +268,30 @@ class SelectClause:
 
 
     def _parse(self, tokens):
-        if len(tokens) == 0: # degenerate case
-            return (None, [])
-
-        i = 0
-
-        # first, skip past any whitespace
-        while i < len(tokens):
-            if not tokens[i].is_whitespace:
-                break
-            i += 1
-        if i == len(tokens):
-            # we were passed *only* whitespace tokens
-            return (None, [])
+        i = 1
+        delimiters = [self.STARTING_DELIMITER]
 
         # check for ALL, DISTINCT, DISTINCT ON(...)
         qualifier = None
-        if tokens[i] == Keywords.ALL:
-            qualifier = tokens[i].value
-            i += 1
-        elif tokens[i] == Keywords.DISTINCT:
-            #TODO: support DISTINCT ON
-            qualifier = tokens[i].value
-            i += 1
+        tok, pos = next_real_token_and_position(tokens[i:])
+        if tok in (Keywords.DISTINCT, Keywords.ALL):
+            qualifier = tok
+            i += pos+1
+        elif tok == Keywords.DISTINCT_ON:
+            i += pos+1
+            while i < len(tokens):
+                if tokens[i].is_whitespace:
+                    i += 1
+                elif tokens[i] == Symbols.LEFT_PAREN:
+                    on_clause_tokens = get_paren_block(tokens[i:])
+                    if on_clause_tokens is None:
+                        raise Exception("broken DISTINCT ON(): unbalanced parens")
+                    else:
+                        qualifier = Expression([Keywords.DISTINCT_ON]+on_clause_tokens)
+                        i += len(on_clause_tokens)
+                        break
+                else:
+                    raise Exception(f"broken DISTINCT ON(): expected ( found {tokens[i]}")
 
         # parse the remaining tokens into expressions
         expressions = []
@@ -303,7 +314,7 @@ class SelectClause:
         if len(buffer) > 0: # one final expression
             expressions.append(Expression(trim_trailing_whitespace(buffer)))
 
-        return (qualifier, expressions)
+        return (delimiters, expressions, qualifier)
 
 
     def render(self, indent):
@@ -314,9 +325,9 @@ class SelectClause:
 
         if self.qualifier:
             parts.append(" ")
-            parts.append(self.qualifier)
-            parts.append("\n")
+            parts.append(self.qualifier.render(indent))
             if self.expressions:
+                parts.append("\n")
                 parts.append(" " * 5)
 
         for i, expr in enumerate(self.expressions):
