@@ -45,6 +45,7 @@ THREE_WORD_PHRASE_STARTERS = [x[0] for x in THREE_WORD_PHRASES]
 #}
 
 CROSS_JOIN = [(Token.Keyword, 'cross'), (Token.Keyword, 'join')]
+DISTINCT_ON = [(Token.Keyword, 'distinct'), (Token.Keyword, 'on')]
 LEFT_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'join')]
 RIGHT_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'join')]
 NATURAL_JOIN = [(Token.Keyword, 'natural'), (Token.Keyword, 'join')]
@@ -60,6 +61,7 @@ BETWEEN_SYMMETRIC = [(Token.Keyword, 'between'), (Token.Keyword, 'symmetric')]
 
 TWO_WORD_PHRASES = [
     CROSS_JOIN,
+    DISTINCT_ON,
     LEFT_JOIN,
     RIGHT_JOIN,
     NATURAL_JOIN,

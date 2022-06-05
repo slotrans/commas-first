@@ -119,6 +119,7 @@ def test_broken_block_comment():
 def test_two_word_key_phrases():
     phrases = [
         'cross join',
+        'distinct on',
         'left join',
         'right join',
         'group by',
