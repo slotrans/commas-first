@@ -357,7 +357,7 @@ class TestStatement:
 
 
     def test_inline_view(self):
-        #select x.foo  
+        #select x.foo
         #  from (select foo
         #          from bar
         #         where 1=1
@@ -414,7 +414,7 @@ class TestStatement:
         assert expected == actual
 
 
-    def test_select_subquery(self):
+    def test_select_scalar_subquery(self):
         #select foo
         #     , (select 1
         #          from baz
@@ -446,6 +446,8 @@ class TestStatement:
             SFToken(SFTokenKind.WORD, "1"),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "       "),
             Symbols.RIGHT_PAREN,
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "as"),
@@ -471,6 +473,77 @@ class TestStatement:
             "          from baz\n"
             "         where 1=1\n"
             "       ) as SCALAR_SUBQUERY\n"
+            "  from bar\n"
+            " where 1=1"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+    def test_select_inlist_subquery(self):
+        #select foo
+        #     , id in (select bar_id
+        #                from baz
+        #               where 1=1
+        #             ) as INLIST_SUBQUERY
+        #  from bar
+        # where 1=1
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "id"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "in"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar_id"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "                "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "               "),
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "             "),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "INLIST_SUBQUERY"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "1"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , in (select bar_id\n"
+            "             from baz\n"
+            "            where 1=1\n"
+            "          ) as INLIST_SUBQUERY\n"
             "  from bar\n"
             " where 1=1"
         )
