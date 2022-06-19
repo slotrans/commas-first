@@ -114,7 +114,8 @@ class TestWhereClause:
         ])
 
         expected = (
-            " where foo.abc = bar.abc\n"
+            ####
+                " where foo.abc = bar.abc\n"
             "       and foo.xyz = bar.xyz"
         )
         actual = clause.render(indent=4)
