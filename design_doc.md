@@ -407,3 +407,32 @@ select x.foo
     - but Statement requires that `select` be the first token, so it would need to be re-worked a bit
     - layout-wise, it _may_ be easier to get the parens in the right spot if they're _not_ part of the Statement... hard to say for sure though until I actually implement margin bumping
     
+### 2022-06-19
+- Re-thinking how "indent" works a bit...
+    - General principle is we don't want to mess with the formatting of expressions, so as to preserve any hand-formatting that's been done. So far I've taken that to mean not interfering *at all* with newlines and spacing within expressions. But implementing "indent" to support bumping over subqueries has accidentally introduced some of that interference. But it's made me question if maybe we _do_ want to interfere in a limited way.
+    - Consider this input:
+```
+select foo
+     , case when a > 1
+then true
+else false end
+     , bar
+```
+        - The "then" and "else" lines are horribly misplaced, but our current approach won't touch them. That's _sort of_ ok, because the user can fix them once and then it'll stick. But we can probably do better with a simple rule...
+        - Expressions that span more than one line must be indented to *at least* the alignment gutter.
+        - Applying that rule to this example would yield:
+```
+select foo
+     , case when a > 1
+       then true
+       else false end
+     , bar
+```
+        - Not perfect, but obviously better!
+    - Implementation strategy for this would be something like...
+        - while rendering an Expression...
+        - immediately after a newline...
+        - if the next token isn't a SPACES (or NEWLINE?) token, insert spaces out to the gutter ("gutter" hasn't been reified up to this point, should it now be?)
+        - if the next token *is* SPACES, check if it's _enough_ spaces to get to or beyond the gutter
+            - if so, render it and continue as normal
+            - if not, add additional spaces to get to the gutter
