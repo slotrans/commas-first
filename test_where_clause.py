@@ -2,6 +2,7 @@ import pytest
 
 from sftoken import SFToken
 from sftoken import SFTokenKind
+from sftoken import Whitespace
 from clause_formatter import WhereClause
 
 
@@ -93,6 +94,37 @@ class TestWhereClause:
         assert expected == actual
 
 
+    def test_render_two_expressions_ANDed_poorly_formatted(self):
+        #where foo.abc = bar.abc 
+        #and foo.xyz = bar.xyz"
+        clause = WhereClause(tokens=[
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.abc"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.abc"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.xyz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.xyz"),
+        ])
+
+        expected = (
+            " where foo.abc = bar.abc\n"
+            "   and foo.xyz = bar.xyz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
     def test_render_two_expressions_ANDed_indented(self):
         # "where foo.abc = bar.abc and foo.xyz = bar.xyz"
         clause = WhereClause(tokens=[
@@ -136,7 +168,7 @@ class TestWhereClause:
             SFToken(SFTokenKind.WORD, "1"),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            Whitespace.NEWLINE,
             SFToken(SFTokenKind.SPACES, "   "),
             SFToken(SFTokenKind.WORD, "and"),
             SFToken(SFTokenKind.SPACES, "   "),
@@ -145,7 +177,7 @@ class TestWhereClause:
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.SPACES, "   "),
             SFToken(SFTokenKind.WORD, "bar.a"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            Whitespace.NEWLINE,
             SFToken(SFTokenKind.WORD, "and"),
             SFToken(SFTokenKind.SPACES, "  "),
             SFToken(SFTokenKind.WORD, "foo.ab"),
@@ -153,7 +185,7 @@ class TestWhereClause:
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.SPACES, "  "),
             SFToken(SFTokenKind.WORD, "bar.ab"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            Whitespace.NEWLINE,
             SFToken(SFTokenKind.WORD, "and"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "foo.abc"),
@@ -187,19 +219,19 @@ class TestWhereClause:
             SFToken(SFTokenKind.WORD, "1"),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            Whitespace.NEWLINE,
             SFToken(SFTokenKind.SPACES, "   "),
             SFToken(SFTokenKind.WORD, "and"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.SYMBOL, "("),
             SFToken(SFTokenKind.SPACES, "   "),
             SFToken(SFTokenKind.WORD, "something"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            Whitespace.NEWLINE,
             SFToken(SFTokenKind.SPACES, "        "),
             SFToken(SFTokenKind.WORD, "or"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "another_thing"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            Whitespace.NEWLINE,
             SFToken(SFTokenKind.SPACES, "       "),
             SFToken(SFTokenKind.SYMBOL, ")"),
         ])
@@ -226,7 +258,7 @@ class TestWhereClause:
             SFToken(SFTokenKind.WORD, "1"),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            Whitespace.NEWLINE,
             SFToken(SFTokenKind.SPACES, "   "),
             SFToken(SFTokenKind.WORD, "and"),
             SFToken(SFTokenKind.SPACES, " "),

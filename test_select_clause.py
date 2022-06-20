@@ -307,6 +307,35 @@ class TestSelectClause:
         assert expected == actual
 
 
+    def test_render_simple_expressions_no_indentation(self):
+        #select foo
+        #, bar
+        #, baz
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
     def test_render_simple_expressions_distinct_qualifier(self):
         # "select distinct foo, bar, baz"
         clause = SelectClause(tokens=[
@@ -526,6 +555,76 @@ class TestSelectClause:
             "            then 2\n"
             "            else 3\n"
             "             end as BLERGH\n"
+            "     , stuff"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_poorly_formatted_case(self):
+        #select foo
+        #     , case when bar
+        #then 1
+        #when baz
+        #then 2
+        #else 3
+        #end as BLERGH
+        #     , stuff
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "case"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "end"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "BLERGH"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "stuff"),
+        ])
+
+        # I would like the 3rd thru 7th lines to be moved over by one more space, but it seems tricky
+        # to get right given that we currently allow expressions to start with any amount of leading
+        # whitespace. Revisit if that changes.
+        expected = (
+            "select foo\n"
+            "     , case when bar\n"
+            "      then 1\n"
+            "      when baz\n"
+            "      then 2\n"
+            "      else 3\n"
+            "      end as BLERGH\n"
             "     , stuff"
         )
         actual = clause.render(indent=0)

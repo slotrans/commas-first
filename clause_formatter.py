@@ -108,16 +108,33 @@ class Expression:
         #return "".join([e.render(indent) for e in self.elements])
         out = ""
         effective_indent = indent
+        immediately_after_newline = False
         i = 0
         while i < len(self.elements):
             e = self.elements[i]
+
+            if immediately_after_newline:
+                if e.kind == SFTokenKind.NEWLINE:
+                    # we should probably collapse consecutive newlines, but if they do happen, no indentation is needed
+                    pass
+                elif e.kind == SFTokenKind.SPACES:
+                    # if the newline IS followed by spaces, but not enough spaces to reach the indent, add more so that it will
+                    extra_spaces = indent - len(e.value)
+                    if extra_spaces > 0:
+                        out += " " * extra_spaces
+                        effective_indent = extra_spaces
+                else:
+                    # otherwise, add enough spaces to reach the indent
+                    out += " " * indent
+                    effective_indent = indent
+                immediately_after_newline = False
+
             fragment = e.render(effective_indent)
             out += fragment
             effective_indent += len(fragment)
             if e == Whitespace.NEWLINE:
                 #PONDER: what if we made the newline itself responsible for adding the indent, in render()?
-                out += " " * indent
-                effective_indent = indent
+                immediately_after_newline = True
             elif e == Symbols.LEFT_PAREN and is_parenthesized_subquery(self.elements[i:i+3]):
                 paren_indent = effective_indent - 1
                 out += self.elements[i+1].render(effective_indent)
