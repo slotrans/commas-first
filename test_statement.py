@@ -619,3 +619,38 @@ class TestStatement:
 
         print(actual)
         assert expected == actual
+
+
+    def test_select_union_all(self):
+        # select foo from table1 union all select foo from table2
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "table1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "union all"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "table2"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "  from table1\n"
+            "union all\n"
+            "select foo\n"
+            "  from table2\n"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual

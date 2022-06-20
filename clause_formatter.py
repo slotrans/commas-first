@@ -149,13 +149,152 @@ class Expression:
         return out
 
 
-# TODO
+# see https://www.postgresql.org/docs/14/queries-with.html
 class WithClause:
-    def __init__(self, tokens):
-        self.tokens = tokens
+    __slots__ = (
+        "input_tokens",
+        "delimiters",
+        "before_stuff", # e.g. "identifier as" or "identifier as materialized" or "identifier(<col list>) as"
+        "statements",
+        "after_stuff", # SEARCH clause for recursive CTEs, rarely used. Also used to capture broken syntax
+    )
+    STARTING_DELIMITER = SFToken(SFTokenKind.WORD, "with")
+    OTHER_DELIMITERS = set([Symbols.COMMA])
+    CTE_INDENT_SPACES = 4
 
-    def render(self):
-        pass
+    def __init__(self, tokens):
+        self._validate(tokens)
+
+        self.input_tokens = tokens
+
+        (
+            self.delimiters, 
+            self.before_stuff, 
+            self.statements,
+            self.after_stuff,
+        ) = self._parse(tokens)
+
+
+    def _validate(self, tokens):
+        if not tokens:
+            raise ValueError("tokens must be non-empty")
+
+        if tokens[0] != self.STARTING_DELIMITER:
+            raise ValueError(f"WithClause must begin with \"WITH\" keyword")
+
+        return True
+
+
+    def _parse_pieces(self, tokens):
+        i = 0
+        paren_depth = 0
+        buffer = []
+        while i < len(tokens):
+            if tokens[i] == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
+                subquery_tokens = get_paren_block(tokens[i:])
+                if subquery_tokens is None:
+                    # unbalanced parens
+                    # idk whether we should handle it here or one level up
+                    return (None, None, None)
+                else:
+                    # note that subquery_tokens includes the bounding parens, but we discard them here,
+                    # so we can more easily place them deliberately in render()
+                    subquery_length = len(subquery_tokens)
+                    remaining_tokens = tokens[i+subquery_length:]
+                    return (buffer, subquery_tokens[1:-1], remaining_tokens)
+            else:
+                if tokens[i] == Symbols.LEFT_PAREN:
+                    paren_depth += 1
+                elif tokens[i] == Symbols.RIGHT_PAREN:
+                    #TODO: detect unbalanced parens
+                    paren_depth -= 1
+                buffer.append(tokens[i])
+            i += 1
+
+        # if we end up here, the input was not well-formed
+        return (buffer, [], [])
+
+
+    def _parse(self, tokens):
+        i = 1 # we already know token 0 is the starting delimiter
+        delimiters = [self.STARTING_DELIMITER]
+        before_stuff = []
+        statements = []
+        after_stuff = []
+        paren_depth = 0
+        buffer = []
+        while i < len(tokens):
+            if paren_depth == 0 and tokens[i] in self.OTHER_DELIMITERS:
+                delimiters.append(tokens[i])
+                before_tokens, stmt_tokens, after_tokens = self._parse_pieces(buffer)
+                before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
+                statements.append(Statement(stmt_tokens))
+                after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
+                buffer = []
+            else:
+                if tokens[i] == Symbols.LEFT_PAREN:
+                    paren_depth += 1
+                elif tokens[i] == Symbols.RIGHT_PAREN:
+                    #TODO: detect unbalanced parens
+                    paren_depth -= 1
+                buffer.append(tokens[i])
+            i += 1
+        # one final expression, empty in the weird/broken case where the final token was JOIN or etc
+        if (len(buffer) > 0 
+            or len(delimiters) > len(before_stuff) 
+            or len(delimiters) > len(statements) 
+            or len(delimiters) > len(after_stuff)):
+            before_tokens, stmt_tokens, after_tokens = self._parse_pieces(buffer)
+            before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
+            statements.append(Statement(stmt_tokens))
+            after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
+
+        assert len(delimiters) == len(before_stuff)
+        assert len(delimiters) == len(statements)
+        assert len(delimiters) == len(after_stuff)
+
+        return (delimiters, before_stuff, statements, after_stuff)
+
+
+    def render(self, indent):
+        parts = []
+        i = 0
+        effective_indent = indent
+        while i < len(self.delimiters):
+            if i > 0:
+                parts.append("\n")
+                parts.append(" " * indent)
+                effective_indent = indent
+
+            fragment = self.delimiters[i].render(effective_indent)
+            effective_indent += len(fragment)
+            parts.append(fragment)
+
+            fragment = self.before_stuff[i].render(effective_indent)
+            effective_indent += len(fragment)
+            parts.append(fragment)
+
+            parts.append("\n")
+            parts.append(" " * indent)
+            effective_indent = indent
+            parts.append("(")
+            parts.append("\n")
+
+            parts.append(" " * (effective_indent+self.CTE_INDENT_SPACES))
+            parts.append(self.statements[i].render(effective_indent+self.CTE_INDENT_SPACES))
+
+            parts.append("\n")
+            parts.append(" " * indent)
+            effective_indent = indent
+            parts.append(")")
+            effective_indent = effective_indent + 1
+
+            parts.append(self.after_stuff[i].render(effective_indent))
+
+            i += 1
+
+        out = "".join(parts)
+        return out
 
 
 class BasicClause:
