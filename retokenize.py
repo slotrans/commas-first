@@ -57,6 +57,7 @@ WITHIN_GROUP = [(Token.Keyword, 'within'), (Token.Keyword, 'group')]
 IS_NULL = [(Token.Keyword, 'is'), (Token.Keyword, 'null')]
 NOT_BETWEEN = [(Token.Keyword, 'not'), (Token.Keyword, 'between')]
 BETWEEN_SYMMETRIC = [(Token.Keyword, 'between'), (Token.Keyword, 'symmetric')]
+UNION_ALL = [(Token.Keyword, 'union'), (Token.Keyword, 'all')]
 
 
 TWO_WORD_PHRASES = [
@@ -73,6 +74,7 @@ TWO_WORD_PHRASES = [
     IS_NULL,
     NOT_BETWEEN,
     BETWEEN_SYMMETRIC,
+    UNION_ALL,
 ]
 TWO_WORD_PHRASE_STARTERS = [x[0] for x in TWO_WORD_PHRASES]
 

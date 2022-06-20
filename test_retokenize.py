@@ -129,6 +129,7 @@ def test_two_word_key_phrases():
         'is null',
         'not between',
         'between symmetric',
+        'union all',
     ]
     for phrase in phrases:
         tokens = list(lexer.get_tokens(phrase))
