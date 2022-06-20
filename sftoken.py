@@ -75,6 +75,10 @@ class SFToken:
         return NotImplemented
 
 
+    def __str__(self):
+        return f"SFToken({self.kind.name}, '{self.value}', {self.is_whitespace})"
+
+
 Keywords = SimpleNamespace(
     ALL              = SFToken(SFTokenKind.WORD, "all"),
     AND              = SFToken(SFTokenKind.WORD, "and"),
