@@ -254,7 +254,7 @@ class SelectClause:
 
         self.input_tokens = tokens
 
-        self.delimiters, self.expressions, self.qualifier = self._parse(tokens[1:])
+        self.delimiters, self.expressions, self.qualifier = self._parse(tokens)
 
 
     def _validate(self, tokens):
@@ -298,9 +298,21 @@ class SelectClause:
         paren_depth = 0
         buffer = []
         while i < len(tokens):
-            if tokens[i] == Symbols.COMMA and paren_depth == 0:
+            if paren_depth == 0 and tokens[i] in self.OTHER_DELIMITERS:
+                delimiters.append(tokens[i])
                 expressions.append(Expression(trim_trailing_whitespace(buffer)))
                 buffer = []
+            elif tokens[i] == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
+                subquery_tokens = get_paren_block(tokens[i:])
+                if subquery_tokens is None:
+                    # unbalanced parens
+                    pass
+                else:
+                    buffer.append(Symbols.LEFT_PAREN)
+                    buffer.append(Statement(subquery_tokens[1:-1]))
+                    buffer.append(Symbols.RIGHT_PAREN)
+                    i += len(subquery_tokens)
+                    continue
             else:
                 if tokens[i] == Symbols.LEFT_PAREN:
                     paren_depth += 1
@@ -309,15 +321,17 @@ class SelectClause:
                     paren_depth -= 1
                 #TODO: detect and handle paren-wrapped subqueries
                 buffer.append(tokens[i])
-
             i += 1
-        if len(buffer) > 0: # one final expression
+        # one final expression, empty in the weird/broken case where the final token was JOIN or etc
+        if len(buffer) > 0 or len(delimiters) > len(expressions):
             expressions.append(Expression(trim_trailing_whitespace(buffer)))
+
+        assert len(delimiters) == len(expressions), f"{len(delimiters)} delimiters : {len(expressions)} expressions"
 
         return (delimiters, expressions, qualifier)
 
 
-    def render(self, indent):
+    def render_old(self, indent):
         if not self.qualifier and not self.expressions:
             return "select"
 
@@ -347,6 +361,37 @@ class SelectClause:
 
         out = "".join(parts)
         return out
+
+    def _render_delimiter(self, delimiter):
+        return delimiter.value.rjust(self.PADDING)
+
+    def render(self, indent):
+        parts = []
+        i = 0
+        effective_indent = indent
+        while i < len(self.delimiters):
+            if i > 0:
+                parts.append("\n")
+                parts.append(" " * indent)
+                effective_indent = indent
+
+            fragment = self._render_delimiter(self.delimiters[i])
+            effective_indent += len(fragment)
+            parts.append(fragment)
+
+            if i == 0 and self.qualifier:
+                parts.append(" ")
+                parts.append(self.qualifier.render(indent))
+                parts.append("\n")
+                parts.append(" " * 6)
+
+            parts.append(self.expressions[i].render(effective_indent))
+
+            i += 1
+
+        out = "".join(parts)
+        return out
+
 
 
 class FromClause(BasicClause):

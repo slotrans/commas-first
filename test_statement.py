@@ -35,7 +35,7 @@ class TestStatement:
     def test_select_1(self):
         statement = Statement(tokens=[
             SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "1"),
         ])
 
@@ -540,10 +540,10 @@ class TestStatement:
 
         expected = (
             "select foo\n"
-            "     , in (select bar_id\n"
-            "             from baz\n"
-            "            where 1=1\n"
-            "          ) as INLIST_SUBQUERY\n"
+            "     , id in (select bar_id\n"
+            "                from baz\n"
+            "               where 1=1\n"
+            "             ) as INLIST_SUBQUERY\n"
             "  from bar\n"
             " where 1=1"
         )
