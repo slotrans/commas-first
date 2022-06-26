@@ -85,7 +85,9 @@ def is_parenthesized_subquery(elements):
     return (
             len(elements) >= 3
         and elements[0] == Symbols.LEFT_PAREN
-        and isinstance(elements[1], Statement)
+        and (   isinstance(elements[1], Statement) 
+             or isinstance(elements[1], CompoundStatement)
+            )
         and elements[2] == Symbols.RIGHT_PAREN
     )
 
@@ -228,7 +230,7 @@ class WithClause:
                 delimiters.append(tokens[i])
                 before_tokens, stmt_tokens, after_tokens = self._parse_pieces(buffer)
                 before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
-                statements.append(Statement(stmt_tokens))
+                statements.append(CompoundStatement(stmt_tokens))
                 after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
                 buffer = []
             else:
@@ -246,7 +248,7 @@ class WithClause:
             or len(delimiters) > len(after_stuff)):
             before_tokens, stmt_tokens, after_tokens = self._parse_pieces(buffer)
             before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
-            statements.append(Statement(stmt_tokens))
+            statements.append(CompoundStatement(stmt_tokens))
             after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
 
         assert len(delimiters) == len(before_stuff)
@@ -343,7 +345,7 @@ class BasicClause:
                     pass
                 else:
                     buffer.append(Symbols.LEFT_PAREN)
-                    buffer.append(Statement(subquery_tokens[1:-1]))
+                    buffer.append(CompoundStatement(subquery_tokens[1:-1]))
                     buffer.append(Symbols.RIGHT_PAREN)
                     i += len(subquery_tokens)
                     continue
@@ -465,7 +467,7 @@ class SelectClause:
                     pass
                 else:
                     buffer.append(Symbols.LEFT_PAREN)
-                    buffer.append(Statement(subquery_tokens[1:-1]))
+                    buffer.append(CompoundStatement(subquery_tokens[1:-1]))
                     buffer.append(Symbols.RIGHT_PAREN)
                     i += len(subquery_tokens)
                     continue
@@ -736,7 +738,7 @@ class Statement:
                     pass
                 else:
                     buffer.append(Symbols.LEFT_PAREN)
-                    buffer.append(Statement(subquery_tokens[1:-1]))
+                    buffer.append(CompoundStatement(subquery_tokens[1:-1]))
                     buffer.append(Symbols.RIGHT_PAREN)
                     i += len(subquery_tokens)
                     continue                 
