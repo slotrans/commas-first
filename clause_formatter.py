@@ -790,3 +790,81 @@ class Statement:
 
         out = clause_joiner.join([v.render(indent) for k,v in clauses_in_order])
         return out
+
+
+class CompoundStatement:
+    __slots__ = (
+        "input_tokens",
+        "statements",
+        "set_operations",
+    )
+    SET_OP_KEYWORDS = set([
+        # Postgres allows ALL and DISTINCT to be appended to any set operation...
+        Keywords.UNION,
+        Keywords.UNION_ALL,
+        Keywords.UNION_DISTINCT,
+        Keywords.INTERSECT,
+        Keywords.INTERSECT_ALL,
+        Keywords.INTERSECT_DISTINCT,
+        Keywords.EXCEPT,
+        Keywords.EXCEPT_ALL,
+        Keywords.EXCEPT_DISTINCT,
+        Keywords.MINUS, # ...but Oracle doesn't
+    ])
+
+    def __init__(self, tokens):
+        self.input_tokens = tokens
+
+        self.statements, self.set_operations = self._parse(tokens)
+
+
+    def _parse(self, tokens):
+        statements = []
+        set_operations = []
+        buffer = []
+        seeking_select = True
+        for i, tok in enumerate(tokens):
+            # TODO: "(statement) set_op (statement)" is allowed so some paren-awareness is needed
+            if seeking_select is True and tok.is_whitespace:
+                # drop any whitespace that precedes SELECT
+                pass
+            elif tok in self.SET_OP_KEYWORDS:
+                statements.append(Statement(buffer))
+                set_operations.append(tok)
+                buffer = []
+                seeking_select = True
+            else:
+                buffer.append(tok)
+                if tok == Keywords.SELECT:
+                    seeking_select = False
+        # final statement
+        if len(buffer) > 0:
+            statements.append(Statement(buffer))
+
+        # if you do something dumb like "select ... union union select..." this will explode
+        assert len(statements) == len(set_operations) + 1
+
+        return (statements, set_operations)
+
+
+    def starts_with_whitespace(self):
+        return False
+
+
+    @property
+    def is_whitespace(self):
+        return False
+
+
+    def render(self, indent):
+        parts = [self.statements[0]]
+        i = 0
+        while i < len(self.set_operations):
+            parts.append(self.set_operations[i])
+            parts.append(self.statements[i+1])
+            i += 1
+
+        stmt_joiner = "\n" + (" " * indent)
+
+        out = stmt_joiner.join([p.render(indent) for p in parts])
+        return out
