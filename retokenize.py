@@ -58,6 +58,11 @@ IS_NULL = [(Token.Keyword, 'is'), (Token.Keyword, 'null')]
 NOT_BETWEEN = [(Token.Keyword, 'not'), (Token.Keyword, 'between')]
 BETWEEN_SYMMETRIC = [(Token.Keyword, 'between'), (Token.Keyword, 'symmetric')]
 UNION_ALL = [(Token.Keyword, 'union'), (Token.Keyword, 'all')]
+UNION_DISTINCT = [(Token.Keyword, 'union'), (Token.Keyword, 'distinct')]
+EXCEPT_ALL = [(Token.Keyword, 'except'), (Token.Keyword, 'all')]
+EXCEPT_DISTINCT = [(Token.Keyword, 'except'), (Token.Keyword, 'distinct')]
+INTERSECT_ALL = [(Token.Keyword, 'intersect'), (Token.Keyword, 'all')]
+INTERSECT_DISTINCT = [(Token.Keyword, 'intersect'), (Token.Keyword, 'distinct')]
 
 
 TWO_WORD_PHRASES = [
@@ -75,6 +80,11 @@ TWO_WORD_PHRASES = [
     NOT_BETWEEN,
     BETWEEN_SYMMETRIC,
     UNION_ALL,
+    UNION_DISTINCT,
+    EXCEPT_ALL,
+    EXCEPT_DISTINCT,
+    INTERSECT_ALL,
+    INTERSECT_DISTINCT,
 ]
 TWO_WORD_PHRASE_STARTERS = [x[0] for x in TWO_WORD_PHRASES]
 

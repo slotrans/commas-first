@@ -130,6 +130,11 @@ def test_two_word_key_phrases():
         'not between',
         'between symmetric',
         'union all',
+        'union distinct',
+        'except all',
+        'except distinct',
+        'intersect all',
+        'intersect distinct',
     ]
     for phrase in phrases:
         tokens = list(lexer.get_tokens(phrase))
