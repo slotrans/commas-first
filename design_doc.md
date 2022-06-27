@@ -436,3 +436,12 @@ select foo
         - if the next token *is* SPACES, check if it's _enough_ spaces to get to or beyond the gutter
             - if so, render it and continue as normal
             - if not, add additional spaces to get to the gutter
+
+### 2022-06-26
+- Line comments currently cause a bug where an extra newline gets added. This is because the line comment token itself has a newline in it, e.g. "--comment\n". Ordinarily when we build an Expression we call trim_trailing_whitespace() on the input tokens, which strips away any newlines at the end of the token list. But this doesn't touch the newline that's embedded in a line comment, so when we render, the line comment is printed with its newline, and then we add another one. Two potential strategies...
+    - trim_trailing_whitespace() could be modified so that when the last token is a line comment, the embedded newline is removed
+        - in theory this is safe since the rendering process adds the newlines back in
+        - its still icky though because we're tampering with a comment
+    - when rendering, we could keep track of cases when an Expression (or anything in expression position) ended with a newline, and if so then suppress adding our own
+        - seems safer
+        - but also kinda lame? idk there's an annoying statefulness to it
