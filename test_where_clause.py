@@ -294,3 +294,140 @@ class TestWhereClause:
 
         print(actual)
         assert expected == actual
+
+
+    def test_render_multiple_expressions_with_line_comment1(self):
+        # where foo.abc = bar.abc
+        #   and foo.xyz = bar.xyz
+        #   --comment
+        #   and foo.qrs = bar.qrs
+        clause = WhereClause(tokens=[
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.abc"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.abc"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.xyz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--comment1\n"),
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.qrs"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.qrs"),            
+        ])
+
+        expected = (
+            " where foo.abc = bar.abc\n"
+            "   and foo.xyz = bar.xyz\n"
+            "   --comment1\n"
+            "   and foo.qrs = bar.qrs"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_multiple_expressions_with_line_comment2(self):
+        # where foo.abc = bar.abc
+        #   and foo.xyz = bar.xyz --comment2
+        #   and foo.qrs = bar.qrs
+        clause = WhereClause(tokens=[
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.abc"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.abc"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.xyz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--comment2\n"),
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.qrs"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.qrs"),            
+        ])
+
+        expected = (
+            " where foo.abc = bar.abc\n"
+            "   and foo.xyz = bar.xyz --comment2\n"
+            "   and foo.qrs = bar.qrs"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_multiple_expressions_with_line_comment3(self):
+        # where foo.abc = bar.abc
+        #   and foo.xyz = bar.xyz
+        #--comment3
+        #   and foo.qrs = bar.qrs
+        clause = WhereClause(tokens=[
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.abc"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.abc"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.xyz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.LINE_COMMENT, "--comment3\n"),
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.qrs"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.qrs"),            
+        ])
+
+        expected = (
+            " where foo.abc = bar.abc\n"
+            "   and foo.xyz = bar.xyz\n"
+            "--comment3\n"
+            "   and foo.qrs = bar.qrs"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual

@@ -306,3 +306,39 @@ class TestWithClause:
 
         print(actual)
         assert expected == actual
+
+
+    def test_render_single_simple_cte_with_line_comment(self):
+        #with foo as 
+        #--comment
+        #(
+        #    select 1
+        #)
+        clause = WithClause(tokens=[
+            SFToken(SFTokenKind.WORD, "with"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.LINE_COMMENT, "--comment\n"),
+            Symbols.LEFT_PAREN,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            Symbols.RIGHT_PAREN,
+        ])
+
+        expected = (
+            "with foo as\n"
+            "--comment\n"
+            "(\n"
+            "    select 1\n"
+            ")"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual

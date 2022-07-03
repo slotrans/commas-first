@@ -2,6 +2,7 @@ import pytest
 
 from sftoken import SFToken
 from sftoken import SFTokenKind
+from sftoken import Whitespace
 from clause_formatter import FromClause
 
 
@@ -212,6 +213,127 @@ class TestFromClause:
             "  join bar on(    foo.x = bar.x\n"
             "              and foo.y = bar.y\n"
             "             )"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_sql99_one_simple_join_on_with_line_comment1(self):
+        #  from foo 
+        #  --comment1
+        #  join bar on(foo.x = bar.x)
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--comment1\n"),
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo.x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.x"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ])
+
+        expected = (
+            "  from foo\n"
+            "  --comment1\n"
+            "  join bar on(foo.x = bar.x)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_sql99_one_simple_join_on_with_line_comment2(self):
+        #  from foo --comment2
+        #  join bar on(foo.x = bar.x)
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--comment2\n"),
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo.x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.x"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ])
+
+        expected = (
+            "  from foo --comment2\n"
+            "  join bar on(foo.x = bar.x)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_sql99_two_simple_join_on_with_line_comment3(self):
+        #  from foo
+        #  join bar on(foo.x = bar.x) --comment3
+        #  join baz on(bar.y = baz.y)
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo.x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.x"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--comment3\n"),
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "bar.y"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz.y"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ])
+
+        expected = (
+            "  from foo\n"
+            "  join bar on(foo.x = bar.x) --comment3\n"
+            "  join baz on(bar.y = baz.y)"
         )
         actual = clause.render(indent=0)
 
