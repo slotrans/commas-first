@@ -445,3 +445,36 @@ select foo
     - when rendering, we could keep track of cases when an Expression (or anything in expression position) ended with a newline, and if so then suppress adding our own
         - seems safer
         - but also kinda lame? idk there's an annoying statefulness to it
+
+### 2022-07-03
+- TestSelectClause#test_render_simple_expressions_block_comment_no_qualifier is failing,
+    -expected:
+    ```
+    select foo
+         , bar
+         /* BLOCK
+            COMMENT */
+         , baz
+    ```
+
+    - actual:
+    ```
+    select foo
+         , bar
+          /* BLOCK
+            COMMENT */
+         , baz
+    ```
+
+    - the reason is the indentation logic I recently added (see notes from 2022-06-19) that bumps everything over to the far side of the central column of spaces.
+    - an additional complexity is that only the *first* line of the block comment is bumped over, because any further newlines and/or spaces are contained within the block comment, and the indentation logic specifically tracks NEWLINE tokens
+    - I feel like the expectations here aren't quite clear...
+        - One might expect that the block comment would be entirely unmoved. The start end end markers, along with everything contained therein, should come out of the formatter in exactly the same X,Y position they went in. Or at least that the start and end markers would have the same position _relative_ to each other, even if the comment block itself had to be moved with respect to surrounding code.
+        - An alternative expectation might be that the start marker can be moved arbitrarily so long as the contents of the comment aren't changed, and likewise that anything after the end marker could be moved. This would be effectively the same intuition as we have for line comments (where we can do anything we like _to the left of_ the comment marker).
+        - Yet another might be that leading (and trailing?) whitespace within a block comment is fair game, and if that messes up a carefully hand-aligned comment, that's *your* problem. This appears to be how IntelliJ 11 (all I've got on this machine) behaves when formatting Java.
+        - I think *MY* intuition is something like...
+            - if there is only whitespace (or nothing) to the left of the start marker, the start marker should not be moved
+                - if there is non-whitespace to the left of the start marker, it can be moved left or right, or even bumped to the next line
+            - nothing *inside* the comment should be moved
+            - anything *after* the end marker can be moved
+        - not sure I want to spend a bunch of time on this right now

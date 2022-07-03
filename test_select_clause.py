@@ -122,6 +122,43 @@ class TestSelectClause:
         assert expected == actual
 
 
+    def test_render_simple_expressions_block_comment_no_qualifier2(self):
+        #select foo
+        #     , bar
+        #/* BLOCK
+        #   COMMENT */
+        #     , baz
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.BLOCK_COMMENT, "/* BLOCK\n   COMMENT */"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "/* BLOCK\n"
+            "   COMMENT */\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
     def test_render_complex_expressions_no_qualifier(self):
         #select foo
         #     , coalesce(bar, 0)
