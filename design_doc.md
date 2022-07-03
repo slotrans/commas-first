@@ -478,3 +478,12 @@ select foo
             - nothing *inside* the comment should be moved
             - anything *after* the end marker can be moved
         - not sure I want to spend a bunch of time on this right now
+
+- Next up is end-to-end
+    - existing `formatter.py` is the old stuff and doesn't help much
+    - rough outline is:
+        - read input
+        - pass to pygments to tokenize
+        - pass through `retokenize`
+        - build a CompoundStatement and render it
+    - one complication is potentially being passed multiple statements (with semicolons)... probably OK to explode for now, but _some_ of what we would need to detect the end of a statement and re-start the state machine is already there
