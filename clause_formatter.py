@@ -114,6 +114,7 @@ class Expression:
         i = 0
         while i < len(self.elements):
             e = self.elements[i]
+            next_e = self.elements[i+1] if i+1 < len(self.elements) else None
 
             if immediately_after_newline:
                 if e.kind == SFTokenKind.NEWLINE:
@@ -121,10 +122,14 @@ class Expression:
                     pass
                 elif e.kind == SFTokenKind.SPACES:
                     # if the newline IS followed by spaces, but not enough spaces to reach the indent, add more so that it will
-                    extra_spaces = indent - len(e.value)
-                    if extra_spaces > 0:
-                        out += " " * extra_spaces
-                        effective_indent = extra_spaces
+                    # UNLESS the next token is a comment!
+                    if next_e is not None and next_e.kind in (SFTokenKind.LINE_COMMENT, SFTokenKind.BLOCK_COMMENT):
+                        pass
+                    else:
+                        extra_spaces = indent - len(e.value)
+                        if extra_spaces > 0:
+                            out += " " * extra_spaces
+                            effective_indent = extra_spaces
                 else:
                     # otherwise, add enough spaces to reach the indent
                     out += " " * indent
@@ -134,7 +139,7 @@ class Expression:
             fragment = e.render(effective_indent)
             out += fragment
             effective_indent += len(fragment)
-            if e == Whitespace.NEWLINE:
+            if e == Whitespace.NEWLINE or e.kind == SFTokenKind.LINE_COMMENT:
                 #PONDER: what if we made the newline itself responsible for adding the indent, in render()?
                 immediately_after_newline = True
             elif e == Symbols.LEFT_PAREN and is_parenthesized_subquery(self.elements[i:i+3]):
@@ -375,20 +380,27 @@ class BasicClause:
         parts = []
         i = 0
         effective_indent = indent
+        suppress_newline = False
         while i < len(self.delimiters):
             if i > 0:
-                parts.append("\n")
+                if not suppress_newline:
+                    parts.append("\n")
                 parts.append(" " * indent)
                 effective_indent = indent
+            suppress_newline = False
 
             #parts.append(self._render_delimiter(self.delimiters[i]))
             #parts.append(self.expressions[i].render(indent))
 
-            fragment = self._render_delimiter(self.delimiters[i])
-            effective_indent += len(fragment)
-            parts.append(fragment)
+            delim_fragment = self._render_delimiter(self.delimiters[i])
+            effective_indent += len(delim_fragment)
+            parts.append(delim_fragment)
 
-            parts.append(self.expressions[i].render(effective_indent))
+            expr_fragment = self.expressions[i].render(effective_indent)
+            parts.append(expr_fragment)
+
+            if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
+                suppress_newline = True
 
             i += 1
 
@@ -527,15 +539,18 @@ class SelectClause:
         parts = []
         i = 0
         effective_indent = indent
+        suppress_newline = False
         while i < len(self.delimiters):
             if i > 0:
-                parts.append("\n")
+                if not suppress_newline:
+                    parts.append("\n")
                 parts.append(" " * indent)
                 effective_indent = indent
+            suppress_newline = False
 
-            fragment = self._render_delimiter(self.delimiters[i])
-            effective_indent += len(fragment)
-            parts.append(fragment)
+            delim_fragment = self._render_delimiter(self.delimiters[i])
+            effective_indent += len(delim_fragment)
+            parts.append(delim_fragment)
 
             if i == 0 and self.qualifier:
                 parts.append(" ")
@@ -543,7 +558,11 @@ class SelectClause:
                 parts.append("\n")
                 parts.append(" " * 6)
 
-            parts.append(self.expressions[i].render(effective_indent))
+            expr_fragment = self.expressions[i].render(effective_indent)
+            parts.append(expr_fragment)
+
+            if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
+                suppress_newline = True
 
             i += 1
 
