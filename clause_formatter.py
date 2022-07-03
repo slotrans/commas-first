@@ -551,7 +551,6 @@ class SelectClause:
         return out
 
 
-
 class FromClause(BasicClause):
     STARTING_DELIMITER = Keywords.FROM
     OTHER_DELIMITERS = set([
