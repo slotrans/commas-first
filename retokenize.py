@@ -303,21 +303,29 @@ def pygments_token_to_sftoken(token):
     elif ttype == Token.Keyword:
         return SFToken(SFTokenKind.WORD, value)
     elif ttype == Token.Literal.Number.Float:
-        pass
-    elif ttype == Token.Literal.String.Name:
-        pass
+        return SFToken(SFTokenKind.LITERAL, value)
+    #elif ttype == Token.Literal.String.Name:
+    #    pass
     elif ttype == Token.Literal.String.Single:
-        pass
+        return SFToken(SFTokenKind.LITERAL, value)
     elif ttype == Token.Name:
-        pass
+        if '"' in value or '`' in value:
+            return SFToken(SFTokenKind.LITERAL, value)
+        else:
+            return SFToken(SFTokenKind.WORD, value)
     elif ttype == Token.Name.Builtin:
-        pass
+        return SFToken(SFTokenKind.WORD, value)
     elif ttype == Token.Operator:
-        pass
+        return SFToken(SFTokenKind.SYMBOL, value)
     elif ttype == Token.Punctuation:
-        pass
+        return SFToken(SFTokenKind.SYMBOL, value)
     elif ttype == Token.Text.Whitespace:
-        pass
+        if value == "\n":
+            return SFToken(SFTokenKind.NEWLINE, "\n")
+        elif all([c == " " for c in value]):
+            return SFToken(SFTokenKind.SPACES, value)
+        else:
+            raise ValueError(f"mixed whitespace value: '{value}'")
     else:
         # we need to be comprehensive so explode loudly on any unhandled case
         raise ValueError(f"unexpected Pygments token type '{ttype}' with value '{value}'")
