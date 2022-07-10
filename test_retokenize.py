@@ -5,6 +5,7 @@ from pygments.lexers import get_lexer_by_name
 from pygments.token import Token
 
 import retokenize
+from sftoken import SFToken, SFTokenKind
 
 
 lexer = get_lexer_by_name("postgres", stripall=True)
@@ -225,3 +226,120 @@ def test_qualified_identifier_with_quotes_two_dots():
     expected_consumed = 5
     assert expected_token == actual_token
     assert expected_consumed == actual_consumed
+
+
+### TRANSLATION
+
+def test_translation_of_integer_literal():
+    token = (Token.Literal.Number.Float, "42")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LITERAL, "42")
+    assert expected == actual
+
+def test_translation_of_ordinary_float_literal():
+    token = (Token.Literal.Number.Float, "3.14")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LITERAL, "3.14")
+    assert expected == actual
+
+def test_translation_of_scientific_float_literal():
+    token = (Token.Literal.Number.Float, "1e6")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LITERAL, "1e6")
+    assert expected == actual
+
+def test_translation_of_string_literal():
+    token = (Token.Literal.String.Single, "'string literal'")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LITERAL, "'string literal'")
+    assert expected == actual
+
+def test_translation_of_unquoted_single_qualified_identifier():
+    token = (Token.Name, "foo.bar")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.WORD, "foo.bar")
+    assert expected == actual
+
+def test_translation_of_quoted_single_qualified_identifier():
+    token = (Token.Name, '"foo"."bar"')
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LITERAL, '"foo"."bar"')
+    assert expected == actual
+
+def test_translation_of_unquoted_double_qualified_identifier():
+    token = (Token.Name, "foo.bar.baz")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.WORD, "foo.bar.baz")
+    assert expected == actual
+
+def test_translation_of_quoted_double_qualified_identifier():
+    token = (Token.Name, '"foo"."bar"."baz"')
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LITERAL, '"foo"."bar"."baz"')
+    assert expected == actual
+
+def test_translation_of_operators():
+    for token in [
+        (Token.Operator, '!='),
+        (Token.Operator, '+'),
+        (Token.Operator, '::'),
+        (Token.Operator, '<'),
+        (Token.Operator, '<='),
+        (Token.Operator, '<@'),
+        (Token.Operator, '='),
+        (Token.Operator, '>'),
+        (Token.Operator, '>='),
+        (Token.Operator, '@>'),
+        (Token.Operator, '~='),
+        # there are more...
+    ]:
+        actual = retokenize.pygments_token_to_sftoken(token)
+        expected = SFToken(SFTokenKind.SYMBOL, token[1])
+        assert expected == actual
+
+def test_translation_of_punctuation():
+    for token in [
+        (Token.Punctuation, '('),
+        (Token.Punctuation, ')'),
+        (Token.Punctuation, ','),
+        (Token.Punctuation, '.'), # I've never observed "." to come out as Token.Punctuation rather than Token.Literal.Number.Float
+        (Token.Punctuation, ':'), # when would this ever...?
+        (Token.Punctuation, ';'),
+        (Token.Punctuation, '['),
+        (Token.Punctuation, ']'),
+        (Token.Punctuation, '{'),
+        (Token.Punctuation, '}'),
+    ]:
+        actual = retokenize.pygments_token_to_sftoken(token)
+        expected = SFToken(SFTokenKind.SYMBOL, token[1])
+        assert expected == actual
+
+def test_translation_of_spaces():
+    for token in [
+        (Token.Text.Whitespace, " "),
+        (Token.Text.Whitespace, "  "),
+        (Token.Text.Whitespace, "   "),
+        (Token.Text.Whitespace, "    "),
+        # you get the point
+    ]:
+        actual = retokenize.pygments_token_to_sftoken(token)
+        expected = SFToken(SFTokenKind.SPACES, token[1])
+        assert expected == actual
+
+def test_translation_of_newline():
+    token = (Token.Text.Whitespace, "\n")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.NEWLINE, token[1])
+    assert expected == actual
+
+def test_translation_of_block_comment():
+    token = (Token.Comment.Multiline, "/* block comment */")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.BLOCK_COMMENT, token[1])
+    assert expected == actual
+
+def test_translation_of_line_comment():
+    token = (Token.Comment.Single, "--line comment\n")
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LINE_COMMENT, token[1])
+    assert expected == actual

@@ -5,7 +5,7 @@ import pygments
 from pygments.lexers import get_lexer_by_name
 from pygments.token import Token
 
-from sftoken import SFToken
+from sftoken import SFToken, SFTokenKind
 
 
 IS_NOT_DISTINCT_FROM = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'distinct'), (Token.Keyword, 'from')]
@@ -290,11 +290,43 @@ def get_qualified_identifier(tokens):
     return (assembled_token, len(consumed))
 
 
+### TRANSLATION FUNCTION(S)
+
+def pygments_token_to_sftoken(token):
+    ttype, value = token
+
+    # cases are alphabetical
+    if ttype == Token.Comment.Multiline:
+        return SFToken(SFTokenKind.BLOCK_COMMENT, value)
+    elif ttype == Token.Comment.Single:
+        return SFToken(SFTokenKind.LINE_COMMENT, value)
+    elif ttype == Token.Keyword:
+        return SFToken(SFTokenKind.WORD, value)
+    elif ttype == Token.Literal.Number.Float:
+        pass
+    elif ttype == Token.Literal.String.Name:
+        pass
+    elif ttype == Token.Literal.String.Single:
+        pass
+    elif ttype == Token.Name:
+        pass
+    elif ttype == Token.Name.Builtin:
+        pass
+    elif ttype == Token.Operator:
+        pass
+    elif ttype == Token.Punctuation:
+        pass
+    elif ttype == Token.Text.Whitespace:
+        pass
+    else:
+        # we need to be comprehensive so explode loudly on any unhandled case
+        raise ValueError(f"unexpected Pygments token type '{ttype}' with value '{value}'")
+
+
 ### DRIVER FUNCTIONS
 
 def retokenize1(tokens):
     out = []
-
     i = 0
     length = len(tokens)
     while i < length:
@@ -352,44 +384,25 @@ def retokenize1(tokens):
 
 def retokenize2(tokens):
     out = []
-
     i = 0
     length = len(tokens)
     while i < length:
-        #TODO: this is all old, and needs to be replaced with just(?) a search for qualified identifiers
-
-        if i+4 < length: # double-qualified identifiers
+        if i+2 < length: # qualified identifiers
             phrase = tokens[i:i+5]
-            double_qualified_identifier = get_double_qualified_identifier(phrase)
-            if double_qualified_identifier:
-                out.append(double_qualified_identifier)
-                i += 5
-                continue
-
-        if i+2 < length: # 3-token phrases, qualified identifiers
-            phrase = tokens[i:i+3]
-            if phrase in THREE_WORD_PHRASES:
-                out.append(merge_keyphrase(phrase))
-                i += 3
-                continue
-            else:
-                qualified_identifier = get_qualified_identifier(phrase)
-                if qualified_identifier:
-                    out.append(qualified_identifier)
-                    i += 3
-                    continue
-
-        if i+1 < length: # 2-token phrases
-            phrase = tokens[i:i+2]
-            if phrase in TWO_WORD_PHRASES:
-                out.append(merge_keyphrase(phrase))
-                i += 2
+            qualified_identifier, tokens_consumed = get_qualified_identifier(phrase)
+            if qualified_identifier:
+                out.append(qualified_identifier)
+                i += tokens_consumed
                 continue
 
         out.append(tokens[i])
         i += 1
 
     return out
+
+
+def sftokenize(tokens):
+    return [pygments_token_to_sftoken(t) for t in tokens]
 
 
 if __name__ == '__main__':
