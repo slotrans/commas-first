@@ -8,7 +8,7 @@ from retokenize import pre_process_tokens, retokenize1, retokenize2, sftokenize
 from clause_formatter import CompoundStatement
 
 
-def do_format(input_string):
+def do_format(unformatted_code):
     lexer = get_lexer_by_name("postgres", stripall=True)
     tokens = pre_process_tokens(lexer.get_tokens(unformatted_code))
 
