@@ -343,3 +343,62 @@ def test_translation_of_line_comment():
     actual = retokenize.pygments_token_to_sftoken(token)
     expected = SFToken(SFTokenKind.LINE_COMMENT, token[1])
     assert expected == actual
+
+
+### DRIVERS
+
+def test_retokenize1_grouped_count():
+    tokens = retokenize.retokenize1(list(lexer.get_tokens("select foo, count(1) from bar where 1=1 group by foo order by foo")))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'count'),
+        (Token.Punctuation, '('),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Punctuation, ')'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'bar'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'where'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Operator, '='),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'group by'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'order by'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
+
+
+#def test_retokenize1_four_word_phrases():
+#cram several in here
+
+#def test_retokenize1_three_word_phrases():
+#cram several in here
+
+#def test_retokenize1_two_word_phrases():
+#cram several in here
+
+#def test_retokenize1_single_quoted_literal():
+
+#def test_retokenize1_dollar_quoted_literal():
+#test both $$blergh$$ and $foo$blergh$foo$ styles
+
+#def test_retokenize1_doubled_and_backtick_quoted_literals():
+#test both
+
+#def test_retokenize2_qualified_identifiers():
+#cram all cases in here
