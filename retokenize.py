@@ -370,7 +370,7 @@ def retokenize1(tokens):
         elif i+2 < length and tokens[i] in (THREE_WORD_PHRASE_STARTERS):
             keyphrase, tokens_consumed = get_three_word_key_phrase(tokens[i:])
         elif i+1 < length and tokens[i] in (TWO_WORD_PHRASE_STARTERS):
-            keyphrase, tokens_consumed = get_three_word_key_phrase(tokens[i:])
+            keyphrase, tokens_consumed = get_two_word_key_phrase(tokens[i:])
 
         if keyphrase:
             out.append(keyphrase)
