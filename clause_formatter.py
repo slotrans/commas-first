@@ -771,7 +771,7 @@ class Statement:
                     # both keywords are used, we'll hit this case. It's normal.
                     buffer.append(tok)
                 elif potential_new_scope <= current_scope:
-                    raise ValueError(f"unexpected token {tok} in scope {current_scope}")
+                    raise ValueError(f"unexpected token {tok} in scope {current_scope.name}")
                 else:
                     clause_class = SCOPE_CLAUSE_MAP[current_scope]
                     clause_map[current_scope] = clause_class(buffer)
