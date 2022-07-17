@@ -619,3 +619,137 @@ class TestStatement:
 
         print(actual)
         assert expected == actual
+
+
+    def test_window_function_in_select(self):
+        # "order by" appears inside a function call here, should not trigger a new scope
+
+        #select foo
+        #     , lead(foo, 1) over(order by event_datetime) as NEXT_FOO
+        #  from bar
+        # where 1=1
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "lead"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "over"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "order by"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "event_datetime"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "NEXT_FOO"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "1"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , lead(foo, 1) over(order by event_datetime) as NEXT_FOO\n"
+            "  from bar\n"
+            " where 1=1"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_substring_and_extract_in_where(self):
+        # "from" appears inside function calls here, should not trigger a new scope
+
+        #select 1
+        #  from bar
+        # where 1=1
+        #   and substring(foo from 2 for 3) != 'xxx'
+        #   and extract('year' from event_datetime) > 2000
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "substring"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "for"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "!="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.LITERAL, "'xxx'"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "extract"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.LITERAL, "'year'"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "event_datetime"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ">"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2000"),
+        ])
+
+        expected = (
+            "select 1\n"
+            "  from bar\n"
+            " where 1=1\n"
+            "   and substring(foo from 2 for 3) != 'xxx'\n"
+            "   and extract('year' from event_datetime) > 2000"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual

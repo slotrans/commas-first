@@ -743,6 +743,7 @@ class Statement:
         clause_map = {}
 
         current_scope = ClauseScope.INITIAL
+        paren_depth = 0
         i = 0
         buffer = []
         while i < len(tokens):
@@ -761,23 +762,33 @@ class Statement:
                     i += len(subquery_tokens)
                     continue                 
 
-            potential_new_scope = KEYWORD_SCOPE_MAP.get(tok, None)
-            if potential_new_scope:
-                if current_scope is ClauseScope.INITIAL:
-                    buffer.append(tok)
-                    current_scope = potential_new_scope
-                elif potential_new_scope == current_scope and current_scope == ClauseScope.LIMIT_OFFSET:
-                    # LIMIT/OFFSET is a weird clause because OFFSET/LIMIT is also valid, so any time
-                    # both keywords are used, we'll hit this case. It's normal.
-                    buffer.append(tok)
-                elif potential_new_scope <= current_scope:
-                    raise ValueError(f"unexpected token {tok} in scope {current_scope.name}")
-                else:
-                    clause_class = SCOPE_CLAUSE_MAP[current_scope]
-                    clause_map[current_scope] = clause_class(buffer)
+            if tok == Symbols.LEFT_PAREN:
+                buffer.append(tok)
+                paren_depth += 1
+            elif tok == Symbols.RIGHT_PAREN:
+                buffer.append(tok)
+                paren_depth -= 1
+            elif paren_depth == 0:
+                # ONLY probe for a scope change if we are outside any misc parens (function calls etc)
+                potential_new_scope = KEYWORD_SCOPE_MAP.get(tok, None)
+                if potential_new_scope:
+                    if current_scope is ClauseScope.INITIAL:
+                        buffer.append(tok)
+                        current_scope = potential_new_scope
+                    elif potential_new_scope == current_scope and current_scope == ClauseScope.LIMIT_OFFSET:
+                        # LIMIT/OFFSET is a weird clause because OFFSET/LIMIT is also valid, so any time
+                        # both keywords are used, we'll hit this case. It's normal.
+                        buffer.append(tok)
+                    elif potential_new_scope <= current_scope:
+                        raise ValueError(f"unexpected token {tok} in scope {current_scope.name}")
+                    else:
+                        clause_class = SCOPE_CLAUSE_MAP[current_scope]
+                        clause_map[current_scope] = clause_class(buffer)
 
-                    current_scope = potential_new_scope
-                    buffer = [tok]
+                        current_scope = potential_new_scope
+                        buffer = [tok]
+                else:
+                    buffer.append(tok)
             else:
                 buffer.append(tok)
 
