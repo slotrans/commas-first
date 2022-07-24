@@ -286,16 +286,46 @@ def test_translation_of_quoted_double_qualified_identifier():
 
 def test_translation_of_operators():
     for token in [
+        # these are sorted
         (Token.Operator, '!='),
+        (Token.Operator, '!~'),
+        (Token.Operator, '!~*'),
+        (Token.Operator, '##'),
+        (Token.Operator, '#-#'),
+        (Token.Operator, '&&'),
+        (Token.Operator, '&<'),
+        (Token.Operator, '&<|'),
+        (Token.Operator, '&>'),
+        (Token.Operator, '*'),
         (Token.Operator, '+'),
+        (Token.Operator, '-'),
+        (Token.Operator, '/'),
         (Token.Operator, '::'),
         (Token.Operator, '<'),
+        (Token.Operator, '<<'),
+        (Token.Operator, '<<|'),
         (Token.Operator, '<='),
         (Token.Operator, '<@'),
+        (Token.Operator, '<^'),
         (Token.Operator, '='),
         (Token.Operator, '>'),
         (Token.Operator, '>='),
+        (Token.Operator, '>>'),
+        (Token.Operator, '>^'),
+        (Token.Operator, '?#'),
+        (Token.Operator, '?-|'),
+        (Token.Operator, '?|'),
+        (Token.Operator, '?||'),
+        (Token.Operator, '@-@'),
         (Token.Operator, '@>'),
+        (Token.Operator, '@@'),
+        (Token.Operator, '^'),
+        (Token.Operator, '|&>'),
+        (Token.Operator, '|/'),
+        (Token.Operator, '|>>'),
+        (Token.Operator, '||/'),
+        (Token.Operator, '~'),
+        (Token.Operator, '~*'),
         (Token.Operator, '~='),
         # there are more...
     ]:
@@ -485,12 +515,6 @@ def test_retokenize1_three_word_phrases():
 
 
 def test_retokenize1_two_word_phrases_group1():
-    #UNION_ALL,
-    #UNION_DISTINCT,
-    #EXCEPT_ALL,
-    #EXCEPT_DISTINCT,
-    #INTERSECT_ALL,
-    #INTERSECT_DISTINCT,
     # this is not a sane or even valid query, btw
     sql = (
         "select distinct on(foo)\n"
@@ -702,13 +726,134 @@ def test_retokenize1_two_word_phrases_group2():
     assert expected_tokens == actual_tokens
 
 
-#def test_retokenize1_single_quoted_literal():
+def test_retokenize1_single_quoted_literal():
+    sql = (
+        "select 'foo'\n"
+        "  from bar\n"
+        " where baz = 'words'"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String.Single, "'foo'"),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'bar'),
+        (Token.Text.Whitespace, '\n '),
+        (Token.Keyword, 'where'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'baz'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Operator, '='),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String.Single, "'words'"),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
 
-#def test_retokenize1_dollar_quoted_literal():
-#test both $$blergh$$ and $foo$blergh$foo$ styles
 
-#def test_retokenize1_doubled_and_backtick_quoted_literals():
-#test both
+def test_retokenize1_dollar_quoted_literal():
+    # both styles
+    sql = (
+        "select $$foo$$\n"
+        "  from bar\n"
+        " where baz = $special$words$special$"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String, '$$foo$$'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'bar'),
+        (Token.Text.Whitespace, '\n '),
+        (Token.Keyword, 'where'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'baz'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Operator, '='),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String, '$special$words$special$'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
 
-#def test_retokenize2_qualified_identifiers():
-#cram all cases in here
+
+def test_retokenize1_double_and_backtick_quoted_literals():
+    sql = (
+        "select \"foo\" as \"Foo\"\n"
+        "  from `bar`\n"
+        " where 1=1"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String.Name, '"foo"'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'as'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String.Name, '"Foo"'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String.Name, '`bar`'),
+        (Token.Text.Whitespace, '\n '),
+        (Token.Keyword, 'where'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Operator, '='),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
+
+
+# not a fully isolated test of retokenize2 because it calls retokenize1...
+def test_retokenize2_qualified_identifiers():
+    sql = (
+        "select table_name.column_name\n"
+        "     , schema_name.table_name.column_name\n"
+        "     , db_name.schema_name.table_name.column_name\n"
+        "     , \"Quoted\".\"Name\"\n"
+        "     , \"Longer\".\"Quoted\".\"Name\"\n"
+        "  from foo"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize2(retokenize.retokenize1(tokens))
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table_name.column_name'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'schema_name.table_name.column_name'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'db_name.schema_name.table_name'),
+        (Token.Literal.Number.Float, '.'),
+        (Token.Name, 'column_name'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, '"Quoted"."Name"'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, '"Longer"."Quoted"."Name"'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
