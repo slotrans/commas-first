@@ -377,11 +377,13 @@ def retokenize1(tokens):
 
         # multi-keyword phrases
         keyphrase = None
-        if i+3 < length and tokens[i] in (FOUR_WORD_PHRASE_STARTERS):
+        if i+6 < length and tokens[i] in (FOUR_WORD_PHRASE_STARTERS):
             keyphrase, tokens_consumed = get_four_word_key_phrase(tokens[i:])
-        elif i+2 < length and tokens[i] in (THREE_WORD_PHRASE_STARTERS):
+
+        if not keyphrase and i+4 < length and tokens[i] in (THREE_WORD_PHRASE_STARTERS):
             keyphrase, tokens_consumed = get_three_word_key_phrase(tokens[i:])
-        elif i+1 < length and tokens[i] in (TWO_WORD_PHRASE_STARTERS):
+
+        if not keyphrase and i+2 < length and tokens[i] in (TWO_WORD_PHRASE_STARTERS):
             keyphrase, tokens_consumed = get_two_word_key_phrase(tokens[i:])
 
         if keyphrase:
