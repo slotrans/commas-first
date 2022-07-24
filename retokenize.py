@@ -19,7 +19,10 @@ FOUR_WORD_PHRASE_STARTERS = [x[0] for x in FOUR_WORD_PHRASES]
 LEFT_OUTER_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')]
 RIGHT_OUTER_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')]
 FULL_OUTER_JOIN = [(Token.Keyword, 'full'), (Token.Keyword, 'outer'), (Token.Keyword, 'join')]
+IS_NOT_FALSE = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'false')]
 IS_NOT_NULL = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'null')]
+IS_NOT_TRUE = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'true')]
+IS_NOT_UNKNOWN = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'unknown')]
 IS_DISTINCT_FROM = [(Token.Keyword, 'is'), (Token.Keyword, 'distinct'), (Token.Keyword, 'from')]
 NOT_BETWEEN_SYMMETRIC = [(Token.Keyword, 'not'), (Token.Keyword, 'between'), (Token.Keyword, 'symmetric')]
 AT_TIME_ZONE = [(Token.Keyword, 'at'), (Token.Name.Builtin, 'time'), (Token.Keyword, 'zone')]
@@ -28,7 +31,10 @@ THREE_WORD_PHRASES = [
     LEFT_OUTER_JOIN,
     RIGHT_OUTER_JOIN,
     FULL_OUTER_JOIN,
+    IS_NOT_FALSE,
     IS_NOT_NULL,
+    IS_NOT_TRUE,
+    IS_NOT_UNKNOWN,
     IS_DISTINCT_FROM,
     NOT_BETWEEN_SYMMETRIC,
     AT_TIME_ZONE,
@@ -54,7 +60,10 @@ GROUP_BY = [(Token.Keyword, 'group'), (Token.Keyword, 'by')]
 ORDER_BY = [(Token.Keyword, 'order'), (Token.Keyword, 'by')]
 PARTITION_BY = [(Token.Keyword, 'partition'), (Token.Keyword, 'by')]
 WITHIN_GROUP = [(Token.Keyword, 'within'), (Token.Keyword, 'group')]
+IS_FALSE = [(Token.Keyword, 'is'), (Token.Keyword, 'false')]
 IS_NULL = [(Token.Keyword, 'is'), (Token.Keyword, 'null')]
+IS_TRUE = [(Token.Keyword, 'is'), (Token.Keyword, 'true')]
+IS_UNKNOWN = [(Token.Keyword, 'is'), (Token.Keyword, 'unknown')]
 NOT_BETWEEN = [(Token.Keyword, 'not'), (Token.Keyword, 'between')]
 BETWEEN_SYMMETRIC = [(Token.Keyword, 'between'), (Token.Keyword, 'symmetric')]
 UNION_ALL = [(Token.Keyword, 'union'), (Token.Keyword, 'all')]
