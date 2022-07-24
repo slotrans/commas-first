@@ -127,7 +127,10 @@ def test_two_word_key_phrases():
         'order by',
         'partition by',
         'within group',
+        'is false',
         'is null',
+        'is true',
+        'is unknown',
         'not between',
         'between symmetric',
         'union all',
@@ -151,7 +154,10 @@ def test_three_word_key_phrases():
         'left outer join',
         'right outer join',
         'full outer join',
+        'is not false',
         'is not null',
+        'is not true',
+        'is not unknown',
         'is distinct from',
         'not between symmetric',
         'at time zone',
@@ -348,7 +354,7 @@ def test_translation_of_line_comment():
 ### DRIVERS
 
 def test_retokenize1_grouped_count():
-    tokens = retokenize.retokenize1(list(lexer.get_tokens("select foo, count(1) from bar where 1=1 group by foo order by foo")))
+    tokens = list(lexer.get_tokens("select foo, count(1) from bar where 1=1 group by foo order by foo"))
     actual_tokens = retokenize.retokenize1(tokens)
     expected_tokens = [
         (Token.Keyword, 'select'),
@@ -383,14 +389,318 @@ def test_retokenize1_grouped_count():
     assert expected_tokens == actual_tokens
 
 
-#def test_retokenize1_four_word_phrases():
-#cram several in here
+def test_retokenize1_four_word_phrases():
+    sql = (
+        "select foo is not distinct from bar\n"
+        "  from baz"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'is not distinct from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'bar'),
+        #(Token.Text.Whitespace, '\n'),
+        #(Token.Text.Whitespace, '  '),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'baz'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
 
-#def test_retokenize1_three_word_phrases():
-#cram several in here
 
-#def test_retokenize1_two_word_phrases():
-#cram several in here
+def test_retokenize1_three_word_phrases():
+    # this is not a sane query, btw
+    sql = (
+        "select foo is distinct from bar\n"
+        "     , event_dt at time zone 'UTC'\n"
+        "  from baz\n"
+        "  left outer join table1\n"
+        "  right outer join table2\n"
+        "  full outer join table3\n"
+        " where event_dt is not null\n"
+        "   and flerb not between symmetric 1 and 9"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'is distinct from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'bar'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'event_dt'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'at time zone'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.String.Single, "'UTC'"),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'baz'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'left outer join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table1'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'right outer join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table2'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'full outer join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table3'),
+        (Token.Text.Whitespace, '\n '),
+        (Token.Keyword, 'where'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'event_dt'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'is not null'),
+        (Token.Text.Whitespace, '\n   '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'flerb'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'not between symmetric'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '9'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
+
+
+def test_retokenize1_two_word_phrases_group1():
+    #UNION_ALL,
+    #UNION_DISTINCT,
+    #EXCEPT_ALL,
+    #EXCEPT_DISTINCT,
+    #INTERSECT_ALL,
+    #INTERSECT_DISTINCT,
+    # this is not a sane or even valid query, btw
+    sql = (
+        "select distinct on(foo)\n"
+        "     , foo\n"
+        "     , count(bar) over(partition by foo)\n"
+        "     , percentile_cont(0.5) within group(order by foo)\n"
+        "  from baz\n"
+        "  left join table1\n"
+        "  right join table2\n"
+        "  natural join table3\n"
+        "  lateral join table4\n"
+        "  cross join table5\n"
+        " where something is null\n"
+        "   and flerb not between 1 and 9\n"
+        "   and flerb2 between symmetric 4 and 8\n"
+        "   and flerb3 is false\n"
+        "   and flerb4 is true\n"
+        "   and flerb5 is unknown\n"
+        " group by foo\n"
+        " order by foo"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'distinct on'),
+        (Token.Punctuation, '('),
+        (Token.Name, 'foo'),
+        (Token.Punctuation, ')'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'count'),
+        (Token.Punctuation, '('),
+        (Token.Name, 'bar'),
+        (Token.Punctuation, ')'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'over'),
+        (Token.Punctuation, '('),
+        (Token.Keyword, 'partition by'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Punctuation, ')'),
+        (Token.Text.Whitespace, '\n     '),
+        (Token.Punctuation, ','),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'percentile_cont'),
+        (Token.Punctuation, '('),
+        (Token.Literal.Number.Float, '0.5'),
+        (Token.Punctuation, ')'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'within group'),
+        (Token.Punctuation, '('),
+        (Token.Keyword, 'order by'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Punctuation, ')'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'baz'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'left join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table1'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'right join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table2'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'natural join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table3'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'lateral join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table4'),
+        (Token.Text.Whitespace, '\n  '),
+        (Token.Keyword, 'cross join'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'table5'),
+        (Token.Text.Whitespace, '\n '),
+        (Token.Keyword, 'where'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'something'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'is null'),
+        (Token.Text.Whitespace, '\n   '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'flerb'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'not between'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '9'),
+        (Token.Text.Whitespace, '\n   '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'flerb2'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'between symmetric'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '4'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '8'),
+        (Token.Text.Whitespace, '\n   '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'flerb3'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'is false'),
+        (Token.Text.Whitespace, '\n   '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'flerb4'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'is true'),
+        (Token.Text.Whitespace, '\n   '),
+        (Token.Keyword, 'and'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'flerb5'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'is unknown'),
+        (Token.Text.Whitespace, '\n '),
+        (Token.Keyword, 'group by'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, '\n '),
+        (Token.Keyword, 'order by'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
+
+
+def test_retokenize1_two_word_phrases_group2():
+    # this is not a sane or even valid query, btw
+    sql = (
+        "select 1\n"
+        "union all\n"
+        "select 2\n"
+        "union distinct\n"
+        "select 3\n"
+        "except all\n"
+        "select 4\n"
+        "except distinct\n"
+        "select 5\n"
+        "intersect all\n"
+        "select 6\n"
+        "intersect distinct\n"
+        "select 7"
+    )
+    tokens = list(lexer.get_tokens(sql))
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'union all'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '2'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'union distinct'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '3'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'except all'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '4'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'except distinct'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '5'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'intersect all'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '6'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'intersect distinct'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '7'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
+
 
 #def test_retokenize1_single_quoted_literal():
 
