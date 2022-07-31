@@ -127,8 +127,3 @@ Whitespace = SimpleNamespace(
     NEWLINE   = SFToken(SFTokenKind.NEWLINE, "\n"),
     ONE_SPACE = SFToken(SFTokenKind.SPACES, " "),
 )
-
-
-def sftokens_from_pygments_tokens(tokens):
-    ALL_WHITESPACE = re.compile(r'^\s+$')
-    pass
