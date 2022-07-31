@@ -3,6 +3,7 @@ import pytest
 from sftoken import SFToken
 from sftoken import SFTokenKind
 from clause_formatter import trim_trailing_whitespace
+from clause_formatter import trim_leading_whitespace
 from clause_formatter import get_paren_block
 
 
@@ -65,6 +66,69 @@ class TestTrimTrailingWhitespace:
 
         expected = tokens[0:3]
         actual = trim_trailing_whitespace(tokens)
+
+        assert expected == actual
+
+
+class TestTrimLeadingWhitespace:
+    def test_empty(self):
+        expected = []
+        actual = trim_leading_whitespace([])
+        assert expected == actual
+
+
+    def test_no_whitespace(self):
+        tokens = [
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens
+        actual = trim_leading_whitespace(tokens)
+
+        assert expected == actual
+
+
+    def test_one_spaces_token(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens[1:]
+        actual = trim_leading_whitespace(tokens)
+
+        assert expected == actual
+
+
+    def test_one_newline_token(self):
+        tokens = [
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens[1:]
+        actual = trim_leading_whitespace(tokens)
+
+        assert expected == actual
+
+
+    def test_multiple(self):
+        tokens = [
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens[2:]
+        actual = trim_leading_whitespace(tokens)
 
         assert expected == actual
 

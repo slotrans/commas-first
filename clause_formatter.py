@@ -79,7 +79,15 @@ def trim_trailing_whitespace(tokens):
     while i >= 0 and tokens[i].is_whitespace:
         i -= 1
 
-    return tokens[0:i+1]
+    return tokens[:i+1]
+
+
+def trim_leading_whitespace(tokens):
+    i = 0
+    while i < len(tokens) and tokens[i].is_whitespace:
+        i += 1
+
+    return tokens[i:]
 
 
 def is_parenthesized_subquery(elements):
