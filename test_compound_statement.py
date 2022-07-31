@@ -10,6 +10,23 @@ from clause_formatter import CompoundStatement
 class TestCompoundStatement:
     #def test_?_on_empty_input(self):  what should exact behavior be for empty input?
 
+    def test_bare_select(self):
+        # select 1
+        statement = CompoundStatement(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+        ])
+
+        expected = (
+            "select 1"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
     def test_select_union_all(self):
         # select 1 union all select 2
         statement = CompoundStatement(tokens=[
