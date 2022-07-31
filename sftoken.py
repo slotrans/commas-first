@@ -79,6 +79,10 @@ class SFToken:
         return f"SFToken({self.kind.name}, '{self.value}', {self.is_whitespace})"
 
 
+    def __repr__(self):
+        return f"SFToken(SFTokenKind.{self.kind.name}, '{self.value}')"
+
+
 Keywords = SimpleNamespace(
     ALL                = SFToken(SFTokenKind.WORD, "all"),
     AND                = SFToken(SFTokenKind.WORD, "and"),
@@ -114,6 +118,7 @@ Keywords = SimpleNamespace(
     UNION_DISTINCT     = SFToken(SFTokenKind.WORD, "union distinct"),
     USING              = SFToken(SFTokenKind.WORD, "using"),
     WHERE              = SFToken(SFTokenKind.WORD, "where"),
+    WITH               = SFToken(SFTokenKind.WORD, "with"),
 )
 
 Symbols = SimpleNamespace(
