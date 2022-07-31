@@ -13,6 +13,86 @@ lexer = get_lexer_by_name("postgres", stripall=True)
 
 ### FIRST PASS
 
+def test_one_space():
+    input_token = (Token.Text.Whitespace, " ")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, " ")]
+    assert expected_tokens == actual_tokens
+
+
+def test_many_spaces():
+    input_token = (Token.Text.Whitespace, "    ")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "    ")]
+    assert expected_tokens == actual_tokens
+
+
+def test_one_newline():
+    input_token = (Token.Text.Whitespace, "\n")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "\n")]
+    assert expected_tokens == actual_tokens
+
+
+def test_two_newlines():
+    input_token = (Token.Text.Whitespace, "\n\n")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "\n"), (Token.Text.Whitespace, "\n")]
+    assert expected_tokens == actual_tokens
+
+
+def test_one_crlf_newline():
+    input_token = (Token.Text.Whitespace, "\r\n")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "\n")]
+    assert expected_tokens == actual_tokens
+
+
+def test_two_crlf_newlines():
+    input_token = (Token.Text.Whitespace, "\r\n\r\n")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "\n"), (Token.Text.Whitespace, "\n")]
+    assert expected_tokens == actual_tokens
+
+
+def test_newline_plus_spaces():
+    input_token = (Token.Text.Whitespace, "\n    ")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "\n"), (Token.Text.Whitespace, "    ")]
+    assert expected_tokens == actual_tokens
+
+
+def test_mixed_newlines_and_spaces():
+    input_token = (Token.Text.Whitespace, " \n \n ")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, " "), (Token.Text.Whitespace, "\n"), (Token.Text.Whitespace, " "), (Token.Text.Whitespace, "\n"), (Token.Text.Whitespace, " ")]
+    assert expected_tokens == actual_tokens
+
+
+# tab tests are coupled to how many spaces a tab is mapped to!
+# they will need to change if that's made configurable!
+def test_one_tab():
+    input_token = (Token.Text.Whitespace, "\t")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "    ")]
+    assert expected_tokens == actual_tokens
+
+
+def test_two_tabs():
+    input_token = (Token.Text.Whitespace, "\t\t")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "        ")]
+    assert expected_tokens == actual_tokens
+
+
+def test_mixed_tabs_and_spaces():
+    input_token = (Token.Text.Whitespace, " \t \t ")
+    actual_tokens = retokenize.explode_whitespace(input_token)
+    expected_tokens = [(Token.Text.Whitespace, "           ")]
+    assert expected_tokens == actual_tokens
+
+
+
 def test_simple_string_literal():
     tokens = list(lexer.get_tokens("'String Literal'")) # [(Token.Literal.String.Single, "'"), (Token.Literal.String.Single, 'String Literal'), (Token.Literal.String.Single, "'")]
     actual_token, actual_consumed = retokenize.get_single_quoted_literal(tokens)
@@ -434,9 +514,8 @@ def test_retokenize1_four_word_phrases():
         (Token.Keyword, 'is not distinct from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'bar'),
-        #(Token.Text.Whitespace, '\n'),
-        #(Token.Text.Whitespace, '  '),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'baz'),
@@ -467,7 +546,8 @@ def test_retokenize1_three_word_phrases():
         (Token.Keyword, 'is distinct from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'bar'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'event_dt'),
@@ -475,29 +555,35 @@ def test_retokenize1_three_word_phrases():
         (Token.Keyword, 'at time zone'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.String.Single, "'UTC'"),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'baz'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'left outer join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table1'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'right outer join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table2'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'full outer join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table3'),
-        (Token.Text.Whitespace, '\n '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'where'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'event_dt'),
         (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'is not null'),
-        (Token.Text.Whitespace, '\n   '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '   '),
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'flerb'),
@@ -545,11 +631,13 @@ def test_retokenize1_two_word_phrases_group1():
         (Token.Punctuation, '('),
         (Token.Name, 'foo'),
         (Token.Punctuation, ')'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'foo'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'count'),
@@ -563,7 +651,8 @@ def test_retokenize1_two_word_phrases_group1():
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'foo'),
         (Token.Punctuation, ')'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'percentile_cont'),
@@ -577,37 +666,45 @@ def test_retokenize1_two_word_phrases_group1():
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'foo'),
         (Token.Punctuation, ')'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'baz'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'left join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table1'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'right join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table2'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'natural join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table3'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'lateral join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table4'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'cross join'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table5'),
-        (Token.Text.Whitespace, '\n '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'where'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'something'),
         (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'is null'),
-        (Token.Text.Whitespace, '\n   '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '   '),
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'flerb'),
@@ -619,7 +716,8 @@ def test_retokenize1_two_word_phrases_group1():
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.Number.Float, '9'),
-        (Token.Text.Whitespace, '\n   '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '   '),
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'flerb2'),
@@ -631,29 +729,34 @@ def test_retokenize1_two_word_phrases_group1():
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.Number.Float, '8'),
-        (Token.Text.Whitespace, '\n   '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '   '),
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'flerb3'),
         (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'is false'),
-        (Token.Text.Whitespace, '\n   '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '   '),
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'flerb4'),
         (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'is true'),
-        (Token.Text.Whitespace, '\n   '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '   '),
         (Token.Keyword, 'and'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'flerb5'),
         (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'is unknown'),
-        (Token.Text.Whitespace, '\n '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'group by'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'foo'),
-        (Token.Text.Whitespace, '\n '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'order by'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'foo'),
@@ -738,11 +841,13 @@ def test_retokenize1_single_quoted_literal():
         (Token.Keyword, 'select'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.String.Single, "'foo'"),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'bar'),
-        (Token.Text.Whitespace, '\n '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'where'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'baz'),
@@ -768,11 +873,13 @@ def test_retokenize1_dollar_quoted_literal():
         (Token.Keyword, 'select'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.String, '$$foo$$'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'bar'),
-        (Token.Text.Whitespace, '\n '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'where'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'baz'),
@@ -801,11 +908,13 @@ def test_retokenize1_double_and_backtick_quoted_literals():
         (Token.Keyword, 'as'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.String.Name, '"Foo"'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'from'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.String.Name, '`bar`'),
-        (Token.Text.Whitespace, '\n '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
         (Token.Keyword, 'where'),
         (Token.Text.Whitespace, ' '),
         (Token.Literal.Number.Float, '1'),
@@ -832,25 +941,30 @@ def test_retokenize2_qualified_identifiers():
         (Token.Keyword, 'select'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'table_name.column_name'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'schema_name.table_name.column_name'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'db_name.schema_name.table_name'),
         (Token.Literal.Number.Float, '.'),
         (Token.Name, 'column_name'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, '"Quoted"."Name"'),
-        (Token.Text.Whitespace, '\n     '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '     '),
         (Token.Punctuation, ','),
         (Token.Text.Whitespace, ' '),
         (Token.Name, '"Longer"."Quoted"."Name"'),
-        (Token.Text.Whitespace, '\n  '),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
         (Token.Keyword, 'from'),
         (Token.Text.Whitespace, ' '),
         (Token.Name, 'foo'),

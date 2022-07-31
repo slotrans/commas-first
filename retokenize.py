@@ -141,6 +141,19 @@ def pre_process_tokens(tokenlist):
     return out
 
 
+def explode_whitespace(token):
+    SPACES_PER_TAB = 4 #TODO: set via CLI arg
+    temp = []
+    for piece in re.findall("\r\n|\n|[\t ]+", token[1]):
+        if piece in ("\r\n", "\n"):
+            temp.append((Token.Text.Whitespace, "\n"))
+        else:
+            untabified = piece.replace("\t", " "*SPACES_PER_TAB)
+            temp.append((Token.Text.Whitespace, untabified))
+
+    return temp
+
+
 def get_single_quoted_literal(tokens):
     length = len(tokens)
     if length < 3 or tokens[0] != SINGLE_QUOTE:
@@ -337,7 +350,7 @@ def pygments_token_to_sftoken(token):
         elif all([c == " " for c in value]):
             return SFToken(SFTokenKind.SPACES, value)
         else:
-            raise ValueError(f"mixed whitespace value: '{value}'")
+            raise ValueError(f"mixed/illegal whitespace value: '{value}'")
     else:
         # we need to be comprehensive so explode loudly on any unhandled case
         raise ValueError(f"unexpected Pygments token type '{ttype}' with value '{value}'")
@@ -393,9 +406,9 @@ def retokenize1(tokens):
 
         # whitespace
         if tokens[i][0] is Token.Text.Whitespace:
-            #TODO: convert tabs to spaces
-            #TODO: split newlines apart from other whitespace
-            pass
+            out += explode_whitespace(tokens[i])
+            i += 1
+            continue
 
         # everything else passes through unmodified
         out.append(tokens[i])
