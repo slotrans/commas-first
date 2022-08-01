@@ -203,32 +203,18 @@ class WithClause:
 
     def _parse_pieces(self, tokens):
         i = 0
-        paren_depth = 0
-        buffer = []
         while i < len(tokens):
-            if tokens[i] == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
-                subquery_tokens = get_paren_block(tokens[i:])
-                if subquery_tokens is None:
-                    # unbalanced parens
-                    # idk whether we should handle it here or one level up
-                    return (None, None, None)
-                else:
-                    # note that subquery_tokens includes the bounding parens, but we discard them here,
-                    # so we can more easily place them deliberately in render()
-                    subquery_length = len(subquery_tokens)
-                    remaining_tokens = tokens[i+subquery_length:]
-                    return (buffer, subquery_tokens[1:-1], remaining_tokens)
-            else:
-                if tokens[i] == Symbols.LEFT_PAREN:
-                    paren_depth += 1
-                elif tokens[i] == Symbols.RIGHT_PAREN:
-                    #TODO: detect unbalanced parens
-                    paren_depth -= 1
-                buffer.append(tokens[i])
+            if is_parenthesized_subquery(tokens[i:i+3]):
+                # discard the parens
+                before = tokens[:i]
+                statement = tokens[i+1]
+                after = tokens[i+3:]
+                return (before, statement, after)
             i += 1
 
         # if we end up here, the input was not well-formed
-        return (buffer, [], [])
+        # might want to just raise an exception instead...
+        return ([], None, [])
 
 
     def _parse(self, tokens):
@@ -242,9 +228,9 @@ class WithClause:
         while i < len(tokens):
             if paren_depth == 0 and tokens[i] in self.OTHER_DELIMITERS:
                 delimiters.append(tokens[i])
-                before_tokens, stmt_tokens, after_tokens = self._parse_pieces(buffer)
+                before_tokens, stmt, after_tokens = self._parse_pieces(buffer)
                 before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
-                statements.append(CompoundStatement(stmt_tokens))
+                statements.append(stmt)
                 after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
                 buffer = []
             else:
@@ -260,9 +246,9 @@ class WithClause:
             or len(delimiters) > len(before_stuff) 
             or len(delimiters) > len(statements) 
             or len(delimiters) > len(after_stuff)):
-            before_tokens, stmt_tokens, after_tokens = self._parse_pieces(buffer)
+            before_tokens, stmt, after_tokens = self._parse_pieces(buffer)
             before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
-            statements.append(CompoundStatement(stmt_tokens))
+            statements.append(stmt)
             after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
 
         assert len(delimiters) == len(before_stuff)
