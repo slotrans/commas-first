@@ -2,8 +2,10 @@ import pytest
 
 from sftoken import SFToken
 from sftoken import SFTokenKind
+from sftoken import Symbols
 from sftoken import Whitespace
 from clause_formatter import SelectClause
+from clause_formatter import CompoundStatement
 
 
 class TestSelectClause:
@@ -706,6 +708,53 @@ class TestSelectClause:
             "     , l28\n"
             "     , l91\n"
             "     , stuff"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_scalar_subquery(self):
+        # "select foo, (select count(1) from bar where 1=1), baz"
+        clause = SelectClause(tokens=[
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "count"),
+                Symbols.LEFT_PAREN,
+                SFToken(SFTokenKind.WORD, "1"),
+                Symbols.RIGHT_PAREN,
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "bar"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , (select count(1)\n"
+            "          from bar\n"
+            "         where 1=1\n"
+            "       )\n"
+            "     , baz"
         )
         actual = clause.render(indent=0)
 

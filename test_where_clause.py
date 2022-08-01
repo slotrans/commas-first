@@ -4,6 +4,7 @@ from sftoken import SFToken
 from sftoken import SFTokenKind
 from sftoken import Whitespace
 from clause_formatter import WhereClause
+from clause_formatter import CompoundStatement
 
 
 class TestWhereClause:
@@ -267,19 +268,21 @@ class TestWhereClause:
             SFToken(SFTokenKind.WORD, "in"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "id"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "from"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "1"),
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "id"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "foo"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
             SFToken(SFTokenKind.SYMBOL, ")"),
         ])
 
