@@ -753,3 +753,40 @@ class TestStatement:
 
         print(actual)
         assert expected == actual
+
+
+    def test_single_cte(self):
+        # with cte1 as (select 1) select foo from table1
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.WORD, "with"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "cte1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "table1"),
+        ])
+
+        expected = (
+            "with cte1 as\n"
+            "(\n"
+            "    select 1\n"
+            ")\n"
+            "select foo\n"
+            "  from table1"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual        

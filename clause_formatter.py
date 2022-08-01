@@ -697,7 +697,7 @@ class LimitOffsetClause:
 
 class ClauseScope(enum.IntEnum):
     INITIAL = 1
-    #WITH = 2 #NYI
+    WITH = 2
     SELECT = 3
     FROM = 4
     WHERE = 5
@@ -710,7 +710,7 @@ class ClauseScope(enum.IntEnum):
 
 
 KEYWORD_SCOPE_MAP = {
-    #Keywords.WITH: ClauseScope.WITH,
+    Keywords.WITH: ClauseScope.WITH,
     Keywords.SELECT: ClauseScope.SELECT,
     Keywords.FROM: ClauseScope.FROM,
     Keywords.WHERE: ClauseScope.WHERE,
@@ -724,7 +724,7 @@ KEYWORD_SCOPE_MAP = {
 
 
 SCOPE_CLAUSE_MAP = {
-    #ClauseScope.WITH: WithClause,
+    ClauseScope.WITH: WithClause,
     ClauseScope.SELECT: SelectClause,
     ClauseScope.FROM: FromClause,
     ClauseScope.WHERE: WhereClause,

@@ -487,3 +487,23 @@ select foo
         - pass through `retokenize`
         - build a CompoundStatement and render it
     - one complication is potentially being passed multiple statements (with semicolons)... probably OK to explode for now, but _some_ of what we would need to detect the end of a statement and re-start the state machine is already there
+
+
+### 2022-07-31
+- Noticed "WITH" was still commented out and marked NYI in Statement. Uncommented it and starting running tests, and there are problems.
+    - long story short: the Statement parser picks out the parenthesized subquery in a WITH, and turns it into a CompoundStatement, *before* handing it to WithClause
+    - this is not what WithClause expects, so stuff blows up
+    - two ideas spring to mind:
+        - somehow disable subquery parsing while in ClauseScope.WITH
+        - adjust the WithClause parser to handle CompoundStatement objects mixed in with tokens
+    - code is in a bit of a broken state until this gets resolved (cop-out resolution would be to re-comment ClauseScope.WITH)
+
+    - after thinking about it a bit, I'm inclined to keep subquery detection in the Statement parser, and remove it from the various XClause parsers (and by implication, modify them as needed to assume they will be passed CompoundStatement objects, also modify their tests accordingly)
+    - but, it's probably worth committing the current state to a branch, and then implementing BOTH approach as branches off of that
+
+- Thinking about how to implement CLI args, specifically how to get them inside the code that needs to respect them
+    - For example, if we're invoked with `--strip-leading-whitespace`, how do we use that to modify the behavior of the various clause classes, which is where the construction of Expression objects actually happens?
+        - explicit arguments?
+        - module-level globals?
+        - avoid branching by doing module-level setup?
+            - meaning like, have a `trim_whitespace` *variable* which gets set to one function or another based on the arguments, and then there's no branching at the actual call site, you just always call `trim_whitespace(...)`
