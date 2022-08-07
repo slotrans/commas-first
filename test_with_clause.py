@@ -354,3 +354,45 @@ class TestWithClause:
 
         print(actual)
         assert expected == actual
+
+
+    def test_single_cte_full_query(self):
+        # with cte1 as (select 1 from bar where 1=1)
+        clause = WithClause(tokens=[
+            SFToken(SFTokenKind.WORD, 'with'),
+            SFToken(SFTokenKind.SPACES, ' '),
+            SFToken(SFTokenKind.WORD, 'cte1'),
+            SFToken(SFTokenKind.SPACES, ' '),
+            SFToken(SFTokenKind.WORD, 'as'),
+            SFToken(SFTokenKind.SPACES, ' '),
+            SFToken(SFTokenKind.SYMBOL, '('),
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, 'select'),
+                SFToken(SFTokenKind.SPACES, ' '),
+                SFToken(SFTokenKind.LITERAL, '1'),
+                SFToken(SFTokenKind.SPACES, ' '),
+                SFToken(SFTokenKind.WORD, 'from'),
+                SFToken(SFTokenKind.SPACES, ' '),
+                SFToken(SFTokenKind.WORD, 'bar'),
+                SFToken(SFTokenKind.SPACES, ' '),
+                SFToken(SFTokenKind.WORD, 'where'),
+                SFToken(SFTokenKind.SPACES, ' '),
+                SFToken(SFTokenKind.LITERAL, '1'),
+                SFToken(SFTokenKind.SYMBOL, '='),
+                SFToken(SFTokenKind.LITERAL, '1'),
+            ]),
+            SFToken(SFTokenKind.SYMBOL, ')'),
+        ])
+
+        expected = (
+            "with cte1 as\n"
+            "(\n"
+            "    select 1\n"
+            "      from bar\n"
+            "     where 1=1\n"
+            ")"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
