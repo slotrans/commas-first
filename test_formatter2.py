@@ -20,7 +20,7 @@ for input_path in Path("queries_for_test").glob("*_IN.sql"):
     output_contents = slurp(output_path).rstrip("\n")
     expected_outputs.append(output_contents)
 
-    test_id = input_path.name.rstrip("_IN.sql")
+    test_id = input_path.name.replace("_IN.sql", "")
     test_ids.append(test_id)
 
 
