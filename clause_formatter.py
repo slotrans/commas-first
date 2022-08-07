@@ -339,25 +339,12 @@ class BasicClause:
                 delimiters.append(tokens[i])
                 expressions.append(Expression(trim_trailing_whitespace(buffer)))
                 buffer = []
-            #subquery-parsing-in-statement-only-20220731
-            #elif tokens[i] == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
-            #    subquery_tokens = get_paren_block(tokens[i:])
-            #    if subquery_tokens is None:
-            #        # unbalanced parens
-            #        pass
-            #    else:
-            #        buffer.append(Symbols.LEFT_PAREN)
-            #        buffer.append(CompoundStatement(subquery_tokens[1:-1]))
-            #        buffer.append(Symbols.RIGHT_PAREN)
-            #        i += len(subquery_tokens)
-            #        continue
             else:
                 if tokens[i] == Symbols.LEFT_PAREN:
                     paren_depth += 1
                 elif tokens[i] == Symbols.RIGHT_PAREN:
                     #TODO: detect unbalanced parens
                     paren_depth -= 1
-                #TODO: detect and handle paren-wrapped subqueries
                 buffer.append(tokens[i])
             i += 1
         # one final expression, empty in the weird/broken case where the final token was JOIN or etc
@@ -469,25 +456,12 @@ class SelectClause:
                 delimiters.append(tokens[i])
                 expressions.append(Expression(trim_trailing_whitespace(buffer)))
                 buffer = []
-            #subquery-parsing-in-statement-only-20220731
-            #elif tokens[i] == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
-            #    subquery_tokens = get_paren_block(tokens[i:])
-            #    if subquery_tokens is None:
-            #        # unbalanced parens
-            #        pass
-            #    else:
-            #        buffer.append(Symbols.LEFT_PAREN)
-            #        buffer.append(CompoundStatement(subquery_tokens[1:-1]))
-            #        buffer.append(Symbols.RIGHT_PAREN)
-            #        i += len(subquery_tokens)
-            #        continue
             else:
                 if tokens[i] == Symbols.LEFT_PAREN:
                     paren_depth += 1
                 elif tokens[i] == Symbols.RIGHT_PAREN:
                     #TODO: detect unbalanced parens
                     paren_depth -= 1
-                #TODO: detect and handle paren-wrapped subqueries
                 buffer.append(tokens[i])
             i += 1
         # one final expression, empty in the weird/broken case where the final token was JOIN or etc
