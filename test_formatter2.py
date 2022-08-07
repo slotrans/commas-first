@@ -28,4 +28,5 @@ for input_path in Path("queries_for_test").glob("*_IN.sql"):
 def test_do_format(test_input, expected_output):
     actual_output = do_format(test_input).render(indent=0)
     print(actual_output)
+    #print(actual_output.replace(" ", "⦁"))
     assert expected_output == actual_output

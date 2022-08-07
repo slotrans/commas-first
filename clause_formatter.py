@@ -215,6 +215,7 @@ class WithClause:
         # if we end up here, the input was not well-formed
         # might want to just raise an exception instead...
         return ([], None, [])
+        #raise ValueError("")
 
 
     def _parse(self, tokens):
@@ -850,21 +851,21 @@ class CompoundStatement:
         statements = []
         set_operations = []
         buffer = []
-        seeking_select = True
+        seeking_statement_start = True
         for i, tok in enumerate(tokens):
             # TODO: "(statement) set_op (statement)" is allowed so some paren-awareness is needed
-            if seeking_select is True and tok.is_whitespace:
-                # drop any whitespace that precedes SELECT
+            if seeking_statement_start is True and tok.is_whitespace:
+                # drop any whitespace that precedes SELECT/WITH
                 pass
             elif tok in self.SET_OP_KEYWORDS:
                 statements.append(Statement(buffer))
                 set_operations.append(tok)
                 buffer = []
-                seeking_select = True
+                seeking_statement_start = True
             else:
                 buffer.append(tok)
-                if tok == Keywords.SELECT:
-                    seeking_select = False
+                if tok in (Keywords.SELECT, Keywords.WITH):
+                    seeking_statement_start = False
         # final statement
         if len(buffer) > 0:
             statements.append(Statement(buffer))
