@@ -5,19 +5,15 @@ from pathlib import Path
 from formatter2 import do_format
 
 
-def slurp(openable):
-    return open(openable, "r", encoding="utf-8").read()
-
-
 test_inputs = []
 expected_outputs = []
 test_ids = []
 for input_path in Path("queries_for_test").glob("*_IN.sql"):
-    input_contents = slurp(input_path).rstrip("\n")
+    input_contents = input_path.read_text("utf-8").rstrip("\n")
     test_inputs.append(input_contents)
 
     output_path = input_path.with_name(input_path.name.replace("_IN.sql", "_OUT.sql"))
-    output_contents = slurp(output_path).rstrip("\n")
+    output_contents = output_path.read_text("utf-8").rstrip("\n")
     expected_outputs.append(output_contents)
 
     test_id = input_path.name.replace("_IN.sql", "")
