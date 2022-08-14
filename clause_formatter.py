@@ -157,7 +157,7 @@ class Expression:
                 out += "\n"
                 out += " " * paren_indent
                 out += ")"
-                i += 3
+                i += 3 # left paren, subquery, right paren
                 continue
 
             i += 1
