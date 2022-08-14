@@ -116,7 +116,6 @@ class Expression:
         return len(self.elements) == 0
 
     def render(self, indent):
-        #return "".join([e.render(indent) for e in self.elements])
         out = ""
         effective_indent = indent
         immediately_after_newline = False
