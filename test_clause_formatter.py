@@ -1,10 +1,16 @@
 import pytest
 
+import sf_flags
 from sftoken import SFToken
 from sftoken import SFTokenKind
 from clause_formatter import trim_trailing_whitespace
 from clause_formatter import trim_leading_whitespace
 from clause_formatter import get_paren_block
+
+
+# pytest magic
+def setup_module():
+    sf_flags.reset_to_defaults()
 
 
 class TestTrimTrailingWhitespace:

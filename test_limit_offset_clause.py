@@ -1,8 +1,14 @@
 import pytest
 
+import sf_flags
 from sftoken import SFToken
 from sftoken import SFTokenKind
 from clause_formatter import LimitOffsetClause
+
+
+# pytest magic
+def setup_module():
+    sf_flags.reset_to_defaults()
 
 
 class TestLimitOffsetClause:

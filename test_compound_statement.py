@@ -1,10 +1,16 @@
 import pytest
 
+import sf_flags
 from sftoken import SFToken
 from sftoken import SFTokenKind
 from sftoken import Symbols
 from sftoken import Whitespace
 from clause_formatter import CompoundStatement
+
+
+# pytest magic
+def setup_module():
+    sf_flags.reset_to_defaults()
 
 
 class TestCompoundStatement:

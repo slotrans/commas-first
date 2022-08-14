@@ -2,7 +2,13 @@ import pytest
 
 from pathlib import Path
 
+import sf_flags
 from formatter2 import do_format
+
+
+# pytest magic
+def setup_module():
+    sf_flags.reset_to_defaults()
 
 
 test_inputs = []

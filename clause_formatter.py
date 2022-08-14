@@ -160,6 +160,7 @@ class Expression:
             fragment = e.render(effective_indent)
             out += fragment
             effective_indent += len(fragment)
+
             if e == Whitespace.NEWLINE or e.kind == SFTokenKind.LINE_COMMENT:
                 #PONDER: what if we made the newline itself responsible for adding the indent, in render()?
                 immediately_after_newline = True
@@ -242,9 +243,9 @@ class WithClause:
             if paren_depth == 0 and tokens[i] in self.OTHER_DELIMITERS:
                 delimiters.append(tokens[i])
                 before_tokens, stmt, after_tokens = self._parse_pieces(buffer)
-                before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
+                before_stuff.append(Expression(before_tokens))
                 statements.append(stmt)
-                after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
+                after_stuff.append(Expression(after_tokens))
                 buffer = []
             else:
                 if tokens[i] == Symbols.LEFT_PAREN:
@@ -260,9 +261,9 @@ class WithClause:
             or len(delimiters) > len(statements) 
             or len(delimiters) > len(after_stuff)):
             before_tokens, stmt, after_tokens = self._parse_pieces(buffer)
-            before_stuff.append(Expression(trim_trailing_whitespace(before_tokens)))
+            before_stuff.append(Expression(before_tokens))
             statements.append(stmt)
-            after_stuff.append(Expression(trim_trailing_whitespace(after_tokens)))
+            after_stuff.append(Expression(after_tokens))
 
         assert len(delimiters) == len(before_stuff)
         assert len(delimiters) == len(statements)
@@ -349,7 +350,7 @@ class BasicClause:
         while i < len(tokens):
             if paren_depth == 0 and tokens[i] in self.OTHER_DELIMITERS:
                 delimiters.append(tokens[i])
-                expressions.append(Expression(trim_trailing_whitespace(buffer)))
+                expressions.append(Expression(buffer))
                 buffer = []
             else:
                 if tokens[i] == Symbols.LEFT_PAREN:
@@ -361,7 +362,7 @@ class BasicClause:
             i += 1
         # one final expression, empty in the weird/broken case where the final token was JOIN or etc
         if len(buffer) > 0 or len(delimiters) > len(expressions):
-            expressions.append(Expression(trim_trailing_whitespace(buffer)))
+            expressions.append(Expression(buffer))
 
         assert len(delimiters) == len(expressions)
 
@@ -466,7 +467,7 @@ class SelectClause:
         while i < len(tokens):
             if paren_depth == 0 and tokens[i] in self.OTHER_DELIMITERS:
                 delimiters.append(tokens[i])
-                expressions.append(Expression(trim_trailing_whitespace(buffer)))
+                expressions.append(Expression(buffer))
                 buffer = []
             else:
                 if tokens[i] == Symbols.LEFT_PAREN:
@@ -478,7 +479,7 @@ class SelectClause:
             i += 1
         # one final expression, empty in the weird/broken case where the final token was JOIN or etc
         if len(buffer) > 0 or len(delimiters) > len(expressions):
-            expressions.append(Expression(trim_trailing_whitespace(buffer)))
+            expressions.append(Expression(buffer))
 
         assert len(delimiters) == len(expressions), f"{len(delimiters)} delimiters : {len(expressions)} expressions"
 
@@ -642,8 +643,8 @@ class LimitOffsetClause:
             target_buffer.append(tokens[i])
             i += 1
 
-        limit_expression = Expression(trim_trailing_whitespace(limit_buffer))
-        offset_expression = Expression(trim_trailing_whitespace(offset_buffer))
+        limit_expression = Expression(limit_buffer)
+        offset_expression = Expression(offset_buffer)
 
         return limit_expression, offset_expression, limit_first
 
