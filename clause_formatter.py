@@ -1,5 +1,6 @@
 import enum
 
+import sf_flags
 from sftoken import SFToken, SFTokenKind, Keywords, Symbols, Whitespace
 
 
@@ -102,8 +103,14 @@ def is_parenthesized_subquery(elements):
 
 
 class Expression:
-    def __init__(self, elements):
-        self.elements = elements
+    __slots__ = (
+        "input_tokens",
+        "elements",
+    )
+
+    def __init__(self, tokens):
+        self.input_tokens = tokens
+        self.elements = self._parse(tokens)
 
     def starts_with_whitespace(self):
         return len(self.elements) > 0 and self.elements[0].is_whitespace
@@ -114,6 +121,12 @@ class Expression:
 
     def is_empty(self):
         return len(self.elements) == 0
+
+    def _parse(self, tokens):
+        if sf_flags.TRIM_LEADING_WHITESPACE:
+            return trim_leading_whitespace(trim_trailing_whitespace(tokens))
+        else:
+            return trim_trailing_whitespace(tokens)
 
     def render(self, indent):
         out = ""
