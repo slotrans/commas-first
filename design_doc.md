@@ -507,3 +507,42 @@ select foo
         - module-level globals?
         - avoid branching by doing module-level setup?
             - meaning like, have a `trim_whitespace` *variable* which gets set to one function or another based on the arguments, and then there's no branching at the actual call site, you just always call `trim_whitespace(...)`
+
+
+### 2022-08-14
+- Been thinking more about implementing flags, I see two issues of implementation and one issue of testing
+    - Impl. Issue #1: representing the flag value and making it available to the rest of the program
+        - could be module-level variables, a singleton class/object, or explicit arguments passed down through the call graph, maybe others
+        - I think module-level variables are the... maybe not "simplest", but most straightforward
+        - no risks associated with mutation or anything because the values will be set once at program startup and remain constant during execution, so in effect they're runtime-determined constants (a.k.a. configuration)
+        - there won't be many of them
+        - allowing different parts of the program to be aware of and use certain global values adds a little complexity but _not much_
+        - saves me from having to add explicit arguments in a zillion places, often just for pass-through
+    - Impl. Issue #2: respecting the flag values at the location where the flag-controlled behavior occurs
+        - obviously basic `if` statements are the most direct
+        - alternatively, the code can be made semi-branchless by using function pointers, different classes with a factory, etc.
+        - one thing I want to avoid is having the "flag not set" case be an obvious happy path, differing from the "flag set" case in a way that makes the latter ugly, hard to understand, etc. Branchless approaches neatly avoid this but there are other ways
+        - no performance concern either way
+    - Testing Issue: explosion of output cases
+        - currently for N inputs there are N deterministic outputs
+        - with 1 flag, N inputs have N * 2 outputs
+        - with 2 flags, N * 4, and so on, N * 2^N in the general case
+        - I don't think there's any way to avoid this, but it can be contained
+            - e.g. if trimming leading whitespace is done inside Expression, we can do extra tests on Expression (actually it has _no_ tests currently...) but not in the clause classes
+            - end-to-end tests will have their outputs multiplied but these are the least work to specify so that's fine, though the test generator will have to be modified ("OUT.sql" will need to be replaced/extended with suffixes that indicate the combination of flags)
+
+- "trim leading whitespace" flag
+    - currently, we trim trailing whitespace _before_ we construct the Expression, e.g. `Expression(trim_trailing_whitespace(buffer))`
+    - alternatively we could make trimming an Expression responsibility by moving that call _inside_ the construction
+        - or, it could be handled during rendering
+        - from an outside-the-class perspective, "during construction" and "during rendering" are equivalent!
+        - there is a slight difference from the status quo in that `input_tokens` would have a different value in the trim-before-construct and trim-during-construct cases, but that's very minor
+    - that would then create a natural, highly-localized place to respect the flag value
+
+- "compact expressions" flag
+    - basically the same?
+    - meaning, whether we modify/discard whitespace, either during construction or rendering, within the scope of an Expression, can be made a responsibility of the Expression class itself, with no other code knowing or caring (other than the code that parses arguments and sets the globals)
+
+- for both of the above
+    - note that currently, Expression does _no_ parsing work (or any other work) during construction, unlike the clause classes
+    - my gut feeling is that giving it a parsing step, and handling these flags there instead of during rendering, will be simpler and more pleasant, because `render()` is already somewhat complicated
