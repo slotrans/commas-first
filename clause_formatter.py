@@ -393,7 +393,12 @@ class BasicClause:
             effective_indent += len(delim_fragment)
             parts.append(delim_fragment)
 
-            expr_fragment = self.expressions[i].render(effective_indent)
+            if self.expressions[i].is_empty(): # don't render the expr at all if it's empty
+                expr_fragment = ""
+            else:
+                # ensure at least one space after the delimiter
+                pre_space = " " if not self.expressions[i].starts_with_whitespace() else ""
+                expr_fragment = pre_space + self.expressions[i].render(effective_indent)
             parts.append(expr_fragment)
 
             if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
@@ -510,7 +515,7 @@ class SelectClause:
                 # If the expression is like [" ", "foo"] then print it as-is, preserving any oddball spacing it might have.
                 # OTOH in cases like "select foo,bar,baz", we need to add a space to get to a good baseline.
                 # This might need to change if expression rendering gets smarter.
-                if not expr.starts_with_whitespace:
+                if not expr.starts_with_whitespace():
                     parts.append(" ")
                 parts.append(expr.render(indent))
 
@@ -543,7 +548,12 @@ class SelectClause:
                 parts.append("\n")
                 parts.append(" " * 6)
 
-            expr_fragment = self.expressions[i].render(effective_indent)
+            if self.expressions[i].is_empty(): # don't render the expr at all if it's empty
+                expr_fragment = ""
+            else:
+                # ensure at least one space after the delimiter
+                pre_space = " " if not self.expressions[i].starts_with_whitespace() else ""
+                expr_fragment = pre_space + self.expressions[i].render(effective_indent)
             parts.append(expr_fragment)
 
             if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
