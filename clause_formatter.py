@@ -545,8 +545,9 @@ class SelectClause:
             if i == 0 and self.qualifier:
                 parts.append(" ")
                 parts.append(self.qualifier.render(indent))
-                parts.append("\n")
-                parts.append(" " * 6)
+                if not self.expressions[0].is_empty():
+                    parts.append("\n")
+                    parts.append(" " * 6)
 
             if self.expressions[i].is_empty(): # don't render the expr at all if it's empty
                 expr_fragment = ""
