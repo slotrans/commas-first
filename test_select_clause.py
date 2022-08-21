@@ -14,6 +14,17 @@ def setup_module():
     sf_flags.reset_to_defaults()
 
 
+@pytest.fixture
+def trim_leading_whitespace_off():
+    sf_flags.TRIM_LEADING_WHITESPACE = False
+
+
+@pytest.fixture
+def trim_leading_whitespace_on():
+    sf_flags.TRIM_LEADING_WHITESPACE = True
+
+
+
 def test_creation_fails_on_empty_input():
     with pytest.raises(ValueError):
         SelectClause(tokens=[])
@@ -320,35 +331,56 @@ def test_render_simple_expressions_no_qualifier_indented():
     assert expected == actual
 
 
-def test_render_simple_expressions_crappy_indentation():
+class TestRenderSimpleExpressionsCrappyIndentation():
     #select
     #    foo,
     #    bar,
     #    baz
-    clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "    "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "    "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "    "),
-        SFToken(SFTokenKind.WORD, "baz"),
-    ])
+    @pytest.fixture
+    def tokens(self):
+        return [
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ]
 
-    expected = (
-        "select foo\n"
-        "     , bar\n"
-        "     , baz"
-    )
-    actual = clause.render(indent=0)
+    # this is kind of a silly test in that this behavior is not particularly _desirable_,
+    # but it is what you get from this input in this mode
+    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+        clause = SelectClause(tokens)
+        expected = (
+            "select\n"
+            "      foo\n"
+            "     ,\n"
+            "      bar\n"
+            "     ,\n"
+            "      baz"
+        )
+        actual = clause.render(indent=0)
 
-    print(actual)
-    assert expected == actual
+        print(actual)
+        assert expected == actual
+
+    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
 def test_render_simple_expressions_no_indentation():
@@ -497,42 +529,59 @@ def test_render_qualifier_only2():
     assert expected == actual
 
 
-def test_custom_spacing():
+class TestCustomSpacing:
     #select foo
     #     ,   l7
     #     ,  l30
     #     , l182
-    clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, "   "),
-        SFToken(SFTokenKind.WORD, "l7"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, "  "),
-        SFToken(SFTokenKind.WORD, "l30"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "l182"),
-    ])
+    @pytest.fixture
+    def tokens(self):
+        return [
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "l7"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "l30"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "l182"),
+        ]
 
-    expected = (
-        "select foo\n"
-        "     ,   l7\n"
-        "     ,  l30\n"
-        "     , l182"
-    )
-    actual = clause.render(indent=0)
+    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     ,   l7\n"
+            "     ,  l30\n"
+            "     , l182"
+        )
+        actual = clause.render(indent=0)
 
-    print(actual)
-    assert expected == actual
+        print(actual)
+        assert expected == actual
+
+    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , l7\n"
+            "     , l30\n"
+            "     , l182"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
 def test_hand_formatted_case():
@@ -607,7 +656,7 @@ def test_hand_formatted_case():
     assert expected == actual
 
 
-def test_poorly_formatted_case():
+class TestPoorlyFormattedCase():
     #select foo
     #     , case when bar
     #then 1
@@ -616,152 +665,221 @@ def test_poorly_formatted_case():
     #else 3
     #end as BLERGH
     #     , stuff
-    clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "case"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "when"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.WORD, "then"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "1"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.WORD, "when"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.WORD, "then"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "2"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.WORD, "else"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "3"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.WORD, "end"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "as"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "BLERGH"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "stuff"),
-    ])
+    @pytest.fixture
+    def tokens(self):
+        return [
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "case"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "end"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "BLERGH"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "     "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "stuff"),
+        ]
 
     # I would like the 3rd thru 7th lines to be moved over by one more space, but it seems tricky
     # to get right given that we currently allow expressions to start with any amount of leading
     # whitespace. Revisit if that changes.
-    expected = (
-        "select foo\n"
-        "     , case when bar\n"
-        "      then 1\n"
-        "      when baz\n"
-        "      then 2\n"
-        "      else 3\n"
-        "      end as BLERGH\n"
-        "     , stuff"
-    )
-    actual = clause.render(indent=0)
+    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , case when bar\n"
+            "      then 1\n"
+            "      when baz\n"
+            "      then 2\n"
+            "      else 3\n"
+            "      end as BLERGH\n"
+            "     , stuff"
+        )
+        actual = clause.render(indent=0)
 
-    print(actual)
-    assert expected == actual
+        print(actual)
+        assert expected == actual
+
+    # This renders the way I would prefer, as a result of a weird interaction. When there's no leading
+    # space in an expression, we add a space _and add 1 to the indent_ before rendering it. So in this
+    # scenario the 3rd-7th lines are one space over because the expression as a whole is indented by one
+    # more space. This difference is not ideal but I don't know the right solution yet.
+    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , case when bar\n"
+            "       then 1\n"
+            "       when baz\n"
+            "       then 2\n"
+            "       else 3\n"
+            "       end as BLERGH\n"
+            "     , stuff"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
-def test_multiple_expressions_per_line():
+class TestMultipleExpressionsPerLine():
     #select
     #    foo, bar,
     #    l7, l28, l91,
     #    stuff
-    clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "    "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "    "),
-        SFToken(SFTokenKind.WORD, "l7"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "l28"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "l91"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "    "),
-        SFToken(SFTokenKind.WORD, "stuff"),
-    ])
-
-    expected = (
-        "select foo\n"
-        "     , bar\n"
-        "     , l7\n"
-        "     , l28\n"
-        "     , l91\n"
-        "     , stuff"
-    )
-    actual = clause.render(indent=0)
-
-    print(actual)
-    assert expected == actual
-
-
-def test_render_scalar_subquery():
-    # "select foo, (select count(1) from bar where 1=1), baz"
-    clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        Symbols.LEFT_PAREN,
-        CompoundStatement([
+    @pytest.fixture
+    def tokens(self):
+        return [
             SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "count"),
-            Symbols.LEFT_PAREN,
-            SFToken(SFTokenKind.WORD, "1"),
-            Symbols.RIGHT_PAREN,
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "l7"),
+            SFToken(SFTokenKind.SYMBOL, ","),
             SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "where"),
+            SFToken(SFTokenKind.WORD, "l28"),
+            SFToken(SFTokenKind.SYMBOL, ","),
             SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "1"),
-        ]),
-        Symbols.RIGHT_PAREN,
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
-    ])
+            SFToken(SFTokenKind.WORD, "l91"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "stuff"),
+        ]
 
-    expected = (
-        "select foo\n"
-        "     , (select count(1)\n"
-        "          from bar\n"
-        "         where 1=1\n"
-        "       )\n"
-        "     , baz"
-    )
-    actual = clause.render(indent=0)
+    # again this result is not exactly desirable but nevertheless it's what you get
+    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+        clause = SelectClause(tokens)
+        expected = (
+            "select\n"
+            "      foo\n"
+            "     , bar\n"
+            "     ,\n"
+            "      l7\n"
+            "     , l28\n"
+            "     , l91\n"
+            "     ,\n"
+            "      stuff"
+        )
+        actual = clause.render(indent=0)
 
-    print(actual)
-    assert expected == actual
+        print(actual)
+        assert expected == actual
+
+    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "     , l7\n"
+            "     , l28\n"
+            "     , l91\n"
+            "     , stuff"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+class TestRenderScalarSubquery():
+    # "select foo, (select count(1) from bar where 1=1), baz"
+    @pytest.fixture
+    def tokens(self):
+        return [
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "count"),
+                Symbols.LEFT_PAREN,
+                SFToken(SFTokenKind.WORD, "1"),
+                Symbols.RIGHT_PAREN,
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "bar"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ]
+
+    # off and on should be identical
+    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , (select count(1)\n"
+            "          from bar\n"
+            "         where 1=1\n"
+            "       )\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+    # off and on should be identical
+    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , (select count(1)\n"
+            "          from bar\n"
+            "         where 1=1\n"
+            "       )\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual

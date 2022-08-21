@@ -546,3 +546,16 @@ select foo
 - for both of the above
     - note that currently, Expression does _no_ parsing work (or any other work) during construction, unlike the clause classes
     - my gut feeling is that giving it a parsing step, and handling these flags there instead of during rendering, will be simpler and more pleasant, because `render()` is already somewhat complicated
+
+
+### 2022-08-21
+- Working on "trim leading whitespace" support and adding/tweaking some test cases for it exposed a weird behavior...
+- For an input like `, foo` we capture the `,` as a delimiter and (` `, `foo`) as the expression. Then at rendering time, we render the delimiter as `    ,` and the expression as ` foo`, which concatenated give the desired result `    , foo`. But this breaks down slightly in the case of multi-line expressions because the _indent_ is set based on the expression starting immediately after the comma. See test_select_clause.py:TestPoorlyFormattedCase for a full example.
+    - This raises the question of how the column-of-spaces should really be modeled.
+    - Currently, it's not really modeled at all, other than that we insert a space when expression doesn't begin with one, which creates the above-described weirdness.
+    - Elevating it to a more first-class part of the layout would require stripping _a single space_ from the start of any expression that has at least one space available to take.
+        - This feels tractable in SelectClause but I'm not sure what would happen in WhereClause etc.
+        - One difference is that in SELECT, `,` acts as the delimiter all by itself, no spaces are required by the syntax. Whereas in WHERE, there *must* be spaces on either side of `and`/`or`. As a result, expressions in SELECT _may or may not_ be found with a leading space, but expressions in WHERE _always_ will be.
+        - It feels a little silly stripping that space only to re-insert it, but I can get over that.
+        - Mostly I'm worried that if I change that part of the design at this point, it'll break a bunch of stuff. But I guess that's why we have tests?
+    - Leaving it the way it is for now. Gonna think about it some more.

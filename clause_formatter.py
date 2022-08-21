@@ -554,6 +554,7 @@ class SelectClause:
             else:
                 # ensure at least one space after the delimiter
                 pre_space = " " if not self.expressions[i].starts_with_whitespace() else ""
+                effective_indent += len(pre_space)
                 expr_fragment = pre_space + self.expressions[i].render(effective_indent)
             parts.append(expr_fragment)
 

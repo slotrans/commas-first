@@ -24,6 +24,9 @@ def trim_leading_whitespace_on():
 
 
 class SameEitherWay:
+    def actual_test(self):
+        raise NotImplementedError
+
     def test_trim_leading_off(self, trim_leading_whitespace_off):
         self.actual_test()
 
