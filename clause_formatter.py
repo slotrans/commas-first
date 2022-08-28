@@ -91,6 +91,24 @@ def trim_leading_whitespace(tokens):
     return tokens[i:]
 
 
+def trim_one_leading_space(tokens):
+    if len(tokens) == 0:
+        return tokens
+
+    first_token = tokens[0]
+    if first_token.kind != SFTokenKind.SPACES:
+        return tokens
+
+    if first_token.value == " ":
+        # for a single space, simply discard that token and return the rest
+        return tokens[1:]
+    else:
+        # for multiple spaces, replace it with a token having 1 fewer spaces
+        length = len(first_token.value)            
+        one_shorter = SFToken(SFTokenKind.SPACES, " "*(length-1))
+        return [one_shorter] + tokens[1:]
+
+
 def is_parenthesized_subquery(elements):
     return (
             len(elements) >= 3

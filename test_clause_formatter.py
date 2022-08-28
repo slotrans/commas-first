@@ -1,11 +1,16 @@
 import pytest
 
 import sf_flags
-from sftoken import SFToken
-from sftoken import SFTokenKind
-from clause_formatter import trim_trailing_whitespace
-from clause_formatter import trim_leading_whitespace
-from clause_formatter import get_paren_block
+from sftoken import (
+    SFToken,
+    SFTokenKind,
+)
+from clause_formatter import (
+    trim_trailing_whitespace,
+    trim_leading_whitespace,
+    trim_one_leading_space,
+    get_paren_block,
+)
 
 
 # pytest magic
@@ -124,7 +129,72 @@ class TestTrimLeadingWhitespace:
         assert expected == actual
 
 
-    def test_multiple(self):
+class TestTrimOneLeadingSpace:
+    def test_empty(self):
+        expected = []
+        actual = trim_one_leading_space([])
+        assert expected == actual
+
+
+    def test_no_whitespace(self):
+        tokens = [
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens
+        actual = trim_one_leading_space(tokens)
+
+        assert expected == actual
+
+
+    def test_one_spaces_token(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens[1:]
+        actual = trim_one_leading_space(tokens)
+
+        assert expected == actual
+
+
+    def test_many_spaces_token(self):
+        for i in range(2, 10): # enough examples to prove the point
+            token_with_i_spaces = SFToken(SFTokenKind.SPACES, " "*i)
+            tokens = [
+                token_with_i_spaces,
+                SFToken(SFTokenKind.WORD, "x"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "y"),
+            ]
+
+            one_space_shorter = SFToken(SFTokenKind.SPACES, " "*(i-1))
+            expected = [one_space_shorter] + tokens[1:]
+            actual = trim_one_leading_space(tokens)
+
+            assert expected == actual
+
+
+    def test_one_newline_token(self):
+        tokens = [
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens
+        actual = trim_one_leading_space(tokens)
+
+        assert expected == actual
+
+
+    def test_mixed_whitespace_starting_with_newline(self):
         tokens = [
             SFToken(SFTokenKind.NEWLINE, "\n"),
             SFToken(SFTokenKind.SPACES, " "),
@@ -133,8 +203,23 @@ class TestTrimLeadingWhitespace:
             SFToken(SFTokenKind.WORD, "y"),
         ]
 
-        expected = tokens[2:]
-        actual = trim_leading_whitespace(tokens)
+        expected = tokens
+        actual = trim_one_leading_space(tokens)
+
+        assert expected == actual
+
+
+    def test_mixed_whitespace_starting_with_one_space(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.WORD, "y"),
+        ]
+
+        expected = tokens[1:]
+        actual = trim_one_leading_space(tokens)
 
         assert expected == actual
 
