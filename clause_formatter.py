@@ -123,10 +123,11 @@ class Expression:
         return len(self.elements) == 0
 
     def _parse(self, tokens):
+        tokens_without_trailing_ws = trim_trailing_whitespace(tokens)
         if sf_flags.TRIM_LEADING_WHITESPACE:
-            return trim_leading_whitespace(trim_trailing_whitespace(tokens))
+            return trim_leading_whitespace(tokens_without_trailing_ws)
         else:
-            return trim_trailing_whitespace(tokens)
+            return tokens_without_trailing_ws
 
     def render(self, indent):
         out = ""
@@ -385,9 +386,6 @@ class BasicClause:
                 parts.append(" " * indent)
                 effective_indent = indent
             suppress_newline = False
-
-            #parts.append(self._render_delimiter(self.delimiters[i]))
-            #parts.append(self.expressions[i].render(indent))
 
             delim_fragment = self._render_delimiter(self.delimiters[i])
             effective_indent += len(delim_fragment)
