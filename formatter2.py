@@ -1,9 +1,11 @@
 import sys
+import argparse
 
 import pygments
 from pygments.lexers import get_lexer_by_name
 from pygments.token import Token
 
+import sf_flags
 from retokenize import pre_process_tokens, retokenize1, retokenize2, sftokenize
 from clause_formatter import CompoundStatement
 
@@ -21,16 +23,25 @@ def do_format(unformatted_code):
     return compound_statement
 
 
-def main():
+def main(args):
+    # set global flags
+    sf_flags.TRIM_LEADING_WHITESPACE = args.trim_leading_whitespace
+
+    # read
     unformatted_code = sys.stdin.read()
 
+    # process
     renderable = do_format(unformatted_code)
 
+    # write
     print(renderable.render(indent=0))
 
     return 0
 
 
 if __name__ == "__main__":
-    # TODO: argparse
-    sys.exit(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--trim-leading-whitespace", action="store_true", help="Trim leading whitespace from expressions")
+    args = parser.parse_args()
+
+    sys.exit(main(args))
