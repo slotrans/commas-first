@@ -45,7 +45,7 @@ def get_paren_block(tokens):
         return None
 
 
-# I'm not sure what my original concept for this function was. It's current unused, and left here as a breadcrumb.
+# I'm not sure what my original concept for this function was. It's currently unused, and left here as a breadcrumb.
 def collapse_whitespace(tokens):
     i = 0
     out = []
