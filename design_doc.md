@@ -559,3 +559,11 @@ select foo
         - It feels a little silly stripping that space only to re-insert it, but I can get over that.
         - Mostly I'm worried that if I change that part of the design at this point, it'll break a bunch of stuff. But I guess that's why we have tests?
     - Leaving it the way it is for now. Gonna think about it some more.
+
+
+### 2022-08-28
+- Ended up implementing the above
+    - The central space is now _always_ printed, when the following expression is non-blank
+    - When constructing an Expression, we strip a single leading space if one is available to take
+    - This does result in trailing spaces (e.g. "     , \n") in a few wonky cases. Not sure what to do about that, if anything.
+    - Also causing comments to be bumped over in a few cases. Comment-handling in general remains a bit of a problem.
