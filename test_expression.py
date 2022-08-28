@@ -143,7 +143,7 @@ class TestExpressionWhitespaceTrimmingTrivial:
     @pytest.fixture
     def tokens(self):
         return [
-            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SPACES, "  "),
             SFToken(SFTokenKind.WORD, "sysdate"),
             SFToken(SFTokenKind.SPACES, " "),            
         ]

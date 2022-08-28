@@ -358,12 +358,12 @@ class TestRenderSimpleExpressionsCrappyIndentation():
     def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
         clause = SelectClause(tokens)
         expected = (
-            "select\n"
-            "      foo\n"
-            "     ,\n"
-            "      bar\n"
-            "     ,\n"
-            "      baz"
+            "select \n"
+            "       foo\n"
+            "     , \n"
+            "       bar\n"
+            "     , \n"
+            "       baz"
         )
         actual = clause.render(indent=0)
 
@@ -709,19 +709,16 @@ class TestPoorlyFormattedCase():
             SFToken(SFTokenKind.WORD, "stuff"),
         ]
 
-    # I would like the 3rd thru 7th lines to be moved over by one more space, but it seems tricky
-    # to get right given that we currently allow expressions to start with any amount of leading
-    # whitespace. Revisit if that changes.
     def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
             "     , case when bar\n"
-            "      then 1\n"
-            "      when baz\n"
-            "      then 2\n"
-            "      else 3\n"
-            "      end as BLERGH\n"
+            "       then 1\n"
+            "       when baz\n"
+            "       then 2\n"
+            "       else 3\n"
+            "       end as BLERGH\n"
             "     , stuff"
         )
         actual = clause.render(indent=0)
@@ -729,10 +726,6 @@ class TestPoorlyFormattedCase():
         print(actual)
         assert expected == actual
 
-    # This renders the way I would prefer, as a result of a weird interaction. When there's no leading
-    # space in an expression, we add a space _and add 1 to the indent_ before rendering it. So in this
-    # scenario the 3rd-7th lines are one space over because the expression as a whole is indented by one
-    # more space. This difference is not ideal but I don't know the right solution yet.
     def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
         clause = SelectClause(tokens)
         expected = (
@@ -783,18 +776,19 @@ class TestMultipleExpressionsPerLine():
         ]
 
     # again this result is not exactly desirable but nevertheless it's what you get
+    # not sure if the trailing spaces should be considered acceptable
     def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
         clause = SelectClause(tokens)
         expected = (
-            "select\n"
-            "      foo\n"
+            "select \n"
+            "       foo\n"
             "     , bar\n"
-            "     ,\n"
-            "      l7\n"
+            "     , \n"
+            "       l7\n"
             "     , l28\n"
             "     , l91\n"
-            "     ,\n"
-            "      stuff"
+            "     , \n"
+            "       stuff"
         )
         actual = clause.render(indent=0)
 

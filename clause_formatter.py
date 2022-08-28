@@ -141,11 +141,11 @@ class Expression:
         return len(self.elements) == 0
 
     def _parse(self, tokens):
-        tokens_without_trailing_ws = trim_trailing_whitespace(tokens)
+        temp = trim_trailing_whitespace(tokens)
         if sf_flags.TRIM_LEADING_WHITESPACE:
-            return trim_leading_whitespace(tokens_without_trailing_ws)
+            return trim_leading_whitespace(temp)
         else:
-            return tokens_without_trailing_ws
+            return trim_one_leading_space(temp)
 
     def render(self, indent):
         out = ""
@@ -296,35 +296,45 @@ class WithClause:
         i = 0
         effective_indent = indent
         while i < len(self.delimiters):
+            # indent
             if i > 0:
                 parts.append("\n")
                 parts.append(" " * indent)
                 effective_indent = indent
 
+            # delimiter
             fragment = self.delimiters[i].render(effective_indent)
             effective_indent += len(fragment)
             parts.append(fragment)
 
+            # before stuff
             fragment = self.before_stuff[i].render(effective_indent)
+            fragment = (" " + fragment) if fragment else ""
             effective_indent += len(fragment)
             parts.append(fragment)
 
+            # open paren
             parts.append("\n")
             parts.append(" " * indent)
             effective_indent = indent
             parts.append("(")
             parts.append("\n")
 
+            # subquery
             parts.append(" " * (effective_indent+self.CTE_INDENT_SPACES))
             parts.append(self.statements[i].render(effective_indent+self.CTE_INDENT_SPACES))
 
+            # close paren
             parts.append("\n")
             parts.append(" " * indent)
             effective_indent = indent
             parts.append(")")
             effective_indent = effective_indent + 1
 
-            parts.append(self.after_stuff[i].render(effective_indent))
+            # after stuff
+            fragment = self.after_stuff[i].render(effective_indent)
+            fragment = (" " + fragment) if fragment else ""
+            parts.append(fragment)
 
             i += 1
 
@@ -409,16 +419,16 @@ class BasicClause:
             effective_indent += len(delim_fragment)
             parts.append(delim_fragment)
 
-            if self.expressions[i].is_empty(): # don't render the expr at all if it's empty
-                expr_fragment = ""
-            else:
-                # ensure at least one space after the delimiter
-                pre_space = " " if not self.expressions[i].starts_with_whitespace() else ""
-                expr_fragment = pre_space + self.expressions[i].render(effective_indent)
-            parts.append(expr_fragment)
+            if not self.expressions[i].is_empty(): # don't render the expr at all if it's empty
+                # always print one space after the delimiter
+                parts.append(" ")
+                effective_indent += 1
+                
+                expr_fragment = self.expressions[i].render(effective_indent)
+                parts.append(expr_fragment)
 
-            if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
-                suppress_newline = True
+                if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
+                    suppress_newline = True
 
             i += 1
 
@@ -565,17 +575,16 @@ class SelectClause:
                     parts.append("\n")
                     parts.append(" " * 6)
 
-            if self.expressions[i].is_empty(): # don't render the expr at all if it's empty
-                expr_fragment = ""
-            else:
-                # ensure at least one space after the delimiter
-                pre_space = " " if not self.expressions[i].starts_with_whitespace() else ""
-                effective_indent += len(pre_space)
-                expr_fragment = pre_space + self.expressions[i].render(effective_indent)
-            parts.append(expr_fragment)
+            if not self.expressions[i].is_empty(): # don't render the expr at all if it's empty
+                # always print one space after the delimiter
+                parts.append(" ")
+                effective_indent += 1
+                
+                expr_fragment = self.expressions[i].render(effective_indent)
+                parts.append(expr_fragment)
 
-            if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
-                suppress_newline = True
+                if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
+                    suppress_newline = True
 
             i += 1
 
