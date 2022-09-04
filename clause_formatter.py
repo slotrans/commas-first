@@ -244,10 +244,31 @@ class WithClause:
                 return (before, statement, after)
             i += 1
 
-        # if we end up here, the input was not well-formed
-        # might want to just raise an exception instead...
-        return ([], None, [])
-        #raise ValueError("")
+        # if we end up here, the input was not particularly well-formed
+        # we may be able to salvage it into something that at least has the *shape* of a CTE
+
+        # (should log a warning?)
+
+        i = 0
+        left_paren_index = None
+        right_paren_index = None
+        while i < len(tokens):
+            if tokens[i] == Symbols.LEFT_PAREN:
+                left_paren_index = i
+            elif tokens[i] == Symbols.RIGHT_PAREN:
+                right_paren_index = i
+
+            if left_paren_index and right_paren_index:
+                # as in the well-formed case, discard the parens
+                before = tokens[:left_paren_index]
+                junk = Expression(tokens[left_paren_index+1:right_paren_index])
+                after = tokens[right_paren_index+1:]
+                return (before, junk, after)
+
+            i += 1
+
+        # welp.
+        raise ValueError(f"could not divide CTE tokens: {tokens}")
 
 
     def _parse(self, tokens):
