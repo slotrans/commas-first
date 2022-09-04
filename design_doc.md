@@ -567,3 +567,18 @@ select foo
     - When constructing an Expression, we strip a single leading space if one is available to take
     - This does result in trailing spaces (e.g. "     , \n") in a few wonky cases. Not sure what to do about that, if anything.
     - Also causing comments to be bumped over in a few cases. Comment-handling in general remains a bit of a problem.
+
+
+### 2022-09-04
+- Rules for "--one-line-expressions" or "--compact" or whatever
+    - Simply forcing "expressions" onto one line isn't sufficient. Specifically, if we strip out newlines but leave other whitespace, we'll end up with stuff like `case when x > 0          then 'positive'` and so on.
+    - One approach would be to strip newlines, then collapse multiple spaces to single spaces. This would get things _close_ and be very easy.
+    - Ideally though we could do more compaction than that, by following a few rules
+        - any NEWLINE...
+            - that is preceded or followed by SPACES can be discarded
+            - otherwise replace with a single space
+        - any SPACES token longer than 1 can be shrunk to 1
+        - (left_paren, space) -> drop the space
+        - (space, right_paren) -> drop the space
+        - (space, comma) -> drop the space
+    
