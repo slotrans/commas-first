@@ -344,6 +344,8 @@ def pygments_token_to_sftoken(token):
         return SFToken(SFTokenKind.SYMBOL, value)
     elif ttype == Token.Punctuation:
         return SFToken(SFTokenKind.SYMBOL, value)
+    elif ttype == Token.Error and value == "$":
+        return SFToken(SFTokenKind.SYMBOL, value)
     elif ttype == Token.Text.Whitespace:
         if value == "\n":
             return SFToken(SFTokenKind.NEWLINE, "\n")
