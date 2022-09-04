@@ -481,3 +481,56 @@ class TestFromClause:
 
         print(actual)
         assert expected == actual
+
+
+    def test_render_join_with_dbt_templating(self):
+        # "from foo join {{ ref('__bar') }} bar on(foo.x = bar.x) join baz on(bar.y = baz.y)"
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "{{"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "ref"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.LITERAL, "'__bar'"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "}}"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo.x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.x"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.WORD, "join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "bar.y"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz.y"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ])
+
+        expected = (
+            "  from foo\n"
+            "  join {{ ref('__bar') }} bar on(foo.x = bar.x)\n"
+            "  join baz on(bar.y = baz.y)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
