@@ -104,7 +104,7 @@ def trim_one_leading_space(tokens):
         return tokens[1:]
     else:
         # for multiple spaces, replace it with a token having 1 fewer spaces
-        length = len(first_token.value)            
+        length = len(first_token.value)
         one_shorter = SFToken(SFTokenKind.SPACES, " "*(length-1))
         return [one_shorter] + tokens[1:]
 
@@ -113,7 +113,7 @@ def is_parenthesized_subquery(elements):
     return (
             len(elements) >= 3
         and elements[0] == Symbols.LEFT_PAREN
-        and (   isinstance(elements[1], Statement) 
+        and (   isinstance(elements[1], Statement)
              or isinstance(elements[1], CompoundStatement)
             )
         and elements[2] == Symbols.RIGHT_PAREN
@@ -216,8 +216,8 @@ class WithClause:
         self.input_tokens = tokens
 
         (
-            self.delimiters, 
-            self.before_stuff, 
+            self.delimiters,
+            self.before_stuff,
             self.statements,
             self.after_stuff,
         ) = self._parse(tokens)
@@ -296,9 +296,9 @@ class WithClause:
                 buffer.append(tokens[i])
             i += 1
         # one final expression, empty in the weird/broken case where the final token was JOIN or etc
-        if (len(buffer) > 0 
-            or len(delimiters) > len(before_stuff) 
-            or len(delimiters) > len(statements) 
+        if (len(buffer) > 0
+            or len(delimiters) > len(before_stuff)
+            or len(delimiters) > len(statements)
             or len(delimiters) > len(after_stuff)):
             before_tokens, stmt, after_tokens = self._parse_pieces(buffer)
             before_stuff.append(Expression(before_tokens))
@@ -444,7 +444,7 @@ class BasicClause:
                 # always print one space after the delimiter
                 parts.append(" ")
                 effective_indent += 1
-                
+
                 expr_fragment = self.expressions[i].render(effective_indent)
                 parts.append(expr_fragment)
 
@@ -600,7 +600,7 @@ class SelectClause:
                 # always print one space after the delimiter
                 parts.append(" ")
                 effective_indent += 1
-                
+
                 expr_fragment = self.expressions[i].render(effective_indent)
                 parts.append(expr_fragment)
 
@@ -709,7 +709,7 @@ class LimitOffsetClause:
 
     def render(self, indent):
         parts = []
-        
+
         if self.limit_first:
             parts.append(" " * indent)
             parts.append(" ")
@@ -753,7 +753,7 @@ KEYWORD_SCOPE_MAP = {
     #Keywords.WINDOW: ClauseScope.WINDOW,
     Keywords.ORDER_BY: ClauseScope.ORDER_BY,
     Keywords.LIMIT: ClauseScope.LIMIT_OFFSET,
-    Keywords.OFFSET: ClauseScope.LIMIT_OFFSET,        
+    Keywords.OFFSET: ClauseScope.LIMIT_OFFSET,
 }
 
 
@@ -803,7 +803,7 @@ class Statement:
                     buffer.append(CompoundStatement(subquery_tokens[1:-1]))
                     buffer.append(Symbols.RIGHT_PAREN)
                     i += len(subquery_tokens)
-                    continue                 
+                    continue
 
             if tok == Symbols.LEFT_PAREN:
                 buffer.append(tok)

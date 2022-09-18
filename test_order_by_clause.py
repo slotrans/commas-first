@@ -43,7 +43,7 @@ class TestOrderByClause:
         actual = clause.render(indent=0)
 
         print(actual)
-        assert expected == actual 
+        assert expected == actual
 
 
     def test_render_simple_expressions(self):

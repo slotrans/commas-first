@@ -102,7 +102,7 @@ class TestWhereClause:
 
 
     def test_render_two_expressions_ANDed_poorly_formatted(self):
-        #where foo.abc = bar.abc 
+        #where foo.abc = bar.abc
         #and foo.xyz = bar.xyz"
         clause = WhereClause(tokens=[
             SFToken(SFTokenKind.WORD, "where"),
@@ -337,7 +337,7 @@ class TestWhereClause:
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.qrs"),            
+            SFToken(SFTokenKind.WORD, "bar.qrs"),
         ])
 
         expected = (
@@ -382,7 +382,7 @@ class TestWhereClause:
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.qrs"),            
+            SFToken(SFTokenKind.WORD, "bar.qrs"),
         ])
 
         expected = (
@@ -427,7 +427,7 @@ class TestWhereClause:
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.SYMBOL, "="),
             SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.qrs"),            
+            SFToken(SFTokenKind.WORD, "bar.qrs"),
         ])
 
         expected = (

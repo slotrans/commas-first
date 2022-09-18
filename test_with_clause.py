@@ -111,7 +111,7 @@ class TestWithClause:
             SFToken(SFTokenKind.SYMBOL, ","),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "y"),
-            Symbols.RIGHT_PAREN,            
+            Symbols.RIGHT_PAREN,
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "as"),
             SFToken(SFTokenKind.SPACES, " "),
@@ -327,7 +327,7 @@ class TestWithClause:
 
 
     def test_render_single_simple_cte_with_line_comment(self):
-        #with foo as 
+        #with foo as
         #--comment
         #(
         #    select 1

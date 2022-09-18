@@ -180,7 +180,7 @@ class TestFromClause:
 
     def test_render_sql99_one_complex_join_already_formatted(self):
         #  from foo
-        #  join bar on(    foo.x = bar.x 
+        #  join bar on(    foo.x = bar.x
         #              and foo.y = bar.y
         #             )
         clause = FromClause(tokens=[
@@ -229,7 +229,7 @@ class TestFromClause:
 
 
     def test_render_sql99_one_simple_join_on_with_line_comment1(self):
-        #  from foo 
+        #  from foo
         #  --comment1
         #  join bar on(foo.x = bar.x)
         clause = FromClause(tokens=[

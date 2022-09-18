@@ -8,4 +8,3 @@ TRIM_LEADING_WHITESPACE = False
 def reset_to_defaults():
     global TRIM_LEADING_WHITESPACE
     TRIM_LEADING_WHITESPACE = False
-    

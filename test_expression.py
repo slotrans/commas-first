@@ -145,7 +145,7 @@ class TestExpressionWhitespaceTrimmingTrivial:
         return [
             SFToken(SFTokenKind.SPACES, "  "),
             SFToken(SFTokenKind.WORD, "sysdate"),
-            SFToken(SFTokenKind.SPACES, " "),            
+            SFToken(SFTokenKind.SPACES, " "),
         ]
 
     def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
