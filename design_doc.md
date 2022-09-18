@@ -581,6 +581,7 @@ select foo
         - (left_paren, space) -> drop the space
         - (space, right_paren) -> drop the space
         - (space, comma) -> drop the space
+    - Note that this wouldn't _add_ any spaces where they probably "should" be, e.g. `(2+3)` would not become `(2 + 3)`, but that's ok
     
 
 ### 2022-09-17
