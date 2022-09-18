@@ -10,7 +10,14 @@ from retokenize import pre_process_tokens, retokenize1, retokenize2, sftokenize
 from clause_formatter import CompoundStatement
 
 
-def do_format(unformatted_code):
+def trim_trailing_whitespace_from_lines(input_string):
+    lines = input_string.split("\n")
+    trimmed_lines = [l.rstrip() for l in lines]
+    reassembled_string = "\n".join(trimmed_lines)
+    return reassembled_string
+
+
+def get_renderable(unformatted_code):
     lexer = get_lexer_by_name("postgres", stripall=True)
     tokens = pre_process_tokens(lexer.get_tokens(unformatted_code))
 
@@ -23,6 +30,13 @@ def do_format(unformatted_code):
     return compound_statement
 
 
+def do_format(unformatted_code):
+    renderable = get_renderable(unformatted_code)
+    rendered = renderable.render(indent=0)
+    trimmed = trim_trailing_whitespace_from_lines(rendered)
+    return trimmed
+
+
 def main(args):
     # set global flags
     sf_flags.TRIM_LEADING_WHITESPACE = args.trim_leading_whitespace
@@ -31,10 +45,10 @@ def main(args):
     unformatted_code = sys.stdin.read()
 
     # process
-    renderable = do_format(unformatted_code)
+    formatted_code = do_format(unformatted_code)
 
     # write
-    print(renderable.render(indent=0))
+    print(trimmed)
 
     return 0
 
