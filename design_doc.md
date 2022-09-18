@@ -582,3 +582,10 @@ select foo
         - (space, right_paren) -> drop the space
         - (space, comma) -> drop the space
     
+
+### 2022-09-17
+- Had an idea that `indent` could be replaced with `ctx` (context), and that could be used to carry both the indent (possibly with a different name) and the CLI flags
+    - This would remove the bit of global state I introduced with `sf_flags` and make testing more explicit
+    - Would require moving the bit of code in Expression that respects the flag(s) from `_parse` to `render`
+        - or, would require passing the context to constructors as well as `render`
+    - Not sure yet if I like this idea but it's a possibility. Could implement it in a branch and see.
