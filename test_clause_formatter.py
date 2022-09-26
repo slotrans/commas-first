@@ -4,12 +4,14 @@ import sf_flags
 from sftoken import (
     SFToken,
     SFTokenKind,
+    Whitespace,
 )
 from clause_formatter import (
     trim_trailing_whitespace,
     trim_leading_whitespace,
     trim_one_leading_space,
     get_paren_block,
+    make_compact,
 )
 
 
@@ -299,4 +301,271 @@ class TestGetParenBlock:
         expected = tokens[0:15]
         actual = get_paren_block(tokens)
 
+        assert expected == actual
+
+
+class TestMakeCompact:
+    def test_empty(self):
+        expected = []
+        actual = make_compact([])
+        assert expected == actual
+
+
+    def test_one_space(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_only_spaces(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, "   "),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_only_newline(self):
+        tokens = [
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_spaces_then_newline(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_newline_then_spaces(self):
+        tokens = [
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_spaces_around_newline(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_newlines_around_spaces(self):
+        tokens = [
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_left_paren_then_space(self):
+        tokens = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_space_then_right_paren(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_space_then_comma(self):
+        tokens = [
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+        ]
+
+        expected = [
+            SFToken(SFTokenKind.SYMBOL, ","),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_spaces_in_list(self):
+        # ( 1 , 2 )
+        tokens = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ")")
+        ]
+
+        # (1, 2)
+        expected = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SYMBOL, ")")
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_case_with_newlines(self):
+        # case 
+        #   when foo > 0
+        #     then 1
+        #   else 0
+        # end
+        tokens = [
+            SFToken(SFTokenKind.WORD, "case"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ">"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "1"),
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.WORD, "end"),
+        ]
+
+        # case when foo > 0 then 1 else 0 end
+        expected = [
+            SFToken(SFTokenKind.WORD, "case"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ">"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "end"),
+        ]
+        actual = make_compact(tokens)
+        assert expected == actual
+
+
+    def test_indented_join(self):
+        # join 
+        #     bar
+        #     on foo.id = bar.foo_id
+        #     and bar.active
+        tokens = [
+            SFToken(SFTokenKind.WORD, "join"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.id"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.foo_id"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.active"),
+        ]
+
+        # join bar on foo.id = bar.foo_id and bar.active
+        expected = [
+            SFToken(SFTokenKind.WORD, "join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo.id"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "="),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.foo_id"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "and"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar.active"),
+        ]
+        actual = make_compact(tokens)
         assert expected == actual

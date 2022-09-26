@@ -109,6 +109,68 @@ def trim_one_leading_space(tokens):
         return [one_shorter] + tokens[1:]
 
 
+def make_compact(tokens):
+    #- any NEWLINE...
+    #    - that is preceded or followed by SPACES can be discarded
+    #    - otherwise replace with a single space
+    #- any SPACES token longer than 1 can be shrunk to 1
+    #- (left_paren, space) -> drop the space
+    #- (space, right_paren) -> drop the space
+    #- (space, comma) -> drop the space
+    out = tokens.copy()
+    i = 0
+    while i < len(out):
+        tok = out[i]
+
+        # shrink all strings of spaces down to 1
+        if tok.kind == SFTokenKind.SPACES and len(tok.value) > 1:
+            tok = Whitespace.ONE_SPACE
+            out[i] = tok
+
+        if i+1 < len(out):
+            next_tok = out[i+1]
+
+            # " ", "\n"
+            if tok.kind == SFTokenKind.SPACES and next_tok.kind == SFTokenKind.NEWLINE:
+                out.pop(i+1)
+                continue
+
+            # "\n", " "
+            if tok.kind == SFTokenKind.NEWLINE and next_tok.kind == SFTokenKind.SPACES:
+                out.pop(i)
+                continue
+
+            # " ", " "  (doesn't occur naturally but this process can create it as an intermediate state)
+            if tok.kind == SFTokenKind.SPACES and next_tok.kind == SFTokenKind.SPACES:
+                out.pop(i)
+                continue
+
+            # "(", " "
+            if tok.value == "(" and next_tok.kind == SFTokenKind.SPACES:
+                out.pop(i+1)
+                continue
+
+            # " ", ")"
+            if tok.kind == SFTokenKind.SPACES and next_tok.value == ")":
+                out.pop(i)
+                continue
+
+            # " ", ","
+            if tok.kind == SFTokenKind.SPACES and next_tok.value == ",":
+                out.pop(i)
+                continue
+        # end of 2-token sequences
+
+        # replace any newlines left (not caught by sequence matches) with a single space
+        if tok.kind == SFTokenKind.NEWLINE:
+            tok = Whitespace.ONE_SPACE
+            out[i] = tok
+
+        i += 1
+
+    return out
+
+
 def is_parenthesized_subquery(elements):
     return (
             len(elements) >= 3
