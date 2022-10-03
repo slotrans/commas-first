@@ -117,6 +117,12 @@ def make_compact(tokens):
     #- (left_paren, space) -> drop the space
     #- (space, right_paren) -> drop the space
     #- (space, comma) -> drop the space
+    #- (word, space, left_paren) -> drop the space
+
+    # The general pattern here is that after making any change that might affect future pattern matches,
+    # we jump back to the top of the loop. And if we changed the "current" token, we move the index variable
+    # back by one (if possible), again to make sure we can see any patterns that created.
+
     out = tokens.copy()
     i = 0
     while i < len(out):
@@ -127,6 +133,19 @@ def make_compact(tokens):
             tok = Whitespace.ONE_SPACE
             out[i] = tok
 
+
+        # 3-token sequences
+        if i+2 < len(out):
+            next_tok = out[i+1]
+            after_next_tok = out[i+2]
+
+            # "word", " ", "("
+            if tok.kind == SFTokenKind.WORD and next_tok.kind == SFTokenKind.SPACES and after_next_tok.value == "(":
+                out.pop(i+1)
+                continue
+
+
+        # 2-token sequences
         if i+1 < len(out):
             next_tok = out[i+1]
 
@@ -138,11 +157,13 @@ def make_compact(tokens):
             # "\n", " "
             if tok.kind == SFTokenKind.NEWLINE and next_tok.kind == SFTokenKind.SPACES:
                 out.pop(i)
+                i = max(i - 1, 0)
                 continue
 
             # " ", " "  (doesn't occur naturally but this process can create it as an intermediate state)
             if tok.kind == SFTokenKind.SPACES and next_tok.kind == SFTokenKind.SPACES:
                 out.pop(i)
+                i = max(i - 1, 0)
                 continue
 
             # "(", " "
@@ -153,18 +174,22 @@ def make_compact(tokens):
             # " ", ")"
             if tok.kind == SFTokenKind.SPACES and next_tok.value == ")":
                 out.pop(i)
+                i = max(i - 1, 0)
                 continue
 
             # " ", ","
             if tok.kind == SFTokenKind.SPACES and next_tok.value == ",":
                 out.pop(i)
+                i = max(i - 1, 0)
                 continue
         # end of 2-token sequences
 
+
         # replace any newlines left (not caught by sequence matches) with a single space
         if tok.kind == SFTokenKind.NEWLINE:
-            tok = Whitespace.ONE_SPACE
-            out[i] = tok
+            out[i] = Whitespace.ONE_SPACE
+            i = max(i - 1, 0)
+            continue
 
         i += 1
 

@@ -464,6 +464,8 @@ class TestMakeCompact:
             SFToken(SFTokenKind.SYMBOL, ")")
         ]
         actual = make_compact(tokens)
+        for t in actual:
+            print(t)
         assert expected == actual
 
 
@@ -520,6 +522,8 @@ class TestMakeCompact:
             SFToken(SFTokenKind.WORD, "end"),
         ]
         actual = make_compact(tokens)
+        for t in actual:
+            print(t)
         assert expected == actual
 
 
@@ -568,4 +572,213 @@ class TestMakeCompact:
             SFToken(SFTokenKind.WORD, "bar.active"),
         ]
         actual = make_compact(tokens)
+        for t in actual:
+            print(t)
+        assert expected == actual
+
+
+    def test_multiline_function_call(self):
+        # coalesce(
+        #     foo,
+        #     bar,
+        #     0
+        # )
+        tokens = [
+            SFToken(SFTokenKind.WORD, "coalesce"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+
+        # coalesce(foo, bar, 0)
+        expected = [
+            SFToken(SFTokenKind.WORD, "coalesce"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+        actual = make_compact(tokens)
+        for t in actual:
+            print(t)
+        assert expected == actual
+
+
+    def test_multiline_function_call_with_crazy_extra_spaces(self):
+        # coalesce (
+        #     foo ,
+        #     bar ,
+        #     0
+        #  )
+        tokens = [
+            SFToken(SFTokenKind.WORD, "coalesce"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+
+        # coalesce(foo, bar, 0)
+        expected = [
+            SFToken(SFTokenKind.WORD, "coalesce"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+        actual = make_compact(tokens)
+        for t in actual:
+            print(t)
+        assert expected == actual
+
+
+    def test_parenthesized_case_with_newlines_plus_function(self):
+        # (
+        # case 
+        #   when foo > 0
+        #     then 1
+        #   else 0
+        # end
+        # )
+        #  +
+        # round ( baz , 2 )
+        tokens = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.WORD, "case"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ">"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "1"),
+            SFToken(SFTokenKind.SPACES, "  "),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.WORD, "end"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "+"),
+            Whitespace.NEWLINE,
+            SFToken(SFTokenKind.WORD, "round"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+
+        # (case when foo > 0 then 1 else 0 end) + round(baz, 2)
+        expected = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "case"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "when"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ">"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "then"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "else"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "0"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "end"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "+"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "round"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+        actual = make_compact(tokens)
+        for t in actual:
+            print(t)
+        assert expected == actual
+
+
+    def test_function_call_with_space(self):
+        # max ( foo )
+        tokens = [
+            SFToken(SFTokenKind.WORD, "max"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+
+        # max(foo)
+        expected = [
+            SFToken(SFTokenKind.WORD, "max"),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+        actual = make_compact(tokens)
+        for t in actual:
+            print(t)
         assert expected == actual
