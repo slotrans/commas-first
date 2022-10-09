@@ -4,6 +4,7 @@ import sf_flags
 from sftoken import SFToken
 from sftoken import SFTokenKind
 from clause_formatter import OrderByClause
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -24,7 +25,7 @@ class TestOrderByClause:
         clause = OrderByClause(tokens=[SFToken(SFTokenKind.WORD, "order by")])
 
         expected = " order by"
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         assert expected == actual
 
@@ -40,7 +41,7 @@ class TestOrderByClause:
         expected = (
             " order by foo"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -65,7 +66,7 @@ class TestOrderByClause:
             "        , bar\n"
             "        , baz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual

@@ -6,6 +6,7 @@ from sftoken import SFTokenKind
 from sftoken import Whitespace
 from clause_formatter import WhereClause
 from clause_formatter import CompoundStatement
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -27,7 +28,7 @@ class TestWhereClause:
         ])
 
         expected = " where 1=1"
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -45,7 +46,7 @@ class TestWhereClause:
 
         # first line, so indent has no effect
         expected = " where 1=1"
-        actual = clause.render(indent=4)
+        actual = clause.render(RenderingContext(indent=4))
 
         print(actual)
         assert expected == actual
@@ -65,7 +66,7 @@ class TestWhereClause:
         ])
 
         expected = " where 1 = 1"
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -95,7 +96,7 @@ class TestWhereClause:
             " where foo.abc = bar.abc\n"
             "   and foo.xyz = bar.xyz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -126,7 +127,7 @@ class TestWhereClause:
             " where foo.abc = bar.abc\n"
             "   and foo.xyz = bar.xyz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -157,7 +158,7 @@ class TestWhereClause:
                 " where foo.abc = bar.abc\n"
             "       and foo.xyz = bar.xyz"
         )
-        actual = clause.render(indent=4)
+        actual = clause.render(RenderingContext(indent=4))
 
         print(actual)
         assert expected == actual
@@ -208,7 +209,7 @@ class TestWhereClause:
             "   and  foo.ab =  bar.ab\n"
             "   and foo.abc = bar.abc"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -249,7 +250,7 @@ class TestWhereClause:
             "        or another_thing\n"
             "       )"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -299,7 +300,7 @@ class TestWhereClause:
             "                   where 1=1\n"
             "                 )"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -346,7 +347,7 @@ class TestWhereClause:
             "   --comment1\n"
             "   and foo.qrs = bar.qrs"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -390,7 +391,7 @@ class TestWhereClause:
             "   and foo.xyz = bar.xyz --comment2\n"
             "   and foo.qrs = bar.qrs"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -436,7 +437,7 @@ class TestWhereClause:
             "--comment3\n"
             "   and foo.qrs = bar.qrs"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual

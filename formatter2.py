@@ -8,6 +8,7 @@ from pygments.token import Token
 import sf_flags
 from retokenize import pre_process_tokens, retokenize1, retokenize2, sftokenize
 from clause_formatter import CompoundStatement
+from clause_formatter import RenderingContext
 
 
 def trim_trailing_whitespace_from_lines(input_string):
@@ -32,7 +33,7 @@ def get_renderable(unformatted_code):
 
 def do_format(unformatted_code):
     renderable = get_renderable(unformatted_code)
-    rendered = renderable.render(indent=0)
+    rendered = renderable.render(RenderingContext(indent=0))
     trimmed = trim_trailing_whitespace_from_lines(rendered)
     return trimmed
 

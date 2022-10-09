@@ -7,6 +7,7 @@ from sftoken import Whitespace
 from sftoken import Symbols
 from clause_formatter import WithClause
 from clause_formatter import CompoundStatement
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -47,7 +48,7 @@ class TestWithClause:
             "    select 1\n"
             ")"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -94,7 +95,7 @@ class TestWithClause:
             "    select 2\n"
             ")"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -134,7 +135,7 @@ class TestWithClause:
             "         , 2\n"
             ")"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -166,7 +167,7 @@ class TestWithClause:
             "    select 1\n"
             ")"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -198,7 +199,7 @@ class TestWithClause:
             "    select 1\n"
             ") blorp"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -320,7 +321,7 @@ class TestWithClause:
             "     where t.id = st.link\n"
             ") search depth first by id set ordercol"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -356,7 +357,7 @@ class TestWithClause:
             "    select 1\n"
             ")"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -398,7 +399,7 @@ class TestWithClause:
             "     where 1=1\n"
             ")"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual

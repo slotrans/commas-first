@@ -6,6 +6,7 @@ from sftoken import SFTokenKind
 from sftoken import Symbols
 from sftoken import Whitespace
 from clause_formatter import CompoundStatement
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -27,7 +28,7 @@ class TestCompoundStatement:
         expected = (
             "select 1"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -52,7 +53,7 @@ class TestCompoundStatement:
             "union all\n"
             "select 2"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -77,7 +78,7 @@ class TestCompoundStatement:
             "except\n"
             "select 2"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -102,7 +103,7 @@ class TestCompoundStatement:
             "intersect\n"
             "select 2"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -151,7 +152,7 @@ class TestCompoundStatement:
             "  from table2\n"
             " where 1=1"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual

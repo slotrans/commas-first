@@ -7,6 +7,7 @@ from sftoken import Symbols
 from sftoken import Whitespace
 from clause_formatter import FromClause
 from clause_formatter import CompoundStatement
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -28,7 +29,7 @@ class TestFromClause:
         ])
 
         expected = "  from foo"
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -49,7 +50,7 @@ class TestFromClause:
         ])
 
         expected = "  from generate_series(0, 9)"
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -74,7 +75,7 @@ class TestFromClause:
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -105,7 +106,7 @@ class TestFromClause:
             "  from foo\n"
             "  join bar on(foo.x = bar.x)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -132,7 +133,7 @@ class TestFromClause:
             "  from foo\n"
             "  join bar using(x)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -172,7 +173,7 @@ class TestFromClause:
             "  from foo\n"
             "  join bar on(foo.x = bar.x and foo.y = bar.y)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -222,7 +223,7 @@ class TestFromClause:
             "              and foo.y = bar.y\n"
             "             )"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -259,7 +260,7 @@ class TestFromClause:
             "  --comment1\n"
             "  join bar on(foo.x = bar.x)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -293,7 +294,7 @@ class TestFromClause:
             "  from foo --comment2\n"
             "  join bar on(foo.x = bar.x)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -343,7 +344,7 @@ class TestFromClause:
             "  join bar on(foo.x = bar.x) --comment3\n"
             "  join baz on(bar.y = baz.y)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -381,7 +382,7 @@ class TestFromClause:
             "         where 1=1\n"
             "       ) x"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -429,7 +430,7 @@ class TestFromClause:
             "       ) x\n"
             "  join baz on(true)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -477,7 +478,7 @@ class TestFromClause:
             "         where 1=1\n"
             "       ) x on(true)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -530,7 +531,7 @@ class TestFromClause:
             "  join {{ ref('__bar') }} bar on(foo.x = bar.x)\n"
             "  join baz on(bar.y = baz.y)"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual

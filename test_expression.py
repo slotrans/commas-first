@@ -6,6 +6,7 @@ from sftoken import SFTokenKind
 from sftoken import Symbols
 from sftoken import Whitespace
 from clause_formatter import Expression
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -36,7 +37,7 @@ class SameEitherWay:
 
 class TestEmpty(SameEitherWay):
     def actual_test(self):
-        actual = Expression([]).render(indent=0)
+        actual = Expression([]).render(RenderingContext(indent=0))
         expected = ""
         assert expected == actual
 
@@ -51,7 +52,7 @@ class TestLiterals(SameEitherWay):
             SFToken(SFTokenKind.WORD, "null"),
         ]
         for lit in literals:
-            actual = Expression([lit]).render(indent=0)
+            actual = Expression([lit]).render(RenderingContext(indent=0))
             expected = lit.value
             assert expected == actual
 
@@ -71,7 +72,7 @@ class TestBasicCompoundExpressions(SameEitherWay):
         ]
         for tseq in token_sequences:
             expr = Expression(tseq)
-            actual = expr.render(indent=0)
+            actual = expr.render(RenderingContext(indent=0))
             expected = "".join([t.value for t in tseq])
             assert expected == actual
 
@@ -126,7 +127,7 @@ class TestCaseWithNewlines(SameEitherWay):
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "HOW_MANY"),
         ])
-        actual = expr.render(indent=0)
+        actual = expr.render(RenderingContext(indent=0))
         expected = (
             "case when foo = 0\n"
             "     then 'zero'\n"
@@ -149,12 +150,12 @@ class TestExpressionWhitespaceTrimmingTrivial:
         ]
 
     def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
-        actual = Expression(tokens).render(indent=0)
+        actual = Expression(tokens).render(RenderingContext(indent=0))
         expected = " sysdate"
         assert expected == actual
 
     def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
-        actual = Expression(tokens).render(indent=0)
+        actual = Expression(tokens).render(RenderingContext(indent=0))
         expected = "sysdate"
         assert expected == actual
 
@@ -173,11 +174,11 @@ class TestExpressionWhitespaceTrimmingTrailingComma:
         ]
 
     def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
-        actual = Expression(tokens).render(indent=0)
+        actual = Expression(tokens).render(RenderingContext(indent=0))
         expected = "\n    foo as BAR"
         assert expected == actual
 
     def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
-        actual = Expression(tokens).render(indent=0)
+        actual = Expression(tokens).render(RenderingContext(indent=0))
         expected = "foo as BAR"
         assert expected == actual

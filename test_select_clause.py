@@ -7,6 +7,7 @@ from sftoken import Symbols
 from sftoken import Whitespace
 from clause_formatter import SelectClause
 from clause_formatter import CompoundStatement
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -37,7 +38,7 @@ def test_render_zero_expressions():
     clause = SelectClause(tokens=[SFToken(SFTokenKind.WORD, "select")])
 
     expected = "select"
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     assert expected == actual
 
@@ -61,7 +62,7 @@ def test_render_simple_expressions_no_qualifier():
         "     , bar\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -96,7 +97,7 @@ def test_render_simple_expressions_line_comment_no_qualifier():
         "     --LINE COMMENT\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -134,7 +135,7 @@ def test_render_simple_expressions_block_comment_no_qualifier():
         "        COMMENT */\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -171,7 +172,7 @@ def test_render_simple_expressions_block_comment_no_qualifier2():
         "   COMMENT */\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -299,7 +300,7 @@ def test_render_complex_expressions_no_qualifier():
         "        or boop > 0\n"
         "       ) as BEEP_BOOP"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -325,7 +326,7 @@ def test_render_simple_expressions_no_qualifier_indented():
         "         , bar\n"
         "         , baz"
     )
-    actual = clause.render(indent=4)
+    actual = clause.render(RenderingContext(indent=4))
 
     print(actual)
     assert expected == actual
@@ -365,7 +366,7 @@ class TestRenderSimpleExpressionsCrappyIndentation():
             "     , \n"
             "       baz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -377,7 +378,7 @@ class TestRenderSimpleExpressionsCrappyIndentation():
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -406,7 +407,7 @@ def test_render_simple_expressions_no_indentation():
         "     , bar\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -434,7 +435,7 @@ def test_render_simple_expressions_distinct_qualifier():
         "     , bar\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -462,7 +463,7 @@ def test_render_simple_expressions_all_qualifier():
         "     , bar\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -493,7 +494,7 @@ def test_render_simple_expressions_distinct_on_qualifier():
         "     , bar\n"
         "     , baz"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -508,7 +509,7 @@ def test_render_qualifier_only():
     ])
 
     expected = "select distinct"
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -523,7 +524,7 @@ def test_render_qualifier_only2():
     ])
 
     expected = "select all"
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -565,7 +566,7 @@ class TestCustomSpacing:
             "     ,  l30\n"
             "     , l182"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -578,7 +579,7 @@ class TestCustomSpacing:
             "     , l30\n"
             "     , l182"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -650,7 +651,7 @@ def test_hand_formatted_case():
         "             end as BLERGH\n"
         "     , stuff"
     )
-    actual = clause.render(indent=0)
+    actual = clause.render(RenderingContext(indent=0))
 
     print(actual)
     assert expected == actual
@@ -721,7 +722,7 @@ class TestPoorlyFormattedCase():
             "       end as BLERGH\n"
             "     , stuff"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -738,7 +739,7 @@ class TestPoorlyFormattedCase():
             "       end as BLERGH\n"
             "     , stuff"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -790,7 +791,7 @@ class TestMultipleExpressionsPerLine():
             "     , \n"
             "       stuff"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -805,7 +806,7 @@ class TestMultipleExpressionsPerLine():
             "     , l91\n"
             "     , stuff"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -857,7 +858,7 @@ class TestRenderScalarSubquery():
             "       )\n"
             "     , baz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -873,7 +874,7 @@ class TestRenderScalarSubquery():
             "       )\n"
             "     , baz"
         )
-        actual = clause.render(indent=0)
+        actual = clause.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual

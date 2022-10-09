@@ -1,4 +1,5 @@
 import enum
+import dataclasses
 
 import sf_flags
 from sftoken import SFToken, SFTokenKind, Keywords, Symbols, Whitespace
@@ -207,6 +208,16 @@ def is_parenthesized_subquery(elements):
     )
 
 
+@dataclasses.dataclass(frozen=True)
+class RenderingContext:
+    indent:                   int  = dataclasses.field(kw_only=True) # no default, must be explicit
+    trim_leading_whitespace:  bool = dataclasses.field(kw_only=True, default=False)
+    one_line_expressions:     bool = dataclasses.field(kw_only=True, default=False)
+
+    def mut(self, **kwargs):
+        return dataclasses.replace(self, **kwargs)
+
+
 class Expression:
     __slots__ = (
         "input_tokens",
@@ -234,9 +245,9 @@ class Expression:
         else:
             return trim_one_leading_space(temp)
 
-    def render(self, indent):
+    def render(self, ctx):
         out = ""
-        effective_indent = indent
+        effective_indent = ctx.indent
         immediately_after_newline = False
         i = 0
         while i < len(self.elements):
@@ -253,17 +264,17 @@ class Expression:
                     if next_e is not None and next_e.kind in (SFTokenKind.LINE_COMMENT, SFTokenKind.BLOCK_COMMENT):
                         pass
                     else:
-                        extra_spaces = indent - len(e.value)
+                        extra_spaces = ctx.indent - len(e.value)
                         if extra_spaces > 0:
                             out += " " * extra_spaces
                             effective_indent = extra_spaces
                 else:
                     # otherwise, add enough spaces to reach the indent
-                    out += " " * indent
-                    effective_indent = indent
+                    out += " " * ctx.indent
+                    effective_indent = ctx.indent
                 immediately_after_newline = False
 
-            fragment = e.render(effective_indent)
+            fragment = e.render(ctx.mut(indent=effective_indent))
             out += fragment
             effective_indent += len(fragment)
 
@@ -272,7 +283,7 @@ class Expression:
                 immediately_after_newline = True
             elif e == Symbols.LEFT_PAREN and is_parenthesized_subquery(self.elements[i:i+3]):
                 paren_indent = effective_indent - 1
-                out += self.elements[i+1].render(effective_indent)
+                out += self.elements[i+1].render(ctx.mut(indent=effective_indent))
                 out += "\n"
                 out += " " * paren_indent
                 out += ")"
@@ -399,48 +410,48 @@ class WithClause:
         return (delimiters, before_stuff, statements, after_stuff)
 
 
-    def render(self, indent):
+    def render(self, ctx):
         parts = []
         i = 0
-        effective_indent = indent
+        effective_indent = ctx.indent
         while i < len(self.delimiters):
             # indent
             if i > 0:
                 parts.append("\n")
-                parts.append(" " * indent)
-                effective_indent = indent
+                parts.append(" " * ctx.indent)
+                effective_indent = ctx.indent
 
             # delimiter
-            fragment = self.delimiters[i].render(effective_indent)
+            fragment = self.delimiters[i].render(ctx.mut(indent=effective_indent))
             effective_indent += len(fragment)
             parts.append(fragment)
 
             # before stuff
-            fragment = self.before_stuff[i].render(effective_indent)
+            fragment = self.before_stuff[i].render(ctx.mut(indent=effective_indent))
             fragment = (" " + fragment) if fragment else ""
             effective_indent += len(fragment)
             parts.append(fragment)
 
             # open paren
             parts.append("\n")
-            parts.append(" " * indent)
-            effective_indent = indent
+            parts.append(" " * ctx.indent)
+            effective_indent = ctx.indent
             parts.append("(")
             parts.append("\n")
 
             # subquery
             parts.append(" " * (effective_indent+self.CTE_INDENT_SPACES))
-            parts.append(self.statements[i].render(effective_indent+self.CTE_INDENT_SPACES))
+            parts.append(self.statements[i].render(ctx.mut(indent=effective_indent+self.CTE_INDENT_SPACES)))
 
             # close paren
             parts.append("\n")
-            parts.append(" " * indent)
-            effective_indent = indent
+            parts.append(" " * ctx.indent)
+            effective_indent = ctx.indent
             parts.append(")")
             effective_indent = effective_indent + 1
 
             # after stuff
-            fragment = self.after_stuff[i].render(effective_indent)
+            fragment = self.after_stuff[i].render(ctx.mut(indent=effective_indent))
             fragment = (" " + fragment) if fragment else ""
             parts.append(fragment)
 
@@ -510,17 +521,17 @@ class BasicClause:
         return delimiter.value.rjust(self.PADDING)
 
 
-    def render(self, indent):
+    def render(self, ctx):
         parts = []
         i = 0
-        effective_indent = indent
+        effective_indent = ctx.indent
         suppress_newline = False
         while i < len(self.delimiters):
             if i > 0:
                 if not suppress_newline:
                     parts.append("\n")
-                parts.append(" " * indent)
-                effective_indent = indent
+                parts.append(" " * ctx.indent)
+                effective_indent = ctx.indent
             suppress_newline = False
 
             delim_fragment = self._render_delimiter(self.delimiters[i])
@@ -532,7 +543,7 @@ class BasicClause:
                 parts.append(" ")
                 effective_indent += 1
 
-                expr_fragment = self.expressions[i].render(effective_indent)
+                expr_fragment = self.expressions[i].render(ctx.mut(indent=effective_indent))
                 parts.append(expr_fragment)
 
                 if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
@@ -659,17 +670,17 @@ class SelectClause:
     def _render_delimiter(self, delimiter):
         return delimiter.value.rjust(self.PADDING)
 
-    def render(self, indent):
+    def render(self, ctx):
         parts = []
         i = 0
-        effective_indent = indent
+        effective_indent = ctx.indent
         suppress_newline = False
         while i < len(self.delimiters):
             if i > 0:
                 if not suppress_newline:
                     parts.append("\n")
-                parts.append(" " * indent)
-                effective_indent = indent
+                parts.append(" " * ctx.indent)
+                effective_indent = ctx.indent
             suppress_newline = False
 
             delim_fragment = self._render_delimiter(self.delimiters[i])
@@ -678,7 +689,7 @@ class SelectClause:
 
             if i == 0 and self.qualifier:
                 parts.append(" ")
-                parts.append(self.qualifier.render(indent))
+                parts.append(self.qualifier.render(ctx))
                 if not self.expressions[0].is_empty():
                     parts.append("\n")
                     parts.append(" " * 6)
@@ -688,7 +699,7 @@ class SelectClause:
                 parts.append(" ")
                 effective_indent += 1
 
-                expr_fragment = self.expressions[i].render(effective_indent)
+                expr_fragment = self.expressions[i].render(ctx.mut(indent=effective_indent))
                 parts.append(expr_fragment)
 
                 if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment
@@ -794,23 +805,23 @@ class LimitOffsetClause:
         return limit_expression, offset_expression, limit_first
 
 
-    def render(self, indent):
+    def render(self, ctx):
         parts = []
 
         if self.limit_first:
-            parts.append(" " * indent)
+            parts.append(" " * ctx.indent)
             parts.append(" ")
-            parts.append(self.limit_expression.render(indent))
+            parts.append(self.limit_expression.render(ctx))
             if not self.offset_expression.is_empty():
                 parts.append("\n")
-                parts.append(self.offset_expression.render(indent))
+                parts.append(self.offset_expression.render(ctx))
         else:
-            parts.append(self.offset_expression.render(indent))
+            parts.append(self.offset_expression.render(ctx))
             if not self.limit_expression.is_empty():
                 parts.append("\n")
-                parts.append(" " * indent)
+                parts.append(" " * ctx.indent)
                 parts.append(" ")
-                parts.append(self.limit_expression.render(indent))
+                parts.append(self.limit_expression.render(ctx))
 
         out = "".join(parts)
         return out
@@ -940,16 +951,16 @@ class Statement:
         return False
 
 
-    def render(self, indent):
+    def render(self, ctx):
         # the ClauseScope keys are numbered in order so sorted() does exactly what we want
         clauses_in_order = sorted(self.clause_map.items())
 
         # Each clause uses `indent` to bump over lines after the first (first line is the caller's responsibility).
         # This bit bumps over the first lines too, for every clause except the first, which makes the Statement
         # as a whole match the behavior of clauses.
-        clause_joiner = "\n" + (" " * indent)
+        clause_joiner = "\n" + (" " * ctx.indent)
 
-        out = clause_joiner.join([v.render(indent) for k,v in clauses_in_order])
+        out = clause_joiner.join([v.render(ctx) for k,v in clauses_in_order])
         return out
 
 
@@ -1017,7 +1028,7 @@ class CompoundStatement:
         return False
 
 
-    def render(self, indent):
+    def render(self, ctx):
         parts = [self.statements[0]]
         i = 0
         while i < len(self.set_operations):
@@ -1025,7 +1036,7 @@ class CompoundStatement:
             parts.append(self.statements[i+1])
             i += 1
 
-        stmt_joiner = "\n" + (" " * indent)
+        stmt_joiner = "\n" + (" " * ctx.indent)
 
-        out = stmt_joiner.join([p.render(indent) for p in parts])
+        out = stmt_joiner.join([p.render(ctx) for p in parts])
         return out

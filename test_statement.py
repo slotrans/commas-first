@@ -8,6 +8,7 @@ from sftoken import Whitespace
 from clause_formatter import ClauseScope
 from clause_formatter import Statement
 from clause_formatter import CompoundStatement
+from clause_formatter import RenderingContext
 
 
 # pytest magic
@@ -22,7 +23,7 @@ class TestStatement:
         statement = Statement(tokens=[SFToken(SFTokenKind.WORD, "select")])
 
         expected = "select"
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -33,7 +34,7 @@ class TestStatement:
 
         # remember the first line is not indented, so the indent has no effect here
         expected = "select"
-        actual = statement.render(indent=4)
+        actual = statement.render(RenderingContext(indent=4))
 
         print(actual)
         assert expected == actual
@@ -47,7 +48,7 @@ class TestStatement:
         ])
 
         expected = "select 1"
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -72,7 +73,7 @@ class TestStatement:
             "     , bar\n"
             "     , baz"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -98,7 +99,7 @@ class TestStatement:
             "         , bar\n"
             "         , baz"
         )
-        actual = statement.render(indent=4)
+        actual = statement.render(RenderingContext(indent=4))
 
         print(actual)
         assert expected == actual
@@ -142,7 +143,7 @@ class TestStatement:
             "  from table1\n"
             "  join table2 on(table1.id = table2.table1_id)"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -180,7 +181,7 @@ class TestStatement:
             " where 1=1\n"
             "   and bar > baz"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -219,7 +220,7 @@ class TestStatement:
             "     where 1=1\n"
             "       and bar > baz"
         )
-        actual = statement.render(indent=4)
+        actual = statement.render(RenderingContext(indent=4))
 
         print(actual)
         assert expected == actual
@@ -259,7 +260,7 @@ class TestStatement:
             " where 1=1\n"
             " group by foo"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -293,7 +294,7 @@ class TestStatement:
             " where 1=1\n"
             " order by foo"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -337,7 +338,7 @@ class TestStatement:
             " limit 9\n"
             "offset 0"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -415,7 +416,7 @@ class TestStatement:
             "       ) x\n"
             " where 1=1"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -483,7 +484,7 @@ class TestStatement:
             "  from bar\n"
             " where 1=1"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -554,7 +555,7 @@ class TestStatement:
             "  from bar\n"
             " where 1=1"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -622,7 +623,7 @@ class TestStatement:
             "               where 1=1\n"
             "             )"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -681,7 +682,7 @@ class TestStatement:
             "  from bar\n"
             " where 1=1"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -756,7 +757,7 @@ class TestStatement:
             "   and substring(foo from 2 for 3) != 'xxx'\n"
             "   and extract('year' from event_datetime) > 2000"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual
@@ -795,7 +796,7 @@ class TestStatement:
             "select foo\n"
             "  from table1"
         )
-        actual = statement.render(indent=0)
+        actual = statement.render(RenderingContext(indent=0))
 
         print(actual)
         assert expected == actual        
