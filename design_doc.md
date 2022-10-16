@@ -590,3 +590,18 @@ select foo
     - Would require moving the bit of code in Expression that respects the flag(s) from `_parse` to `render`
         - or, would require passing the context to constructors as well as `render`
     - Not sure yet if I like this idea but it's a possibility. Could implement it in a branch and see.
+
+
+### 2022-10-16
+- Well, my refactor from `sf_flags` and `indent` to `RenderingContext` is done, now I have to decide if I like it
+    - it certainly makes tests more straightforward, since everything is now stateless and there's no global nonsense
+    - it doesn't _really_ make reasoning about the behavior of code any easier (or harder) because the `RenderingContext` is being passed around _everywhere_, so it's just as global as `sf_flags`
+        - it is at least _explicit_ but I'm not sure that matters
+        - also `RenderingContext` is faux-mutable... in theory `sf_flags` was too but "this will only be set once" was an explicitly-stated (though unenforced) part of the API contract
+            - and at least how it is now, all 3 fields are faux-mutable, and only `indent` should be
+            - though even if `RenderingContext` didn't allow faux-mutation of flags, you could still always gin up a different one and start using it, so that set-once-at-the-start semantic is not there at all
+    - it's a bit annoying that `RenderingContext(...)` constructions are smeared all over the code now
+        - i mean in theory it could carry other values, not just `indent`, but I don't have ideas about any such thing so that's purely hypothetical
+    - invocations like `.render(ctx.mut(indent=effective_indent))` are definitely less readable than `.render(effective_indent)`
+        - so purely as a carrier of mutable values like `indent`, it's worse if there's only one (and not clearly better for more than one, since we don't have that situation to experiment with)
+    - at this point I'm leaning towards discarding this work and going back to `sf_flags`/`indent`
