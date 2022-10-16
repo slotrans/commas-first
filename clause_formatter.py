@@ -238,6 +238,8 @@ class Expression:
         return trim_trailing_whitespace(tokens)
 
     def render(self, ctx):
+        # this is a render-time operation instead of a parse-time operation because it depends
+        # on a value in the RenderingContext
         if ctx.trim_leading_whitespace:
             elements_to_render = trim_leading_whitespace(self.elements)
         else:
