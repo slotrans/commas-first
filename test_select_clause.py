@@ -1,6 +1,5 @@
 import pytest
 
-import sf_flags
 from sftoken import SFToken
 from sftoken import SFTokenKind
 from sftoken import Symbols
@@ -8,22 +7,6 @@ from sftoken import Whitespace
 from clause_formatter import SelectClause
 from clause_formatter import CompoundStatement
 from clause_formatter import RenderingContext
-
-
-# pytest magic
-def setup_module():
-    sf_flags.reset_to_defaults()
-
-
-@pytest.fixture
-def trim_leading_whitespace_off():
-    sf_flags.TRIM_LEADING_WHITESPACE = False
-
-
-@pytest.fixture
-def trim_leading_whitespace_on():
-    sf_flags.TRIM_LEADING_WHITESPACE = True
-
 
 
 def test_creation_fails_on_empty_input():
@@ -356,7 +339,7 @@ class TestRenderSimpleExpressionsCrappyIndentation():
 
     # this is kind of a silly test in that this behavior is not particularly _desirable_,
     # but it is what you get from this input in this mode
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_trim_leading_off(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select \n"
@@ -366,19 +349,19 @@ class TestRenderSimpleExpressionsCrappyIndentation():
             "     , \n"
             "       baz"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=False))
 
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_on(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
             "     , bar\n"
             "     , baz"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=True))
 
         print(actual)
         assert expected == actual
@@ -558,7 +541,7 @@ class TestCustomSpacing:
             SFToken(SFTokenKind.WORD, "l182"),
         ]
 
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_trim_leading_off(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -566,12 +549,12 @@ class TestCustomSpacing:
             "     ,  l30\n"
             "     , l182"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=False))
 
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_on(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -579,7 +562,7 @@ class TestCustomSpacing:
             "     , l30\n"
             "     , l182"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=True))
 
         print(actual)
         assert expected == actual
@@ -710,7 +693,7 @@ class TestPoorlyFormattedCase():
             SFToken(SFTokenKind.WORD, "stuff"),
         ]
 
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_trim_leading_off(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -722,12 +705,12 @@ class TestPoorlyFormattedCase():
             "       end as BLERGH\n"
             "     , stuff"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=False))
 
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_on(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -739,7 +722,7 @@ class TestPoorlyFormattedCase():
             "       end as BLERGH\n"
             "     , stuff"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=True))
 
         print(actual)
         assert expected == actual
@@ -778,7 +761,7 @@ class TestMultipleExpressionsPerLine():
 
     # again this result is not exactly desirable but nevertheless it's what you get
     # not sure if the trailing spaces should be considered acceptable
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_trim_leading_off(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select \n"
@@ -791,12 +774,12 @@ class TestMultipleExpressionsPerLine():
             "     , \n"
             "       stuff"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=False))
 
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_on(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -806,7 +789,7 @@ class TestMultipleExpressionsPerLine():
             "     , l91\n"
             "     , stuff"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=True))
 
         print(actual)
         assert expected == actual
@@ -848,7 +831,7 @@ class TestRenderScalarSubquery():
         ]
 
     # off and on should be identical
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_trim_leading_off(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -858,13 +841,13 @@ class TestRenderScalarSubquery():
             "       )\n"
             "     , baz"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=False))
 
         print(actual)
         assert expected == actual
 
     # off and on should be identical
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_on(self, tokens):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -874,7 +857,7 @@ class TestRenderScalarSubquery():
             "       )\n"
             "     , baz"
         )
-        actual = clause.render(RenderingContext(indent=0))
+        actual = clause.render(RenderingContext(indent=0, trim_leading_whitespace=True))
 
         print(actual)
         assert expected == actual

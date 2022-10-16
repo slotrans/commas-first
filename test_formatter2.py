@@ -2,13 +2,7 @@ import pytest
 
 from pathlib import Path
 
-import sf_flags
 from formatter2 import do_format
-
-
-# pytest magic
-def setup_module():
-    sf_flags.reset_to_defaults()
 
 
 BASE_DIRECTORY = "queries_for_test"
@@ -36,8 +30,7 @@ for input_path in Path(BASE_DIRECTORY).glob("*_IN.sql"):
 
 @pytest.mark.parametrize("test_input,expected_output", zip(test_inputs, expected_outputs["trim_leading_whitespace__off"]), ids=test_ids)
 def test_do_format_with_trim_leading_whitespace_off(test_input, expected_output):
-    sf_flags.TRIM_LEADING_WHITESPACE = False
-    actual_output = do_format(test_input)
+    actual_output = do_format(test_input, trim_leading_whitespace=False)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
     assert expected_output == actual_output
@@ -45,8 +38,7 @@ def test_do_format_with_trim_leading_whitespace_off(test_input, expected_output)
 
 @pytest.mark.parametrize("test_input,expected_output", zip(test_inputs, expected_outputs["trim_leading_whitespace__on"]), ids=test_ids)
 def test_do_format_with_trim_leading_whitespace_on(test_input, expected_output):
-    sf_flags.TRIM_LEADING_WHITESPACE = True
-    actual_output = do_format(test_input)
+    actual_output = do_format(test_input, trim_leading_whitespace=True)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
     assert expected_output == actual_output

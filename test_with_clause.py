@@ -1,6 +1,5 @@
 import pytest
 
-import sf_flags
 from sftoken import SFToken
 from sftoken import SFTokenKind
 from sftoken import Whitespace
@@ -8,11 +7,6 @@ from sftoken import Symbols
 from clause_formatter import WithClause
 from clause_formatter import CompoundStatement
 from clause_formatter import RenderingContext
-
-
-# pytest magic
-def setup_module():
-    sf_flags.reset_to_defaults()
 
 
 class TestWithClause:

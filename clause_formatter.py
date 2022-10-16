@@ -1,7 +1,6 @@
 import enum
 import dataclasses
 
-import sf_flags
 from sftoken import SFToken, SFTokenKind, Keywords, Symbols, Whitespace
 
 
@@ -228,9 +227,6 @@ class Expression:
         self.input_tokens = tokens
         self.elements = self._parse(tokens)
 
-    def starts_with_whitespace(self):
-        return len(self.elements) > 0 and self.elements[0].is_whitespace
-
     @property
     def is_whitespace(self):
         return all([e.is_whitespace for e in self.elements])
@@ -239,20 +235,21 @@ class Expression:
         return len(self.elements) == 0
 
     def _parse(self, tokens):
-        temp = trim_trailing_whitespace(tokens)
-        if sf_flags.TRIM_LEADING_WHITESPACE:
-            return trim_leading_whitespace(temp)
-        else:
-            return trim_one_leading_space(temp)
+        return trim_trailing_whitespace(tokens)
 
     def render(self, ctx):
+        if ctx.trim_leading_whitespace:
+            elements_to_render = trim_leading_whitespace(self.elements)
+        else:
+            elements_to_render = trim_one_leading_space(self.elements)
+
         out = ""
         effective_indent = ctx.indent
         immediately_after_newline = False
         i = 0
-        while i < len(self.elements):
-            e = self.elements[i]
-            next_e = self.elements[i+1] if i+1 < len(self.elements) else None
+        while i < len(elements_to_render):
+            e = elements_to_render[i]
+            next_e = elements_to_render[i+1] if i+1 < len(elements_to_render) else None
 
             if immediately_after_newline:
                 if e.kind == SFTokenKind.NEWLINE:
@@ -281,9 +278,9 @@ class Expression:
             if e == Whitespace.NEWLINE or e.kind == SFTokenKind.LINE_COMMENT:
                 #PONDER: what if we made the newline itself responsible for adding the indent, in render()?
                 immediately_after_newline = True
-            elif e == Symbols.LEFT_PAREN and is_parenthesized_subquery(self.elements[i:i+3]):
+            elif e == Symbols.LEFT_PAREN and is_parenthesized_subquery(elements_to_render[i:i+3]):
                 paren_indent = effective_indent - 1
-                out += self.elements[i+1].render(ctx.mut(indent=effective_indent))
+                out += elements_to_render[i+1].render(ctx.mut(indent=effective_indent))
                 out += "\n"
                 out += " " * paren_indent
                 out += ")"
@@ -636,37 +633,6 @@ class SelectClause:
         return (delimiters, expressions, qualifier)
 
 
-    def render_old(self, indent):
-        if not self.qualifier and not self.expressions:
-            return "select"
-
-        parts = ["select"]
-
-        if self.qualifier:
-            parts.append(" ")
-            parts.append(self.qualifier.render(indent))
-            if self.expressions:
-                parts.append("\n")
-                parts.append(" " * 5)
-
-        for i, expr in enumerate(self.expressions):
-            if i == 0:
-                parts.append(" ")
-                parts.append(expr.render(indent))
-            else:
-                parts.append("\n")
-                parts.append(" " * indent)
-                parts.append("     ,")
-                # If the expression is like [" ", "foo"] then print it as-is, preserving any oddball spacing it might have.
-                # OTOH in cases like "select foo,bar,baz", we need to add a space to get to a good baseline.
-                # This might need to change if expression rendering gets smarter.
-                if not expr.starts_with_whitespace():
-                    parts.append(" ")
-                parts.append(expr.render(indent))
-
-        out = "".join(parts)
-        return out
-
     def _render_delimiter(self, delimiter):
         return delimiter.value.rjust(self.PADDING)
 
@@ -942,10 +908,6 @@ class Statement:
         return clause_map
 
 
-    def starts_with_whitespace(self):
-        return False
-
-
     @property
     def is_whitespace(self):
         return False
@@ -1017,10 +979,6 @@ class CompoundStatement:
         assert len(statements) == len(set_operations) + 1
 
         return (statements, set_operations)
-
-
-    def starts_with_whitespace(self):
-        return False
 
 
     @property

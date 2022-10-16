@@ -5,7 +5,6 @@ import pygments
 from pygments.lexers import get_lexer_by_name
 from pygments.token import Token
 
-import sf_flags
 from retokenize import pre_process_tokens, retokenize1, retokenize2, sftokenize
 from clause_formatter import CompoundStatement
 from clause_formatter import RenderingContext
@@ -31,22 +30,20 @@ def get_renderable(unformatted_code):
     return compound_statement
 
 
-def do_format(unformatted_code):
+def do_format(unformatted_code, trim_leading_whitespace):
     renderable = get_renderable(unformatted_code)
-    rendered = renderable.render(RenderingContext(indent=0))
+    context = RenderingContext(indent=0, trim_leading_whitespace=trim_leading_whitespace)
+    rendered = renderable.render(context)
     trimmed = trim_trailing_whitespace_from_lines(rendered)
     return trimmed
 
 
 def main(args):
-    # set global flags
-    sf_flags.TRIM_LEADING_WHITESPACE = args.trim_leading_whitespace
-
     # read
     unformatted_code = sys.stdin.read()
 
     # process
-    formatted_code = do_format(unformatted_code)
+    formatted_code = do_format(unformatted_code, args.trim_leading_whitespace)
 
     # write
     print(trimmed)
