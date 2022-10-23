@@ -609,3 +609,12 @@ select foo
 
 ### 2022-10-23
 - (above notes plucked from `replace-indent-with-context` branch)
+
+- realized as I got into fixing tests for flag combinations that "compact expressions" _implies_ "trim leading whitespace"
+    - this disrupts how I had been thinking about things and I'm still trying to figure out all the ramifications
+    - it's nice in that it reduces the total cases from 4 to 3
+    - but it means that we don't really have "flags" as such, but more like a "mode" with 3 possible values
+        - IDK if I should refactor the notion of flags into a notion of mode _yet_ or keep at it a while and see what happens
+        - it's not the end of the world if the trim=OFF/compact=ON and trim=ON/compact=ON cases just have the same behavior
+    - it also makes a lot of the tests for `make_compact()` pretty pointless, since any sequence of only whitespace should reduce to "empty list"... I am taking the approach of surrounding these whitespace sequences with words so that the whitespace-collapsing still gets tested
+    - some end-to-end tests failing because of `and id in(select` because I want a space between `in` and `(` but the compaction rules discard that space... probably need a special case here since I don't generally see `in (...)` as equivalent to `fn_call(...)` even though they're structurally identical

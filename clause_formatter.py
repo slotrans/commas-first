@@ -124,9 +124,19 @@ def make_compact(tokens):
     # back by one (if possible), again to make sure we can see any patterns that created.
 
     out = tokens.copy()
+
+    out = trim_leading_whitespace(trim_trailing_whitespace(out))
+
     i = 0
     while i < len(out):
         tok = out[i]
+
+        # skip non-tokens (e.g. CompoundStatement)
+        # this check is repeated in the multi-token blocks
+        if type(tok) is not SFToken:
+            i += 1
+            continue
+
 
         # shrink all strings of spaces down to 1
         if tok.kind == SFTokenKind.SPACES and len(tok.value) > 1:
@@ -139,6 +149,10 @@ def make_compact(tokens):
             next_tok = out[i+1]
             after_next_tok = out[i+2]
 
+            if type(after_next_tok) is not SFToken:
+                i += 1
+                continue
+
             # "word", " ", "("
             if tok.kind == SFTokenKind.WORD and next_tok.kind == SFTokenKind.SPACES and after_next_tok.value == "(":
                 out.pop(i+1)
@@ -148,6 +162,10 @@ def make_compact(tokens):
         # 2-token sequences
         if i+1 < len(out):
             next_tok = out[i+1]
+
+            if type(next_tok) is not SFToken:
+                i += 1
+                continue
 
             # " ", "\n"
             if tok.kind == SFTokenKind.SPACES and next_tok.kind == SFTokenKind.NEWLINE:
@@ -226,10 +244,18 @@ class Expression:
 
     def _parse(self, tokens):
         temp = trim_trailing_whitespace(tokens)
+        
         if sf_flags.TRIM_LEADING_WHITESPACE:
-            return trim_leading_whitespace(temp)
+            temp2 = trim_leading_whitespace(temp)
         else:
-            return trim_one_leading_space(temp)
+            temp2 = trim_one_leading_space(temp)
+
+        if sf_flags.COMPACT_EXPRESSIONS:
+            temp3 = make_compact(temp2)
+        else:
+            temp3 = temp2
+
+        return temp3
 
     def render(self, indent):
         out = ""

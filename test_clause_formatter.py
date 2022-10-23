@@ -313,11 +313,15 @@ class TestMakeCompact:
 
     def test_one_space(self):
         tokens = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
 
         expected = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -325,11 +329,15 @@ class TestMakeCompact:
 
     def test_only_spaces(self):
         tokens = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, "   "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
 
         expected = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -337,11 +345,15 @@ class TestMakeCompact:
 
     def test_only_newline(self):
         tokens = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
 
         expected = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -349,12 +361,16 @@ class TestMakeCompact:
 
     def test_spaces_then_newline(self):
         tokens = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, "    "),
             SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
 
         expected = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -362,12 +378,16 @@ class TestMakeCompact:
 
     def test_newline_then_spaces(self):
         tokens = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.NEWLINE, "\n"),
             SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
 
         expected = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -375,13 +395,17 @@ class TestMakeCompact:
 
     def test_spaces_around_newline(self):
         tokens = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, "    "),
             SFToken(SFTokenKind.NEWLINE, "\n"),
             SFToken(SFTokenKind.SPACES, "    "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
 
         expected = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -389,13 +413,17 @@ class TestMakeCompact:
 
     def test_newlines_around_spaces(self):
         tokens = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.NEWLINE, "\n"),
             SFToken(SFTokenKind.SPACES, "    "),
             SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
 
         expected = [
+            SFToken(SFTokenKind.WORD, "a"),
             SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -462,6 +490,37 @@ class TestMakeCompact:
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "2"),
             SFToken(SFTokenKind.SYMBOL, ")")
+        ]
+        actual = make_compact(tokens)
+        for t in actual:
+            print(t)
+        assert expected == actual
+
+
+    def test_spaces_around_list(self):
+        # ` ( 1 , 2 ) `
+        tokens = [
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ")"),
+            SFToken(SFTokenKind.SPACES, " "),
+        ]
+
+        # (1, 2)
+        expected = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SYMBOL, ")"),
         ]
         actual = make_compact(tokens)
         for t in actual:

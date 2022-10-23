@@ -16,8 +16,10 @@ BASE_DIRECTORY = "queries_for_test"
 
 test_inputs = []
 expected_outputs = {
-    "trim_leading_whitespace__off": [],
-    "trim_leading_whitespace__on": [],
+    "trim_leading_whitespace_OFF__compact_expressions_OFF": [],
+    "trim_leading_whitespace_ON__compact_expressions_OFF": [],
+    "trim_leading_whitespace_OFF__compact_expressions_ON": [],
+    "trim_leading_whitespace_ON__compact_expressions_ON": [],
 }
 test_ids = []
 for input_path in Path(BASE_DIRECTORY).glob("*_IN.sql"):
@@ -34,18 +36,56 @@ for input_path in Path(BASE_DIRECTORY).glob("*_IN.sql"):
     test_ids.append(test_id)
 
 
-@pytest.mark.parametrize("test_input,expected_output", zip(test_inputs, expected_outputs["trim_leading_whitespace__off"]), ids=test_ids)
-def test_do_format_with_trim_leading_whitespace_off(test_input, expected_output):
+@pytest.mark.parametrize(
+    "test_input,expected_output",
+    zip(test_inputs, expected_outputs["trim_leading_whitespace_OFF__compact_expressions_OFF"]),
+    ids=test_ids
+)
+def test_do_format__trim_leading_whitespace_OFF__compact_expressions_OFF(test_input, expected_output):
     sf_flags.TRIM_LEADING_WHITESPACE = False
+    sf_flags.COMPACT_EXPRESSIONS = False
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
     assert expected_output == actual_output
 
 
-@pytest.mark.parametrize("test_input,expected_output", zip(test_inputs, expected_outputs["trim_leading_whitespace__on"]), ids=test_ids)
-def test_do_format_with_trim_leading_whitespace_on(test_input, expected_output):
+@pytest.mark.parametrize(
+    "test_input,expected_output",
+    zip(test_inputs, expected_outputs["trim_leading_whitespace_ON__compact_expressions_OFF"]),
+    ids=test_ids
+)
+def test_do_format__trim_leading_whitespace_ON__compact_expressions_OFF(test_input, expected_output):
     sf_flags.TRIM_LEADING_WHITESPACE = True
+    sf_flags.COMPACT_EXPRESSIONS = False
+    actual_output = do_format(test_input)
+    print(actual_output)
+    #print(actual_output.replace(" ", "⦁"))
+    assert expected_output == actual_output
+
+
+@pytest.mark.parametrize(
+    "test_input,expected_output",
+    zip(test_inputs, expected_outputs["trim_leading_whitespace_OFF__compact_expressions_ON"]),
+    ids=test_ids
+)
+def test_do_format__trim_leading_whitespace_OFF__compact_expressions_ON(test_input, expected_output):
+    sf_flags.TRIM_LEADING_WHITESPACE = False
+    sf_flags.COMPACT_EXPRESSIONS = True
+    actual_output = do_format(test_input)
+    print(actual_output)
+    #print(actual_output.replace(" ", "⦁"))
+    assert expected_output == actual_output
+
+
+@pytest.mark.parametrize(
+    "test_input,expected_output",
+    zip(test_inputs, expected_outputs["trim_leading_whitespace_ON__compact_expressions_ON"]),
+    ids=test_ids
+)
+def test_do_format__trim_leading_whitespace_ON__compact_expressions_ON(test_input, expected_output):
+    sf_flags.TRIM_LEADING_WHITESPACE = True
+    sf_flags.COMPACT_EXPRESSIONS = True
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
