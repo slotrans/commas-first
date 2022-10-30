@@ -131,3 +131,58 @@ class TestLimitOffsetClause:
         actual = clause.render(indent=0)
 
         assert expected == actual
+
+
+    def test_render_limit_offset_with_trailing_line_comments(self):
+        # limit 1 --one
+        #offset 2 --two
+        clause = LimitOffsetClause(tokens=[
+            SFToken(SFTokenKind.WORD, "limit"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--one\n"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "offset"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.LINE_COMMENT, "--two\n"),
+        ])
+
+        expected = (
+            " limit 1 --one\n"
+            "offset 2 --two"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_limit_offset_with_trailing_block_comments(self):
+        # limit 1 /* one */
+        #offset 2 /* two */
+        clause = LimitOffsetClause(tokens=[
+            SFToken(SFTokenKind.WORD, "limit"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.BLOCK_COMMENT, "/* one */"),
+            SFToken(SFTokenKind.NEWLINE, "\n"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "offset"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.BLOCK_COMMENT, "/* two */"),
+        ])
+
+        expected = (
+            " limit 1 /* one */\n"
+            "offset 2 /* two */"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual    

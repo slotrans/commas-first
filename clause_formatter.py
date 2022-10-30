@@ -304,6 +304,8 @@ class Expression:
 
             i += 1
 
+        # I'm not *quite* confident that doing this in Expresion is desirable...
+        out = out.rstrip("\n")
         return out
 
 
@@ -470,6 +472,7 @@ class WithClause:
             i += 1
 
         out = "".join(parts)
+        out = out.rstrip("\n")
         return out
 
 
@@ -564,6 +567,7 @@ class BasicClause:
             i += 1
 
         out = "".join(parts)
+        out = out.rstrip("\n")
         return out
 
 
@@ -689,6 +693,7 @@ class SelectClause:
             i += 1
 
         out = "".join(parts)
+        out = out.rstrip("\n")
         return out
 
 
@@ -805,6 +810,20 @@ class LimitOffsetClause:
                 parts.append(self.limit_expression.render(indent))
 
         out = "".join(parts)
+        out = out.rstrip("\n")
+        return out
+
+
+class JunkClause:
+    __slots__ = (
+        "input_tokens",
+    )
+    def __init__(self, tokens):
+        self.input_tokens = tokens
+
+    def render(self, indent):
+        out = "".join([t.render(indent) for t in self.input_tokens])
+        out = out.rstrip("\n")
         return out
 
 
@@ -837,6 +856,7 @@ KEYWORD_SCOPE_MAP = {
 
 
 SCOPE_CLAUSE_MAP = {
+    ClauseScope.INITIAL: JunkClause,
     ClauseScope.WITH: WithClause,
     ClauseScope.SELECT: SelectClause,
     ClauseScope.FROM: FromClause,
@@ -894,18 +914,16 @@ class Statement:
                 # ONLY probe for a scope change if we are outside any misc parens (function calls etc)
                 potential_new_scope = KEYWORD_SCOPE_MAP.get(tok, None)
                 if potential_new_scope:
-                    if current_scope is ClauseScope.INITIAL:
-                        buffer.append(tok)
-                        current_scope = potential_new_scope
-                    elif potential_new_scope == current_scope and current_scope == ClauseScope.LIMIT_OFFSET:
+                    if potential_new_scope == current_scope and current_scope == ClauseScope.LIMIT_OFFSET:
                         # LIMIT/OFFSET is a weird clause because OFFSET/LIMIT is also valid, so any time
                         # both keywords are used, we'll hit this case. It's normal.
                         buffer.append(tok)
                     elif potential_new_scope <= current_scope:
                         raise ValueError(f"unexpected token {tok} in scope {current_scope.name}")
                     else:
-                        clause_class = SCOPE_CLAUSE_MAP[current_scope]
-                        clause_map[current_scope] = clause_class(buffer)
+                        if len(buffer) > 0:
+                            clause_class = SCOPE_CLAUSE_MAP[current_scope]
+                            clause_map[current_scope] = clause_class(buffer)
 
                         current_scope = potential_new_scope
                         buffer = [tok]

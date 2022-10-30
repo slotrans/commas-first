@@ -799,3 +799,59 @@ class TestStatement:
 
         print(actual)
         assert expected == actual        
+
+
+    def test_block_comment_before_select(self):
+        # /* hey */ select foo, bar, baz
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.BLOCK_COMMENT, "/* hey */"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "/* hey */ \n" # preserving this space isn't ideal...
+            "select foo\n"
+            "     , bar\n"
+            "     , baz"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_line_comment_before_select(self):
+        # --hey 
+        # select foo, bar, baz
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.LINE_COMMENT, "--hey\n"),
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "bar"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+        ])
+
+        expected = (
+            "--hey\n"
+            "select foo\n"
+            "     , bar\n"
+            "     , baz"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
