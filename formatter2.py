@@ -48,7 +48,7 @@ def main(args):
     formatted_code = do_format(unformatted_code)
 
     # write
-    print(trimmed)
+    print(formatted_code)
 
     return 0
 
