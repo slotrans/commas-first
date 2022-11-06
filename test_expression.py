@@ -24,6 +24,10 @@ def trim_leading_whitespace_on():
 
 
 class SameEitherWay:
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     def actual_test(self):
         raise NotImplementedError
 
@@ -140,6 +144,10 @@ class TestCaseWithNewlines(SameEitherWay):
 
 
 class TestExpressionWhitespaceTrimmingTrivial:
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     @pytest.fixture
     def tokens(self):
         return [
@@ -160,6 +168,10 @@ class TestExpressionWhitespaceTrimmingTrivial:
 
 
 class TestExpressionWhitespaceTrimmingTrailingComma:
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     @pytest.fixture
     def tokens(self):
         return [

@@ -332,6 +332,10 @@ def test_render_simple_expressions_no_qualifier_indented():
 
 
 class TestRenderSimpleExpressionsCrappyIndentation():
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     #select
     #    foo,
     #    bar,
@@ -440,6 +444,42 @@ def test_render_simple_expressions_distinct_qualifier():
     assert expected == actual
 
 
+def test_render_simple_expressions_distinct_qualifier_preformatted():
+    # select distinct
+    #        foo
+    #      , bar
+    #      , baz
+    clause = SelectClause(tokens=[
+        SFToken(SFTokenKind.WORD, "select"),
+        SFToken(SFTokenKind.SPACES, " "),
+        SFToken(SFTokenKind.WORD, "distinct"),
+        Whitespace.NEWLINE,
+        SFToken(SFTokenKind.SPACES, "       "),
+        SFToken(SFTokenKind.WORD, "foo"),
+        Whitespace.NEWLINE,
+        SFToken(SFTokenKind.SPACES, "     "),
+        SFToken(SFTokenKind.SYMBOL, ","),
+        SFToken(SFTokenKind.SPACES, " "),
+        SFToken(SFTokenKind.WORD, "bar"),
+        Whitespace.NEWLINE,
+        SFToken(SFTokenKind.SPACES, "     "),
+        SFToken(SFTokenKind.SYMBOL, ","),
+        SFToken(SFTokenKind.SPACES, " "),
+        SFToken(SFTokenKind.WORD, "baz"),
+    ])
+
+    expected = (
+        "select distinct\n"
+        "       foo\n"
+        "     , bar\n"
+        "     , baz"
+    )
+    actual = clause.render(indent=0)
+
+    print(actual)
+    assert expected == actual
+
+
 def test_render_simple_expressions_all_qualifier():
     # "select all foo, bar, baz"
     clause = SelectClause(tokens=[
@@ -530,6 +570,10 @@ def test_render_qualifier_only2():
 
 
 class TestCustomSpacing:
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     #select foo
     #     ,   l7
     #     ,  l30
@@ -657,6 +701,10 @@ def test_hand_formatted_case():
 
 
 class TestPoorlyFormattedCase():
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     #select foo
     #     , case when bar
     #then 1
@@ -745,6 +793,10 @@ class TestPoorlyFormattedCase():
 
 
 class TestMultipleExpressionsPerLine():
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     #select
     #    foo, bar,
     #    l7, l28, l91,
@@ -812,6 +864,10 @@ class TestMultipleExpressionsPerLine():
 
 
 class TestRenderScalarSubquery():
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
     # "select foo, (select count(1) from bar where 1=1), baz"
     @pytest.fixture
     def tokens(self):
