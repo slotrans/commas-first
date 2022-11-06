@@ -685,6 +685,10 @@ class SelectClause:
                 effective_indent += 1
 
                 expr_fragment = self.expressions[i].render(effective_indent)
+                if i == 0 and self.qualifier:
+                    # when there's a qualifier, we add a newline and indentation (see above), but if the input was already
+                    # formatted correctly, then that's redundant and we need to back it out
+                    expr_fragment = expr_fragment.removeprefix("\n" + " " * 7)
                 parts.append(expr_fragment)
 
                 if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment

@@ -480,6 +480,42 @@ def test_render_simple_expressions_distinct_qualifier_preformatted():
     assert expected == actual
 
 
+def test_render_simple_expressions_distinct_qualifier_preformatted_leading_spaces():
+    # select distinct
+    #          z
+    #      ,  yz
+    #      , xyz
+    clause = SelectClause(tokens=[
+        SFToken(SFTokenKind.WORD, "select"),
+        SFToken(SFTokenKind.SPACES, " "),
+        SFToken(SFTokenKind.WORD, "distinct"),
+        Whitespace.NEWLINE,
+        SFToken(SFTokenKind.SPACES, "         "),
+        SFToken(SFTokenKind.WORD, "z"),
+        Whitespace.NEWLINE,
+        SFToken(SFTokenKind.SPACES, "     "),
+        SFToken(SFTokenKind.SYMBOL, ","),
+        SFToken(SFTokenKind.SPACES, "  "),
+        SFToken(SFTokenKind.WORD, "yz"),
+        Whitespace.NEWLINE,
+        SFToken(SFTokenKind.SPACES, "     "),
+        SFToken(SFTokenKind.SYMBOL, ","),
+        SFToken(SFTokenKind.SPACES, " "),
+        SFToken(SFTokenKind.WORD, "xyz"),
+    ])
+
+    expected = (
+        "select distinct\n"
+        "         z\n"
+        "     ,  yz\n"
+        "     , xyz"
+    )
+    actual = clause.render(indent=0)
+
+    print(actual)
+    assert expected == actual
+
+
 def test_render_simple_expressions_all_qualifier():
     # "select all foo, bar, baz"
     clause = SelectClause(tokens=[
