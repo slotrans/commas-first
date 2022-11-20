@@ -154,7 +154,12 @@ def make_compact(tokens):
                 continue
 
             # "word", " ", "("
-            if tok.kind == SFTokenKind.WORD and next_tok.kind == SFTokenKind.SPACES and after_next_tok.value == "(":
+            # EXCEPT if the word is "in": we want to treat `in (...)` differently from `func(...)`
+            if (    tok.kind == SFTokenKind.WORD
+                and next_tok.kind == SFTokenKind.SPACES
+                and after_next_tok.value == "("
+                and tok.value.lower() != "in"
+                ):
                 out.pop(i+1)
                 continue
 

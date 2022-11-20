@@ -529,7 +529,7 @@ class TestMakeCompact:
 
 
     def test_case_with_newlines(self):
-        # case 
+        # case
         #   when foo > 0
         #     then 1
         #   else 0
@@ -587,7 +587,7 @@ class TestMakeCompact:
 
 
     def test_indented_join(self):
-        # join 
+        # join
         #     bar
         #     on foo.id = bar.foo_id
         #     and bar.active
@@ -727,7 +727,7 @@ class TestMakeCompact:
 
     def test_parenthesized_case_with_newlines_plus_function(self):
         # (
-        # case 
+        # case
         #   when foo > 0
         #     then 1
         #   else 0
@@ -836,6 +836,50 @@ class TestMakeCompact:
             SFToken(SFTokenKind.SYMBOL, "("),
             SFToken(SFTokenKind.WORD, "foo"),
             SFToken(SFTokenKind.SYMBOL, ")"),
+        ]
+        actual = make_compact(tokens)
+        for t in actual:
+            print(t)
+        assert expected == actual
+
+
+    def test_in_list_special_case(self):
+        # foo in ( 1 , 2 , 3 )
+        tokens = [
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "in"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, ")")
+        ]
+
+        # foo in (1, 2, 3)
+        expected = [
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "in"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.SYMBOL, ")")
         ]
         actual = make_compact(tokens)
         for t in actual:
