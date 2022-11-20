@@ -655,6 +655,83 @@ select foo
 """,
 )
 
+qft.inlist_in_where = dict(
+input="""\
+select foo from bar where 1=1
+and id in
+(1, 2, 3,
+4, 5, 6)
+""",
+
+# not exactly desirable...
+default="""\
+select foo
+  from bar
+ where 1=1
+   and id in
+       (1, 2, 3,
+       4, 5, 6)
+""",
+
+# same...
+trim_leading_whitespace="""\
+select foo
+  from bar
+ where 1=1
+   and id in
+       (1, 2, 3,
+       4, 5, 6)
+""",
+
+compact_expressions="""\
+select foo
+  from bar
+ where 1=1
+   and id in (1, 2, 3, 4, 5, 6)
+""",
+)
+
+qft.inlist_in_where_preformatted = dict(
+input="""\
+select foo
+  from bar
+ where 1=1
+   and id in ( 1
+             , 2
+             , 3
+             )
+""",
+
+# not exactly desirable...
+default="""\
+select foo
+  from bar
+ where 1=1
+   and id in ( 1
+             , 2
+             , 3
+             )
+""",
+
+# same...
+trim_leading_whitespace="""\
+select foo
+  from bar
+ where 1=1
+   and id in ( 1
+             , 2
+             , 3
+             )
+""",
+
+compact_expressions="""\
+select foo
+  from bar
+ where 1=1
+   and id in (1, 2, 3)
+""",
+)
+
 qft.simple_grouped_count = dict(
 input="""\
 select foo, count(1) from bar where 1=1 group by foo

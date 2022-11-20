@@ -468,6 +468,35 @@ class TestMakeCompact:
         assert expected == actual
 
 
+    # this isn't great, but make_compact() is about removing whitespace, not adding it...
+    def test_packed_list(self):
+        # (1,2,3)
+        tokens = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.SYMBOL, ")")
+        ]
+
+        # (1,2,3)
+        expected = [
+            SFToken(SFTokenKind.SYMBOL, "("),
+            SFToken(SFTokenKind.WORD, "1"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.WORD, "2"),
+            SFToken(SFTokenKind.SYMBOL, ","),
+            SFToken(SFTokenKind.WORD, "3"),
+            SFToken(SFTokenKind.SYMBOL, ")")
+        ]
+        actual = make_compact(tokens)
+        for t in actual:
+            print(t)
+        assert expected == actual
+
+
     def test_spaces_in_list(self):
         # ( 1 , 2 )
         tokens = [
