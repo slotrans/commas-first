@@ -1,5 +1,6 @@
 import sys
 import re
+import argparse
 
 import pygments
 from pygments.lexers import get_lexer_by_name
@@ -448,19 +449,40 @@ def sftokenize(tokens):
     return [pygments_token_to_sftoken(t) for t in tokens]
 
 
+def tokens_for_cli_output(unformatted_code, func_name):
+    tokens = initial_lex(unformatted_code)
+    if func_name == "initial_lex":
+        return tokens
+
+    tokens = pre_process_tokens(tokens)
+    if func_name == "pre_process_tokens":
+        return tokens
+
+    tokens = retokenize1(tokens)
+    if func_name == "retokenize1":
+        return tokens
+
+    tokens = retokenize2(tokens)
+    if func_name == "retokenize2":
+        return tokens
+
+    tokens = sftokenize(tokens)
+    if func_name == "sftokenize":
+        return tokens
+
+    raise ValueError(f"unknown func_name: {func_name}")
+
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser("Rough CLI for exercising retokenize.py (pass input on STDIN)")
+    parser.add_argument("--function", required=True, choices=["initial_lex", "pre_process_tokens", "retokenize1", "retokenize2", "sftokenize"], help="stage at which to stop and print output")
+    args = parser.parse_args()
+    ##########################
+
     unformatted_code = sys.stdin.read()
 
-    lexer = get_lexer_by_name("postgres", stripall=True)
-    tokens = pre_process_tokens(lexer.get_tokens(unformatted_code))
+    tokens = tokens_for_cli_output(unformatted_code, args.function)
 
     print(f'count={len(tokens)}')
     for t in tokens:
-        print(t)
-
-    tokens_after_first_pass = retokenize1(tokens)
-    tokens_after_second_pass = retokenize2(tokens_after_first_pass)
-
-    print(f'count={len(tokens_after_second_pass)}')
-    for t in tokens_after_second_pass:
         print(t)
