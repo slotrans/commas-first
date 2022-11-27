@@ -14,16 +14,21 @@ def setup_module():
 
 
 @pytest.fixture
-def trim_leading_whitespace_off():
-    sf_flags.TRIM_LEADING_WHITESPACE = False
+def mode__default():
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
 
 
 @pytest.fixture
-def trim_leading_whitespace_on():
-    sf_flags.TRIM_LEADING_WHITESPACE = True
+def mode__trim_leading_whitespace():
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
 
 
-class SameEitherWay:
+@pytest.fixture
+def mode__compact_expressions():
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
+
+
+class SameAnyWay:
     @classmethod
     def teardown_class(cls):
         sf_flags.reset_to_defaults()
@@ -31,21 +36,24 @@ class SameEitherWay:
     def actual_test(self):
         raise NotImplementedError
 
-    def test_trim_leading_off(self, trim_leading_whitespace_off):
+    def test_default(self, mode__default):
         self.actual_test()
 
-    def test_trim_leading_on(self, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, mode__trim_leading_whitespace):
+        self.actual_test()
+
+    def test_compact_expressions(self, mode__compact_expressions):
         self.actual_test()
 
 
-class TestEmpty(SameEitherWay):
+class TestEmpty(SameAnyWay):
     def actual_test(self):
         actual = Expression([]).render(indent=0)
         expected = ""
         assert expected == actual
 
 
-class TestLiterals(SameEitherWay):
+class TestLiterals(SameAnyWay):
     def actual_test(self):
         literals = [
             SFToken(SFTokenKind.LITERAL, "'foo'"),
@@ -60,7 +68,7 @@ class TestLiterals(SameEitherWay):
             assert expected == actual
 
 
-class TestBasicCompoundExpressions(SameEitherWay):
+class TestBasicCompoundExpressions(SameAnyWay):
     def actual_test(self):
         token_sequences = [
             #a + b
@@ -80,7 +88,7 @@ class TestBasicCompoundExpressions(SameEitherWay):
             assert expected == actual
 
 
-class TestCaseWithNewlines(SameEitherWay):
+class TestCaseWithNewlines(SameAnyWay):
     def actual_test(self):
         #case when foo = 0
         #     then 'zero'
@@ -156,15 +164,18 @@ class TestExpressionWhitespaceTrimmingTrivial:
             SFToken(SFTokenKind.SPACES, " "),
         ]
 
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_default(self, tokens, mode__default):
         actual = Expression(tokens).render(indent=0)
         expected = " sysdate"
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         actual = Expression(tokens).render(indent=0)
         expected = "sysdate"
         assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        assert False
 
 
 class TestExpressionWhitespaceTrimmingTrailingComma:
@@ -184,12 +195,15 @@ class TestExpressionWhitespaceTrimmingTrailingComma:
             SFToken(SFTokenKind.WORD, "BAR"),
         ]
 
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_default(self, tokens, mode__default):
         actual = Expression(tokens).render(indent=0)
         expected = "\n    foo as BAR"
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         actual = Expression(tokens).render(indent=0)
         expected = "foo as BAR"
         assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        assert False

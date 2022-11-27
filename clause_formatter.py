@@ -249,13 +249,13 @@ class Expression:
 
     def _parse(self, tokens):
         temp = trim_trailing_whitespace(tokens)
-        
-        if sf_flags.TRIM_LEADING_WHITESPACE:
+
+        if sf_flags.FORMAT_MODE == sf_flags.FormatMode.TRIM_LEADING_WHITESPACE:
             temp2 = trim_leading_whitespace(temp)
         else:
             temp2 = trim_one_leading_space(temp)
 
-        if sf_flags.COMPACT_EXPRESSIONS:
+        if sf_flags.FORMAT_MODE == sf_flags.FormatMode.COMPACT_EXPRESSIONS:
             temp3 = make_compact(temp2)
         else:
             temp3 = temp2

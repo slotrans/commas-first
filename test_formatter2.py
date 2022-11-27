@@ -769,8 +769,7 @@ select foo
     ids=qft.get_ids()
 )
 def test_do_format__default(test_input, expected_output):
-    sf_flags.TRIM_LEADING_WHITESPACE = False
-    sf_flags.COMPACT_EXPRESSIONS = False
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
@@ -783,8 +782,7 @@ def test_do_format__default(test_input, expected_output):
     ids=qft.get_ids()
 )
 def test_do_format__trim_leading_whitespace(test_input, expected_output):
-    sf_flags.TRIM_LEADING_WHITESPACE = True
-    sf_flags.COMPACT_EXPRESSIONS = False
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
@@ -797,8 +795,7 @@ def test_do_format__trim_leading_whitespace(test_input, expected_output):
     ids=qft.get_ids()
 )
 def test_do_format__compact_expressions(test_input, expected_output):
-    sf_flags.TRIM_LEADING_WHITESPACE = True
-    sf_flags.COMPACT_EXPRESSIONS = True
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))

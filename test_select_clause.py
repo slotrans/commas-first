@@ -15,14 +15,18 @@ def setup_module():
 
 
 @pytest.fixture
-def trim_leading_whitespace_off():
-    sf_flags.TRIM_LEADING_WHITESPACE = False
+def mode__default():
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
 
 
 @pytest.fixture
-def trim_leading_whitespace_on():
-    sf_flags.TRIM_LEADING_WHITESPACE = True
+def mode__trim_leading_whitespace():
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
 
+
+@pytest.fixture
+def mode__compact_expressions():
+    sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
 
 
 def test_creation_fails_on_empty_input():
@@ -359,7 +363,7 @@ class TestRenderSimpleExpressionsCrappyIndentation():
 
     # this is kind of a silly test in that this behavior is not particularly _desirable_,
     # but it is what you get from this input in this mode
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_default(self, tokens, mode__default):
         clause = SelectClause(tokens)
         expected = (
             "select \n"
@@ -374,7 +378,7 @@ class TestRenderSimpleExpressionsCrappyIndentation():
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -385,6 +389,9 @@ class TestRenderSimpleExpressionsCrappyIndentation():
 
         print(actual)
         assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        assert False
 
 
 def test_render_simple_expressions_no_indentation():
@@ -637,7 +644,7 @@ class TestCustomSpacing:
             SFToken(SFTokenKind.WORD, "l182"),
         ]
 
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_default(self, tokens, mode__default):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -650,7 +657,7 @@ class TestCustomSpacing:
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -662,6 +669,9 @@ class TestCustomSpacing:
 
         print(actual)
         assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        assert False
 
 
 def test_hand_formatted_case():
@@ -793,7 +803,7 @@ class TestPoorlyFormattedCase():
             SFToken(SFTokenKind.WORD, "stuff"),
         ]
 
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_default(self, tokens, mode__default):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -810,7 +820,7 @@ class TestPoorlyFormattedCase():
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -826,6 +836,9 @@ class TestPoorlyFormattedCase():
 
         print(actual)
         assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        assert False
 
 
 class TestMultipleExpressionsPerLine():
@@ -865,7 +878,7 @@ class TestMultipleExpressionsPerLine():
 
     # again this result is not exactly desirable but nevertheless it's what you get
     # not sure if the trailing spaces should be considered acceptable
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_default(self, tokens, mode__default):
         clause = SelectClause(tokens)
         expected = (
             "select \n"
@@ -883,7 +896,7 @@ class TestMultipleExpressionsPerLine():
         print(actual)
         assert expected == actual
 
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -897,6 +910,9 @@ class TestMultipleExpressionsPerLine():
 
         print(actual)
         assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        assert False
 
 
 class TestRenderScalarSubquery():
@@ -939,7 +955,7 @@ class TestRenderScalarSubquery():
         ]
 
     # off and on should be identical
-    def test_trim_leading_off(self, tokens, trim_leading_whitespace_off):
+    def test_default(self, tokens, mode__default):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -955,7 +971,7 @@ class TestRenderScalarSubquery():
         assert expected == actual
 
     # off and on should be identical
-    def test_trim_leading_on(self, tokens, trim_leading_whitespace_on):
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         clause = SelectClause(tokens)
         expected = (
             "select foo\n"
@@ -969,3 +985,6 @@ class TestRenderScalarSubquery():
 
         print(actual)
         assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        assert False
