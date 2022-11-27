@@ -391,7 +391,16 @@ class TestRenderSimpleExpressionsCrappyIndentation():
         assert expected == actual
 
     def test_compact_expressions(self, tokens, mode__compact_expressions):
-        assert False
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
 def test_render_simple_expressions_no_indentation():
@@ -671,7 +680,17 @@ class TestCustomSpacing:
         assert expected == actual
 
     def test_compact_expressions(self, tokens, mode__compact_expressions):
-        assert False
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , l7\n"
+            "     , l30\n"
+            "     , l182"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
 def test_hand_formatted_case():
@@ -838,7 +857,16 @@ class TestPoorlyFormattedCase():
         assert expected == actual
 
     def test_compact_expressions(self, tokens, mode__compact_expressions):
-        assert False
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , case when bar then 1 when baz then 2 else 3 end as BLERGH\n"
+            "     , stuff"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
 class TestMultipleExpressionsPerLine():
@@ -912,7 +940,19 @@ class TestMultipleExpressionsPerLine():
         assert expected == actual
 
     def test_compact_expressions(self, tokens, mode__compact_expressions):
-        assert False
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , bar\n"
+            "     , l7\n"
+            "     , l28\n"
+            "     , l91\n"
+            "     , stuff"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
 class TestRenderScalarSubquery():
@@ -954,7 +994,8 @@ class TestRenderScalarSubquery():
             SFToken(SFTokenKind.WORD, "baz"),
         ]
 
-    # off and on should be identical
+    # formatting mode doesn't affect this one
+
     def test_default(self, tokens, mode__default):
         clause = SelectClause(tokens)
         expected = (
@@ -970,7 +1011,6 @@ class TestRenderScalarSubquery():
         print(actual)
         assert expected == actual
 
-    # off and on should be identical
     def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
         clause = SelectClause(tokens)
         expected = (
@@ -987,4 +1027,16 @@ class TestRenderScalarSubquery():
         assert expected == actual
 
     def test_compact_expressions(self, tokens, mode__compact_expressions):
-        assert False
+        clause = SelectClause(tokens)
+        expected = (
+            "select foo\n"
+            "     , (select count(1)\n"
+            "          from bar\n"
+            "         where 1=1\n"
+            "       )\n"
+            "     , baz"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
