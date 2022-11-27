@@ -76,9 +76,9 @@ class TestBasicCompoundExpressions(SameAnyWay):
             #(1 + 2)
             [Symbols.LEFT_PAREN, SFToken(SFTokenKind.WORD, "1"), Whitespace.ONE_SPACE, SFToken(SFTokenKind.SYMBOL, "+"), Whitespace.ONE_SPACE, SFToken(SFTokenKind.WORD, "2"), Symbols.RIGHT_PAREN],
             #trunc(foo)
-            [],
+            [SFToken(SFTokenKind.WORD, "trunc"), Symbols.LEFT_PAREN, SFToken(SFTokenKind.WORD, "foo"), Symbols.RIGHT_PAREN],
             #round(foo, 0)
-            [],
+            [SFToken(SFTokenKind.WORD, "round"), Symbols.LEFT_PAREN, SFToken(SFTokenKind.WORD, "foo"), Symbols.COMMA, SFToken(SFTokenKind.SPACES, " "), SFToken(SFTokenKind.WORD, "0"), Symbols.RIGHT_PAREN],
             #
         ]
         for tseq in token_sequences:
