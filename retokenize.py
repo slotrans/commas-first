@@ -125,6 +125,12 @@ BLOCK_COMMENT_CLOSE = (Token.Comment.Multiline, '*/')
 
 ### FIRST PASS FUNCTIONS
 
+def initial_lex(unformatted_code):
+    lexer = get_lexer_by_name("postgres", stripall=True)
+    tokens = list(lexer.get_tokens(unformatted_code))
+    return tokens
+
+
 def pre_process_tokens(tokenlist):
     out = []
     for t in tokenlist:

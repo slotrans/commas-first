@@ -1,12 +1,8 @@
 import sys
 import argparse
 
-import pygments
-from pygments.lexers import get_lexer_by_name
-from pygments.token import Token
-
 import sf_flags
-from retokenize import pre_process_tokens, retokenize1, retokenize2, sftokenize
+from retokenize import pre_process_tokens, initial_lex, retokenize1, retokenize2, sftokenize
 from clause_formatter import CompoundStatement
 
 
@@ -18,8 +14,7 @@ def trim_trailing_whitespace_from_lines(input_string):
 
 
 def get_renderable(unformatted_code):
-    lexer = get_lexer_by_name("postgres", stripall=True)
-    tokens = pre_process_tokens(lexer.get_tokens(unformatted_code))
+    tokens = pre_process_tokens(initial_lex(unformatted_code))
 
     tokens_after_first_pass = retokenize1(tokens)
     tokens_after_second_pass = retokenize2(tokens_after_first_pass)
