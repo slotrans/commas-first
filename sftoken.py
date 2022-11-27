@@ -3,8 +3,6 @@ import enum
 from dataclasses import dataclass
 from types import SimpleNamespace
 
-from pygments.token import Token
-
 
 class SFTokenKind(enum.Enum):
     WORD = "WORD"
