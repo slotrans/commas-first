@@ -88,15 +88,20 @@ class TestBasicCompoundExpressions(SameAnyWay):
             assert expected == actual
 
 
-class TestCaseWithNewlines(SameAnyWay):
-    def actual_test(self):
+class TestCaseWithNewlines:
+    @classmethod
+    def teardown_class(cls):
+        sf_flags.reset_to_defaults()
+
+    @pytest.fixture
+    def tokens(self):
         #case when foo = 0
         #     then 'zero'
         #     when foo = 1
         #     then 'one'
         #     else 'more'
         #      end as HOW_MANY
-        expr = Expression([
+        return [
             SFToken(SFTokenKind.WORD, "case"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "when"),
@@ -137,8 +142,10 @@ class TestCaseWithNewlines(SameAnyWay):
             SFToken(SFTokenKind.WORD, "as"),
             SFToken(SFTokenKind.SPACES, " "),
             SFToken(SFTokenKind.WORD, "HOW_MANY"),
-        ])
-        actual = expr.render(indent=0)
+        ]
+
+    def test_default(self, tokens, mode__default):
+        actual = Expression(tokens).render(indent=0)
         expected = (
             "case when foo = 0\n"
             "     then 'zero'\n"
@@ -146,6 +153,27 @@ class TestCaseWithNewlines(SameAnyWay):
             "     then 'one'\n"
             "     else 'more'\n"
             "      end as HOW_MANY"
+        )
+        print(actual)
+        assert expected == actual
+
+    def test_trim_leading_whitespace(self, tokens, mode__trim_leading_whitespace):
+        actual = Expression(tokens).render(indent=0)
+        expected = (
+            "case when foo = 0\n"
+            "     then 'zero'\n"
+            "     when foo = 1\n"
+            "     then 'one'\n"
+            "     else 'more'\n"
+            "      end as HOW_MANY"
+        )
+        print(actual)
+        assert expected == actual
+
+    def test_compact_expressions(self, tokens, mode__compact_expressions):
+        actual = Expression(tokens).render(indent=0)
+        expected = (
+            "case when foo = 0 then 'zero' when foo = 1 then 'one' else 'more' end as HOW_MANY"
         )
         print(actual)
         assert expected == actual
@@ -175,7 +203,9 @@ class TestExpressionWhitespaceTrimmingTrivial:
         assert expected == actual
 
     def test_compact_expressions(self, tokens, mode__compact_expressions):
-        assert False
+        actual = Expression(tokens).render(indent=0)
+        expected = "sysdate"
+        assert expected == actual
 
 
 class TestExpressionWhitespaceTrimmingTrailingComma:
@@ -206,4 +236,6 @@ class TestExpressionWhitespaceTrimmingTrailingComma:
         assert expected == actual
 
     def test_compact_expressions(self, tokens, mode__compact_expressions):
-        assert False
+        actual = Expression(tokens).render(indent=0)
+        expected = "foo as BAR"
+        assert expected == actual
