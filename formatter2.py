@@ -39,7 +39,12 @@ def do_format(unformatted_code):
 
 def main(args):
     # set global flags
-    sf_flags.TRIM_LEADING_WHITESPACE = args.trim_leading_whitespace
+    if args.trim_leading_whitespace:
+        sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
+    elif args.compact_expressions:
+        sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
+    else:
+        sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
 
     # read
     unformatted_code = sys.stdin.read()
@@ -55,7 +60,11 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--trim-leading-whitespace", action="store_true", help="Trim leading whitespace from expressions")
+
+    mx_group = parser.add_mutually_exclusive_group(required=False)
+    mx_group.add_argument("--trim-leading-whitespace", action="store_true", help="Trim leading whitespace from expressions")
+    mx_group.add_argument("--compact-expressions", action="store_true", help="Remove most internal space from expressions (strictly more aggressive than --trim-leading-whitespace)")
+
     args = parser.parse_args()
 
     sys.exit(main(args))
