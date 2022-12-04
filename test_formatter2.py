@@ -762,6 +762,102 @@ select foo
 """,
 )
 
+qft.nested_cte = dict(
+input = """\
+with foo as (
+    with bar as (
+        select a, b, c
+        from blergh
+        where 1=1
+        and a > b
+    )
+    select a, b + c as WHATEVER
+    from bar
+    where 1=1
+    and c is not null
+)
+select whatever, count(a)
+from foo
+where 1=1
+group by whatever
+""",
+
+default="""\
+with foo as
+(
+    with bar as
+    (
+        select a
+             , b
+             , c
+          from blergh
+         where 1=1
+           and a > b
+    )
+    select a
+         , b + c as WHATEVER
+      from bar
+     where 1=1
+       and c is not null
+)
+select whatever
+     , count(a)
+  from foo
+ where 1=1
+ group by whatever
+""",
+
+trim_leading_whitespace="""\
+with foo as
+(
+    with bar as
+    (
+        select a
+             , b
+             , c
+          from blergh
+         where 1=1
+           and a > b
+    )
+    select a
+         , b + c as WHATEVER
+      from bar
+     where 1=1
+       and c is not null
+)
+select whatever
+     , count(a)
+  from foo
+ where 1=1
+ group by whatever
+""",
+
+compact_expressions="""\
+with foo as
+(
+    with bar as
+    (
+        select a
+             , b
+             , c
+          from blergh
+         where 1=1
+           and a > b
+    )
+    select a
+         , b + c as WHATEVER
+      from bar
+     where 1=1
+       and c is not null
+)
+select whatever
+     , count(a)
+  from foo
+ where 1=1
+ group by whatever
+""",
+)
+
 
 @pytest.mark.parametrize(
     "test_input,expected_output",

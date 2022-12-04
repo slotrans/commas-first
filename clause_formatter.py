@@ -901,7 +901,7 @@ class Statement:
             tok = tokens[i]
 
             # subqueries are not valid in all scopes but we'll punt on that for now
-            if tok == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) == Keywords.SELECT:
+            if tok == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) in [Keywords.SELECT, Keywords.WITH]:
                 subquery_tokens = get_paren_block(tokens[i:])
                 if subquery_tokens is None:
                     # unbalanced parens

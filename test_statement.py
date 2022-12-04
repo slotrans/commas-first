@@ -949,7 +949,114 @@ class TestStatement:
         actual = statement.render(indent=0)
 
         print(actual)
-        assert expected == actual        
+        assert expected == actual
+
+
+    def test_two_ctes(self):
+        # with cte1 as (select 1), cte2 as (select 2) select foo from table1
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.WORD, "with"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "cte1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            Symbols.COMMA,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "cte2"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "2"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "table1"),
+        ])
+
+        expected = (
+            "with cte1 as\n"
+            "(\n"
+            "    select 1\n"
+            ")\n"
+            ", cte2 as\n"
+            "(\n"
+            "    select 2\n"
+            ")\n"
+            "select foo\n"
+            "  from table1"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_nested_cte(self):
+        # with cte1 as (with cte2 as (select 1)) select foo from table1
+        statement = Statement(tokens=[
+            SFToken(SFTokenKind.WORD, "with"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "cte1"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "as"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "with"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "cte2"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "as"),
+                Symbols.LEFT_PAREN,
+                CompoundStatement([
+                    SFToken(SFTokenKind.WORD, "select"),
+                    SFToken(SFTokenKind.SPACES, " "),
+                    SFToken(SFTokenKind.WORD, "1"),
+                ]),
+                Symbols.RIGHT_PAREN,
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.WORD, "select"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "foo"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "table1"),
+        ])
+
+        expected = (
+            "with cte1 as\n"
+            "(\n"
+            "    with cte2 as\n"
+            "    (\n"
+            "        select 1\n"
+            "    )\n"
+            ")\n"
+            "select foo\n"
+            "  from table1"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
 
 
     def test_block_comment_before_select(self):
@@ -981,7 +1088,7 @@ class TestStatement:
 
 
     def test_line_comment_before_select(self):
-        # --hey 
+        # --hey
         # select foo, bar, baz
         statement = Statement(tokens=[
             SFToken(SFTokenKind.LINE_COMMENT, "--hey\n"),
