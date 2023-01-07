@@ -413,6 +413,14 @@ def retokenize1(tokens):
             i += tokens_consumed
             continue
 
+        # block comments
+        if i+2 < length and tokens[i] == BLOCK_COMMENT_OPEN:
+            block_comment, tokens_consumed = get_block_comment(tokens[i:])
+            if block_comment:
+                out.append(block_comment)
+                i += tokens_consumed
+                continue
+
         # whitespace
         if tokens[i][0] is Token.Text.Whitespace:
             out += explode_whitespace(tokens[i])

@@ -920,6 +920,37 @@ def test_retokenize1_double_and_backtick_quoted_literals():
     assert expected_tokens == actual_tokens
 
 
+def test_retokenize1_block_comment():
+    sql = (
+        "select foo /* i am a comment */\n"
+        "  from bar\n"
+        " where 1=1"
+    )
+    tokens = retokenize.initial_lex(sql)
+    actual_tokens = retokenize.retokenize1(tokens)
+    expected_tokens = [
+        (Token.Keyword, 'select'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'foo'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Comment.Multiline, '/* i am a comment */'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, '  '),
+        (Token.Keyword, 'from'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Name, 'bar'),
+        (Token.Text.Whitespace, '\n'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Keyword, 'where'),
+        (Token.Text.Whitespace, ' '),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Operator, '='),
+        (Token.Literal.Number.Float, '1'),
+        (Token.Text.Whitespace, '\n'),
+    ]
+    assert expected_tokens == actual_tokens
+
+
 # not a fully isolated test of retokenize2 because it calls retokenize1...
 def test_retokenize2_qualified_identifiers():
     sql = (
