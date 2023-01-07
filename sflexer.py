@@ -10,7 +10,7 @@ def get_char(deq):
         return None
 
 
-def lex(input_string):
+def lex_stateful(input_string):
     if input_string is None or len(input_string) == 0:
         return []
 
@@ -94,5 +94,91 @@ def lex(input_string):
         #   this is our dumping ground... if we haven't matched anything else, it must(?) be a symbol, which in practice means
         #   actual symbols, control characters, plus most weird unicode stuff if it appears outside of quotes
         tokens.append(SFToken(SFTokenKind.SYMBOL, last_char))
+
+    return tokens
+
+
+# alternate approach...
+def lex(input_string):
+    if input_string is None or len(input_string) == 0:
+        return []
+
+    tokens = []
+
+    i = 0
+    while i < len(input_string):
+        # space(s)
+        if " " == input_string[i]:
+            j = i + 1
+            while j < len(input_string):
+                if input_string[j] != " ":
+                    break
+                j += 1
+            spaces = j - i
+            tokens.append(SFToken(SFTokenKind.SPACES, " "*spaces))
+            i = j
+            continue
+
+        # newline
+        if "\n" == input_string[i]:
+            tokens.append(SFToken(SFTokenKind.NEWLINE, "\n"))
+            i += 1
+            continue
+
+        # single-quoted string
+        if "'" == input_string[i]:
+            raise NotImplementedError
+
+        # double-quoted string
+        if '"' == input_string[i]:
+            raise NotImplementedError
+
+        # backtick-quoted string
+        if "`" == input_string[i]:
+            raise NotImplementedError
+
+        # dollar-quoted string
+        if "$" == input_string[i]:
+            # more to this, gotta look for $$ but also $foo$
+            raise NotImplementedError
+
+        # line comment
+        if "--" == input_string[i:i+2]:
+            j = i + 2
+            while j < len(input_string):
+                if input_string[j] == "\n":
+                    break
+                j += 1
+            comment = input_string[i:j+1] # include the newline
+            tokens.append(SFToken(SFTokenKind.LINE_COMMENT, comment))
+            i = j + 1
+            continue
+
+        # block comment
+        if "/*" == input_string[i:i+2]:
+            j = i + 2
+            while j < len(input_string):
+                if input_string[j:j+2] == "*/":
+                    break
+                j += 1
+            comment = input_string[i:j+2] # capture the comment close symbol
+            tokens.append(SFToken(SFTokenKind.BLOCK_COMMENT, comment))
+            i = j + 2
+            continue
+
+        # alphanumeric word (incl. underscore)
+        if input_string[i].isalpha() or "_" == input_string[i]: # this may be too permissive, some non-ascii unicode have isalpha()=True
+            raise NotImplementedError
+
+        # numeric word (integer literals, float literals, scientific literals)
+        if input_string[i].isdigit() or "." == input_string[i]: # there are some wonky characters where isdigit()=True like "¹"
+            raise NotImplementedError
+
+        # symbol
+        #   this is our dumping ground... if we haven't matched anything else, it must(?) be a symbol, which in practice means
+        #   actual symbols, control characters, plus most weird unicode stuff if it appears outside of quotes
+        tokens.append(SFToken(SFTokenKind.SYMBOL, input_string[i]))
+        i += 1
+        continue
 
     return tokens
