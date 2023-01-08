@@ -3,6 +3,14 @@ import collections
 from sftoken import SFToken, SFTokenKind
 
 
+SINGLE_QUOTE = "'"
+DOUBLE_QUOTE = '"'
+BACKTICK = "`"
+BLOCK_COMMENT_OPEN = "/*"
+BLOCK_COMMENT_CLOSE = "*/"
+LINE_COMMENT_START = "--"
+
+
 def get_char(deq):
     try:
         return deq.popleft()
@@ -126,15 +134,28 @@ def lex(input_string):
             continue
 
         # single-quoted string
-        if "'" == input_string[i]:
-            raise NotImplementedError
+        if SINGLE_QUOTE == input_string[i]:
+            j = i + 1
+            while j < len(input_string):
+                if input_string[j] == SINGLE_QUOTE:
+                    if input_string[j+1:j+2] == SINGLE_QUOTE:
+                        # escaped quote
+                        j += 2
+                        continue
+                    else:
+                        break
+                j += 1
+            string_literal = input_string[i:j+1] # capture the closing quote
+            tokens.append(SFToken(SFTokenKind.LITERAL, string_literal))
+            i = j + 1
+            continue
 
         # double-quoted string
-        if '"' == input_string[i]:
+        if DOUBLE_QUOTE == input_string[i]:
             raise NotImplementedError
 
         # backtick-quoted string
-        if "`" == input_string[i]:
+        if BACKTICK == input_string[i]:
             raise NotImplementedError
 
         # dollar-quoted string
@@ -143,7 +164,7 @@ def lex(input_string):
             raise NotImplementedError
 
         # line comment
-        if "--" == input_string[i:i+2]:
+        if LINE_COMMENT_START == input_string[i:i+2]:
             j = i + 2
             while j < len(input_string):
                 if input_string[j] == "\n":
@@ -155,10 +176,10 @@ def lex(input_string):
             continue
 
         # block comment
-        if "/*" == input_string[i:i+2]:
+        if BLOCK_COMMENT_OPEN == input_string[i:i+2]:
             j = i + 2
             while j < len(input_string):
-                if input_string[j:j+2] == "*/":
+                if input_string[j:j+2] == BLOCK_COMMENT_CLOSE:
                     break
                 j += 1
             comment = input_string[i:j+2] # capture the comment close symbol
@@ -168,11 +189,27 @@ def lex(input_string):
 
         # alphanumeric word (incl. underscore)
         if input_string[i].isalpha() or "_" == input_string[i]: # this may be too permissive, some non-ascii unicode have isalpha()=True
-            raise NotImplementedError
+            j = i + 1
+            while j < len(input_string):
+                if not (input_string[j].isalpha() or "_" == input_string[j]):
+                    break
+                j += 1
+            word = input_string[i:j]
+            tokens.append(SFToken(SFTokenKind.WORD, word))
+            i = j
+            continue
 
         # numeric word (integer literals, float literals, scientific literals)
         if input_string[i].isdigit() or "." == input_string[i]: # there are some wonky characters where isdigit()=True like "¹"
-            raise NotImplementedError
+            j = i + 1
+            while j < len(input_string):
+                if not (input_string[j].isdigit() or input_string[j] in [".", "e", "E"]): # not strict, matches crap like 1.e37E5e.8. etc
+                    break
+                j += 1
+            word = input_string[i:j]
+            tokens.append(SFToken(SFTokenKind.WORD, word))
+            i = j
+            continue
 
         # symbol
         #   this is our dumping ground... if we haven't matched anything else, it must(?) be a symbol, which in practice means

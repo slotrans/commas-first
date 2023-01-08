@@ -94,6 +94,13 @@ def test_single_quoted_literal():
     assert expected == actual
 
 
+def test_single_quoted_literal_with_escaped_quote():
+    text = "'bob''s'"
+    expected = [SFToken(SFTokenKind.LITERAL, "'bob''s'")]
+    actual = sflexer.lex(text)
+    assert expected == actual
+
+
 def test_double_quoted_identifier():
     text = '"identifier"'
     expected = [SFToken(SFTokenKind.LITERAL, '"identifier"')]
