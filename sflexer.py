@@ -150,6 +150,11 @@ def lex(input_string):
             i = j + 1
             continue
 
+        # supposedly the (ANTLR) grammar for quotes...
+        # fragment DQUOTA_STRING : '"' ( '\\'. | '""' | ~('"' | '\\') )* '"';
+        # fragment SQUOTA_STRING : '\'' ('\\'. | '\'\'' | ~('\'' | '\\'))* '\'';
+        # fragment BQUOTA_STRING : '`' ( '\\'. | '``' | ~('`' | '\\'))* '`';
+
         # double-quoted string
         if DOUBLE_QUOTE == input_string[i]:
             raise NotImplementedError
