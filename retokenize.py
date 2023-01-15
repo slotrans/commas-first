@@ -57,6 +57,7 @@ LEFT_JOIN = [(Token.Keyword, 'left'), (Token.Keyword, 'join')]
 RIGHT_JOIN = [(Token.Keyword, 'right'), (Token.Keyword, 'join')]
 NATURAL_JOIN = [(Token.Keyword, 'natural'), (Token.Keyword, 'join')]
 LATERAL_JOIN = [(Token.Keyword, 'lateral'), (Token.Keyword, 'join')]
+FULL_JOIN = [(Token.Keyword, 'full'), (Token.Keyword, 'join')]
 GROUP_BY = [(Token.Keyword, 'group'), (Token.Keyword, 'by')]
 ORDER_BY = [(Token.Keyword, 'order'), (Token.Keyword, 'by')]
 PARTITION_BY = [(Token.Keyword, 'partition'), (Token.Keyword, 'by')]
@@ -82,6 +83,7 @@ TWO_WORD_PHRASES = [
     RIGHT_JOIN,
     NATURAL_JOIN,
     LATERAL_JOIN,
+    FULL_JOIN,
     GROUP_BY,
     ORDER_BY,
     PARTITION_BY,

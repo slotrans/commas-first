@@ -710,6 +710,8 @@ class FromClause(BasicClause):
     STARTING_DELIMITER = Keywords.FROM
     OTHER_DELIMITERS = set([
         Keywords.CROSS_JOIN,
+        Keywords.FULL_JOIN,
+        Keywords.FULL_OUTER_JOIN,
         Keywords.INNER_JOIN,
         Keywords.JOIN,
         Keywords.LATERAL_JOIN,

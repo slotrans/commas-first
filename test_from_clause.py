@@ -483,6 +483,198 @@ class TestFromClause:
         assert expected == actual
 
 
+    def test_render_inline_view_with_left_join(self):
+        # "from baz left join (select foo from bar where 1=1) x on(true)"
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "left join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "foo"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "bar"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            Symbols.LEFT_PAREN,
+            SFToken(SFTokenKind.WORD, "true"),
+            Symbols.RIGHT_PAREN,
+        ])
+
+        expected = (
+            "  from baz\n"
+            "  left join (select foo\n"
+            "               from bar\n"
+            "              where 1=1\n"
+            "            ) x on(true)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_inline_view_with_left_outer_join(self):
+        # "from baz left outer join (select foo from bar where 1=1) x on(true)"
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "left outer join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "foo"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "bar"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            Symbols.LEFT_PAREN,
+            SFToken(SFTokenKind.WORD, "true"),
+            Symbols.RIGHT_PAREN,
+        ])
+
+        expected = (
+            "  from baz\n"
+            "  left outer join (select foo\n"
+            "                     from bar\n"
+            "                    where 1=1\n"
+            "                  ) x on(true)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_inline_view_with_full_join(self):
+        # "from baz full join (select foo from bar where 1=1) x on(true)"
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "full join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "foo"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "bar"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            Symbols.LEFT_PAREN,
+            SFToken(SFTokenKind.WORD, "true"),
+            Symbols.RIGHT_PAREN,
+        ])
+
+        expected = (
+            "  from baz\n"
+            "  full join (select foo\n"
+            "               from bar\n"
+            "              where 1=1\n"
+            "            ) x on(true)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_inline_view_with_full_outer_join(self):
+        # "from baz full join (select foo from bar where 1=1) x on(true)"
+        clause = FromClause(tokens=[
+            SFToken(SFTokenKind.WORD, "from"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "baz"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "full outer join"),
+            SFToken(SFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                SFToken(SFTokenKind.WORD, "select"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "foo"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "from"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "bar"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "where"),
+                SFToken(SFTokenKind.SPACES, " "),
+                SFToken(SFTokenKind.WORD, "1"),
+                SFToken(SFTokenKind.SYMBOL, "="),
+                SFToken(SFTokenKind.WORD, "1"),
+            ]),
+            Symbols.RIGHT_PAREN,
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "x"),
+            SFToken(SFTokenKind.SPACES, " "),
+            SFToken(SFTokenKind.WORD, "on"),
+            Symbols.LEFT_PAREN,
+            SFToken(SFTokenKind.WORD, "true"),
+            Symbols.RIGHT_PAREN,
+        ])
+
+        expected = (
+            "  from baz\n"
+            "  full outer join (select foo\n"
+            "                     from bar\n"
+            "                    where 1=1\n"
+            "                  ) x on(true)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
     def test_render_join_with_dbt_templating(self):
         # "from foo join {{ ref('__bar') }} bar on(foo.x = bar.x) join baz on(bar.y = baz.y)"
         clause = FromClause(tokens=[
