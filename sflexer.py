@@ -115,7 +115,10 @@ def lex(input_string):
 
     i = 0
     while i < len(input_string):
+        # https://www.postgresql.org/docs/current/sql-syntax-lexical.html
+
         # space(s)
+        # r"[ ]+"
         if " " == input_string[i]:
             j = i + 1
             while j < len(input_string):
@@ -134,6 +137,7 @@ def lex(input_string):
             continue
 
         # single-quoted string
+        # r"(')(\\.|''|[^'\\])*(')" somehow doesn't require re.DOTALL???
         if SINGLE_QUOTE == input_string[i]:
             j = i + 1
             while j < len(input_string):
@@ -164,11 +168,13 @@ def lex(input_string):
             raise NotImplementedError
 
         # dollar-quoted string
+        # r"(\$[A-Za-z0-9_]*\$)(.*?)(\1)" flags=re.DOTALL
         if "$" == input_string[i]:
             # more to this, gotta look for $$ but also $foo$
             raise NotImplementedError
 
         # line comment
+        # r"--.*?(\n|$)"
         if LINE_COMMENT_START == input_string[i:i+2]:
             j = i + 2
             while j < len(input_string):
@@ -181,6 +187,7 @@ def lex(input_string):
             continue
 
         # block comment
+        # r"(/\*)(.*?)(\*/)" flags=re.DOTALL
         if BLOCK_COMMENT_OPEN == input_string[i:i+2]:
             j = i + 2
             while j < len(input_string):
@@ -193,6 +200,9 @@ def lex(input_string):
             continue
 
         # alphanumeric word (incl. underscore)
+        # r"[A-Za-z0-9_]+" may need a word boundary (\b) at the end?
+        # also PG allows dollar-number placeholders e.g. $1
+        # and dollar signs in identifiers e.g. foo$bar (not SQL standard?)
         if input_string[i].isalpha() or "_" == input_string[i]: # this may be too permissive, some non-ascii unicode have isalpha()=True
             j = i + 1
             while j < len(input_string):
@@ -205,6 +215,11 @@ def lex(input_string):
             continue
 
         # numeric word (integer literals, float literals, scientific literals)
+        # r"[0-9]+"
+        # r"[0-9]+\.([0-9]+)?([eE][-+]?[0-9]+)?"
+        # r"([0-9]+)?\.[0-9]+([eE][-+]?[0-9]+)?"
+        # r"[0-9]+[eE][-+]?[0-9]+"
+        # but, it may be preferable to use the sloppy approach below, or a regex equivalent...
         if input_string[i].isdigit() or "." == input_string[i]: # there are some wonky characters where isdigit()=True like "¹"
             j = i + 1
             while j < len(input_string):
