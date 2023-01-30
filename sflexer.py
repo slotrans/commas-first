@@ -1,4 +1,5 @@
 import collections
+import re
 
 from sftoken import SFToken, SFTokenKind
 
@@ -111,24 +112,19 @@ def lex(input_string):
     if input_string is None or len(input_string) == 0:
         return []
 
+    RE_SPACES = re.compile(r"[ ]+")
+    RE_SINGLE_QUOTED_STRING = re.compile(r"(')(\\.|''|[^'\\])*(')")
+    RE_DOUBLE_QUOTED_STRING = re.compile(r'(")(\\.|""|[^"\\])*(")')
+    RE_BACKTICK_QUOTED_STRING = re.compile(r"(`)(\\.|``|[^`\\])*(`)")
+    RE_DOLLAR_QUOTED_STRING = re.compile(r"(\$[A-Za-z0-9_]*\$)(.*?)(\1)", flags=re.DOTALL)
+    RE_LINE_COMMENT = re.compile(r"--.*?(\n|$)")
+    RE_BLOCK_COMMENT = re.compile(r"(/\*)(.*?)(\*/)", flags=re.DOTALL)
+
     tokens = []
 
     i = 0
     while i < len(input_string):
         # https://www.postgresql.org/docs/current/sql-syntax-lexical.html
-
-        # space(s)
-        # r"[ ]+"
-        if " " == input_string[i]:
-            j = i + 1
-            while j < len(input_string):
-                if input_string[j] != " ":
-                    break
-                j += 1
-            spaces = j - i
-            tokens.append(SFToken(SFTokenKind.SPACES, " "*spaces))
-            i = j
-            continue
 
         # newline
         if "\n" == input_string[i]:
@@ -136,22 +132,12 @@ def lex(input_string):
             i += 1
             continue
 
-        # single-quoted string
-        # r"(')(\\.|''|[^'\\])*(')" somehow doesn't require re.DOTALL???
-        if SINGLE_QUOTE == input_string[i]:
-            j = i + 1
-            while j < len(input_string):
-                if input_string[j] == SINGLE_QUOTE:
-                    if input_string[j+1:j+2] == SINGLE_QUOTE:
-                        # escaped quote
-                        j += 2
-                        continue
-                    else:
-                        break
-                j += 1
-            string_literal = input_string[i:j+1] # capture the closing quote
-            tokens.append(SFToken(SFTokenKind.LITERAL, string_literal))
-            i = j + 1
+        # space(s)
+        match_res = RE_SPACES.match(input_string[i:])
+        if match_res:
+            string_of_spaces = match_res[0]
+            tokens.append(SFToken(SFTokenKind.SPACES, string_of_spaces))
+            i += len(string_of_spaces)
             continue
 
         # supposedly the (ANTLR) grammar for quotes...
@@ -159,44 +145,34 @@ def lex(input_string):
         # fragment SQUOTA_STRING : '\'' ('\\'. | '\'\'' | ~('\'' | '\\'))* '\'';
         # fragment BQUOTA_STRING : '`' ( '\\'. | '``' | ~('`' | '\\'))* '`';
 
-        # double-quoted string
-        if DOUBLE_QUOTE == input_string[i]:
-            raise NotImplementedError
-
-        # backtick-quoted string
-        if BACKTICK == input_string[i]:
-            raise NotImplementedError
-
-        # dollar-quoted string
-        # r"(\$[A-Za-z0-9_]*\$)(.*?)(\1)" flags=re.DOTALL
-        if "$" == input_string[i]:
-            # more to this, gotta look for $$ but also $foo$
-            raise NotImplementedError
+        # all kinds of quoted strings
+        match_res = RE_SINGLE_QUOTED_STRING.match(input_string[i:])
+        if not match_res:
+            match_res = RE_DOUBLE_QUOTED_STRING.match(input_string[i:])
+        if not match_res:
+            match_res = RE_BACKTICK_QUOTED_STRING.match(input_string[i:])
+        if not match_res:
+            match_res = RE_DOLLAR_QUOTED_STRING.match(input_string[i:])
+        if match_res:
+            string_literal = match_res[0]
+            tokens.append(SFToken(SFTokenKind.LITERAL, string_literal))
+            i += len(string_literal)
+            continue
 
         # line comment
-        # r"--.*?(\n|$)"
-        if LINE_COMMENT_START == input_string[i:i+2]:
-            j = i + 2
-            while j < len(input_string):
-                if input_string[j] == "\n":
-                    break
-                j += 1
-            comment = input_string[i:j+1] # include the newline
-            tokens.append(SFToken(SFTokenKind.LINE_COMMENT, comment))
-            i = j + 1
+        match_res = RE_LINE_COMMENT.match(input_string[i:])
+        if match_res:
+            line_comment = match_res[0]
+            tokens.append(SFToken(SFTokenKind.LINE_COMMENT, line_comment))
+            i += len(line_comment)
             continue
 
         # block comment
-        # r"(/\*)(.*?)(\*/)" flags=re.DOTALL
-        if BLOCK_COMMENT_OPEN == input_string[i:i+2]:
-            j = i + 2
-            while j < len(input_string):
-                if input_string[j:j+2] == BLOCK_COMMENT_CLOSE:
-                    break
-                j += 1
-            comment = input_string[i:j+2] # capture the comment close symbol
-            tokens.append(SFToken(SFTokenKind.BLOCK_COMMENT, comment))
-            i = j + 2
+        match_res = RE_BLOCK_COMMENT.match(input_string[i:])
+        if match_res:
+            block_comment = match_res[0]
+            tokens.append(SFToken(SFTokenKind.BLOCK_COMMENT, block_comment))
+            i += len(block_comment)
             continue
 
         # alphanumeric word (incl. underscore)
