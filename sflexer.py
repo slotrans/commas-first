@@ -23,6 +23,7 @@ def lex(input_string):
     RE_DOLLAR_QUOTED_STRING = re.compile(r"(\$[A-Za-z0-9_]*\$)(.*?)(\1)", flags=re.DOTALL)
     RE_LINE_COMMENT = re.compile(r"--.*?(\n|$)")
     RE_BLOCK_COMMENT = re.compile(r"(/\*)(.*?)(\*/)", flags=re.DOTALL)
+    RE_ALPHANUMERIC_WORD = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
     tokens = []
 
@@ -80,18 +81,13 @@ def lex(input_string):
             continue
 
         # alphanumeric word (incl. underscore)
-        # r"[A-Za-z0-9_]+" may need a word boundary (\b) at the end?
-        # also PG allows dollar-number placeholders e.g. $1
-        # and dollar signs in identifiers e.g. foo$bar (not SQL standard?)
-        if input_string[i].isalpha() or "_" == input_string[i]: # this may be too permissive, some non-ascii unicode have isalpha()=True
-            j = i + 1
-            while j < len(input_string):
-                if not (input_string[j].isalpha() or "_" == input_string[j]):
-                    break
-                j += 1
-            word = input_string[i:j]
+        # TODO: also PG allows dollar-number placeholders e.g. $1
+        # TODO: and dollar signs in identifiers e.g. foo$bar (not SQL standard?)
+        match_res = RE_ALPHANUMERIC_WORD.match(input_string[i:])
+        if match_res:
+            word = match_res[0]
             tokens.append(SFToken(SFTokenKind.WORD, word))
-            i = j
+            i += len(word)
             continue
 
         # numeric word (integer literals, float literals, scientific literals)
@@ -100,14 +96,16 @@ def lex(input_string):
         # r"([0-9]+)?\.[0-9]+([eE][-+]?[0-9]+)?"
         # r"[0-9]+[eE][-+]?[0-9]+"
         # but, it may be preferable to use the sloppy approach below, or a regex equivalent...
-        if input_string[i].isdigit() or "." == input_string[i]: # there are some wonky characters where isdigit()=True like "¹"
+        if input_string[i].isdigit() or (
+            "." == input_string[i] and len(input_string) >= 2 and input_string[i+1].isdigit()
+        ): # btw there are some wonky characters where isdigit()=True like "¹"
             j = i + 1
             while j < len(input_string):
                 if not (input_string[j].isdigit() or input_string[j] in [".", "e", "E"]): # not strict, matches crap like 1.e37E5e.8. etc
                     break
                 j += 1
-            word = input_string[i:j]
-            tokens.append(SFToken(SFTokenKind.WORD, word))
+            numeric_word = input_string[i:j]
+            tokens.append(SFToken(SFTokenKind.WORD, numeric_word))
             i = j
             continue
 
@@ -119,3 +117,5 @@ def lex(input_string):
         continue
 
     return tokens
+
+

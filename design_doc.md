@@ -618,3 +618,15 @@ select foo
         - it's not the end of the world if the trim=OFF/compact=ON and trim=ON/compact=ON cases just have the same behavior
     - it also makes a lot of the tests for `make_compact()` pretty pointless, since any sequence of only whitespace should reduce to "empty list"... I am taking the approach of surrounding these whitespace sequences with words so that the whitespace-collapsing still gets tested
     - some end-to-end tests failing because of `and id in(select` because I want a space between `in` and `(` but the compaction rules discard that space... probably need a special case here since I don't generally see `in (...)` as equivalent to `fn_call(...)` even though they're structurally identical
+
+
+### 2023-02-04
+- Lexer thoughts...
+- An issue that's come up is dotted identifiers, because existing code transforms ["foo", ".", "bar"] into ["foo.bar"]. I'm not sure this is strictly necessary, and earlier design notes ponder that same question, but existing tests definitely assume that behavior.
+    - Specifically, the lexer outputs the individual tokens. Getting it to where it can assembled multiple dot-separated words into a single token in a single pass seems annoying. It's probably a lot easier to lex them individually and assemble them in a second pass.
+        - One issue with doing a second pass is that we've already built all the logic to assemble dotted identifiers (as well as phrases, etc) in `retokenize.py` except that it's done in terms of Pygments tokens (in and out). We would want the exact same logic, but with different input and output values. Not clear if there's a reasonable way to make this generic, or if the answer is simply to copy-and-paste.
+    - There's also the issue of whether [foo."bar"] is a _word_ or a _literal_, or if it this case reveals the need for some kind of composite thing.
+        - If we treat it as a literal then it means no post-lex code is allowed to change the case of the non-quoted parts.
+        - If we treat it as a word then post-lex code would need to know that some words can be re-cased and others (partially) can't, which would seem to defeat the purpose of having a word type in the first place.
+        - It also may simple make sense to handle re-casing _in the lexer_ rather than in the formatter, purely as a matter of convenience...
+- I think for now I will make my lexer ["foo", ".", "bar"] etc and plan on adapting `retokenize.py` when the time comes.

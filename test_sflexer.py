@@ -94,9 +94,23 @@ def test_single_quoted_literal():
     assert expected == actual
 
 
-def test_single_quoted_literal_with_escaped_quote():
+def test_single_quoted_literal_with_escaped_quote1():
     text = "'bob''s'"
     expected = [SFToken(SFTokenKind.LITERAL, "'bob''s'")]
+    actual = sflexer.lex(text)
+    assert expected == actual
+
+
+def test_single_quoted_literal_with_escaped_quote2():
+    text = r"'bob\'s'"
+    expected = [SFToken(SFTokenKind.LITERAL, r"'bob\'s'")]
+    actual = sflexer.lex(text)
+    assert expected == actual
+
+
+def test_single_quoted_literal_multiline():
+    text = "'line one\nline two'"
+    expected = [SFToken(SFTokenKind.LITERAL, "'line one\nline two'")]
     actual = sflexer.lex(text)
     assert expected == actual
 
@@ -108,6 +122,20 @@ def test_double_quoted_identifier():
     assert expected == actual
 
 
+def test_double_quoted_identifier_with_escaped_quote1():
+    text = '"this is a ""bad"" identifier"'
+    expected = [SFToken(SFTokenKind.LITERAL, '"this is a ""bad"" identifier"')]
+    actual = sflexer.lex(text)
+    assert expected == actual
+
+
+def test_double_quoted_identifier_with_escaped_quote2():
+    text = r'"this is a \"bad\" identifier"'
+    expected = [SFToken(SFTokenKind.LITERAL, r'"this is a \"bad\" identifier"')]
+    actual = sflexer.lex(text)
+    assert expected == actual
+
+
 def test_backtick_quoted_identifier():
     text = "`identifier`"
     expected = [SFToken(SFTokenKind.LITERAL, "`identifier`")]
@@ -115,9 +143,23 @@ def test_backtick_quoted_identifier():
     assert expected == actual
 
 
+def test_backtick_quoted_identifier_with_escaped_quote1():
+    text = "`one ``two`` three`"
+    expected = [SFToken(SFTokenKind.LITERAL, "`one ``two`` three`")]
+    actual = sflexer.lex(text)
+    assert expected == actual
+
+
+def test_backtick_quoted_identifier_with_escaped_quote2():
+    text = r"`one \`two\` three`"
+    expected = [SFToken(SFTokenKind.LITERAL, r"`one \`two\` three`")]
+    actual = sflexer.lex(text)
+    assert expected == actual
+
+
 def test_dotted_identifier():
     text = "foo.bar"
-    expected = [SFToken(SFTokenKind.WORD, "foo.bar")]
+    expected = [SFToken(SFTokenKind.WORD, "foo"), SFToken(SFTokenKind.SYMBOL, "."), SFToken(SFTokenKind.WORD, "bar")]
     actual = sflexer.lex(text)
     assert expected == actual
 
@@ -173,6 +215,8 @@ def test_symbols():
         "/",
         ":",
         ";",
+        ",",
+        ".",
     ]
 
     for s in symbols:
