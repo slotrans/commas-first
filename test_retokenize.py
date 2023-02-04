@@ -309,6 +309,15 @@ def test_qualified_identifier_with_quotes_two_dots():
     assert expected_consumed == actual_consumed
 
 
+def test_qualified_identifier_with_mixed_quotes():
+    tokens = retokenize.retokenize1(retokenize.initial_lex('alice."Bob"')) # [(Token.Name, 'alice'), (Token.Literal.Number.Float, '.'), (Token.Name, '"Bob"')]
+    actual_token, actual_consumed = retokenize.get_qualified_identifier(tokens)
+    expected_token = (Token.Name, 'alice."Bob"')
+    expected_consumed = 3
+    assert expected_token == actual_token
+    assert expected_consumed == actual_consumed
+
+
 ### TRANSLATION
 
 def test_translation_of_integer_literal():
@@ -358,6 +367,13 @@ def test_translation_of_quoted_double_qualified_identifier():
     actual = retokenize.pygments_token_to_sftoken(token)
     expected = SFToken(SFTokenKind.LITERAL, '"foo"."bar"."baz"')
     assert expected == actual
+
+def test_translation_of_mixed_quoted_single_qualified_identifier():
+    token = (Token.Name, 'foo."bar"')
+    actual = retokenize.pygments_token_to_sftoken(token)
+    expected = SFToken(SFTokenKind.LITERAL, 'foo."bar"')
+    assert expected == actual
+
 
 def test_translation_of_operators():
     for token in [
