@@ -1,6 +1,6 @@
 import re
 
-from sftoken import SFToken, SFTokenKind
+from sftoken import SFToken, SFTokenKind, Symbols
 
 
 SINGLE_QUOTE = "'"
@@ -198,7 +198,7 @@ def get_qualified_identifier(tokens):
 
     consumed = [tokens[0]]
     j = 1
-    while j+1 < length and tokens[j] == SFToken(SFTokenKind.SYMBOL, ".") and is_potential_identifier(tokens[j+1]):
+    while j+1 < length and tokens[j] == Symbols.DOT and is_potential_identifier(tokens[j+1]):
         consumed.append(tokens[j])
         consumed.append(tokens[j+1])
         j += 2
