@@ -630,3 +630,21 @@ select foo
         - If we treat it as a word then post-lex code would need to know that some words can be re-cased and others (partially) can't, which would seem to defeat the purpose of having a word type in the first place.
         - It also may simple make sense to handle re-casing _in the lexer_ rather than in the formatter, purely as a matter of convenience...
 - I think for now I will make my lexer ["foo", ".", "bar"] etc and plan on adapting `retokenize.py` when the time comes.
+
+
+### 2023-02-19
+- As an update to the above, it turns out that _most_ of what `retokenize` does isn't needed for `sflexer`.
+    - string literals are already assembled
+    - quoted identifiers are already assembled
+    - block comments are already assembled
+    - whitespace is already exploded
+- All that leaves is
+    - keyphrases
+    - dotted identifiers
+- Keyphrases were easily solved by regex-lexing them directly, which eliminates a ton of code
+- Code to handle dotted identifiers I just copied with minimal changes
+- One thing that changes though is that keywords/keyphrases are no longer lower-cased by default. Since they are all SFTokenKind.WORD, which compares case-insensitively, I _think_ this is fine, but I suspect it will blow me up at some point in the future...
+
+- Next step would be to go into `formatter2` and replace `retokenize` with `sflexer` and see what breaks!
+    - if that works, we can drop the dependency on Pygments, and all the support code around it
+    - it would also be possible to extend SFToken to track source text location, though I'm not 100% sure this would be valuable
