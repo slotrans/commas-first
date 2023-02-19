@@ -10,6 +10,46 @@ BLOCK_COMMENT_OPEN = "/*"
 BLOCK_COMMENT_CLOSE = "*/"
 LINE_COMMENT_START = "--"
 
+FOUR_WORD_PHRASES = [
+    'is not distinct from',
+]
+
+THREE_WORD_PHRASES = [
+    'left outer join',
+    'right outer join',
+    'full outer join',
+    'is not false',
+    'is not null',
+    'is not true',
+    'is not unknown',
+    'is distinct from',
+    'not between symmetric',
+    'at time zone',
+]
+
+TWO_WORD_PHRASES = [
+    'cross join',
+    'distinct on',
+    'left join',
+    'right join',
+    'group by',
+    'order by',
+    'partition by',
+    'within group',
+    'is false',
+    'is null',
+    'is true',
+    'is unknown',
+    'not between',
+    'between symmetric',
+    'union all',
+    'union distinct',
+    'except all',
+    'except distinct',
+    'intersect all',
+    'intersect distinct',
+]
+
 
 # alternate approach...
 def lex(input_string):
@@ -24,6 +64,9 @@ def lex(input_string):
     RE_LINE_COMMENT = re.compile(r"--.*?(\n|$)")
     RE_BLOCK_COMMENT = re.compile(r"(/\*)(.*?)(\*/)", flags=re.DOTALL)
     RE_ALPHANUMERIC_WORD = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+    RE_FOUR_WORD_KEYPHRASE = re.compile(f"({'|'.join(FOUR_WORD_PHRASES)})", flags=re.IGNORECASE)
+    RE_THREE_WORD_KEYPHRASE = re.compile(f"({'|'.join(THREE_WORD_PHRASES)})", flags=re.IGNORECASE)
+    RE_TWO_WORD_KEYPHRASE = re.compile(f"({'|'.join(TWO_WORD_PHRASES)})", flags=re.IGNORECASE)
 
     tokens = []
 
@@ -80,6 +123,18 @@ def lex(input_string):
             i += len(block_comment)
             continue
 
+        # keyphrases
+        match_res = RE_FOUR_WORD_KEYPHRASE.match(input_string[i:])
+        if not match_res:
+            match_res = RE_THREE_WORD_KEYPHRASE.match(input_string[i:])
+        if not match_res:
+            match_res = RE_TWO_WORD_KEYPHRASE.match(input_string[i:])
+        if match_res:
+            keyphrase = match_res[0]
+            tokens.append(SFToken(SFTokenKind.WORD, keyphrase))
+            i += len(keyphrase)
+            continue
+
         # alphanumeric word (incl. underscore)
         # TODO: also PG allows dollar-number placeholders e.g. $1
         # TODO: and dollar signs in identifiers e.g. foo$bar (not SQL standard?)
@@ -119,3 +174,57 @@ def lex(input_string):
     return tokens
 
 
+# TODO: should this be a method on SFToken???
+def is_potential_identifier(token):
+    if token.kind == SFTokenKind.WORD:
+        return True
+
+    if token.kind == SFTokenKind.LITERAL and token.value[0] != SINGLE_QUOTE:
+        return True
+
+    return False
+
+
+def get_qualified_identifier(tokens):
+    """
+    Consumes a series of dot-separated names, of any length.
+    Only foo.bar and foo.bar.baz are typically found in SQL, but: 
+    1) there are weird dialects out there,
+    2) we wish to be sloppy rather than strict in our parsing.
+    """
+    length = len(tokens)
+    if length < 3 or not is_potential_identifier(tokens[0]):
+        return (None, None)
+
+    consumed = [tokens[0]]
+    j = 1
+    while j+1 < length and tokens[j] == SFToken(SFTokenKind.SYMBOL, ".") and is_potential_identifier(tokens[j+1]):
+        consumed.append(tokens[j])
+        consumed.append(tokens[j+1])
+        j += 2
+
+    if any([t.kind == SFTokenKind.LITERAL for t in consumed]):
+        out_kind = SFTokenKind.LITERAL
+    else:
+        out_kind = SFTokenKind.WORD    
+    assembled_token = SFToken(out_kind, ''.join([t.value for t in consumed]))
+    return (assembled_token, len(consumed))
+
+
+def collapse_identifiers(tokens):
+    out = []
+    i = 0
+    length = len(tokens)
+    while i < length:
+        if i+2 < length:
+            phrase = tokens[i:i+5]
+            qualified_identifier, tokens_consumed = get_qualified_identifier(phrase)
+            if qualified_identifier:
+                out.append(qualified_identifier)
+                i += tokens_consumed
+                continue
+
+        out.append(tokens[i])
+        i += 1
+
+    return out
