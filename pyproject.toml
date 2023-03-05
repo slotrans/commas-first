@@ -6,7 +6,7 @@ authors = ["Noah Yetter <nyetter@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 Pygments = "^2.12.0"
 
 [tool.poetry.dev-dependencies]
