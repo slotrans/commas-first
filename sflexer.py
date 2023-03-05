@@ -51,7 +51,6 @@ TWO_WORD_PHRASES = [
 ]
 
 
-# alternate approach...
 def lex(input_string):
     if input_string is None or len(input_string) == 0:
         return []
