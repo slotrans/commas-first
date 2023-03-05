@@ -6,7 +6,7 @@ import pygments
 from pygments.lexers import get_lexer_by_name
 from pygments.token import Token
 
-from sftoken import SFToken, SFTokenKind
+from cftoken import CFToken, CFTokenKind
 
 
 IS_NOT_DISTINCT_FROM = [(Token.Keyword, 'is'), (Token.Keyword, 'not'), (Token.Keyword, 'distinct'), (Token.Keyword, 'from')]
@@ -326,40 +326,40 @@ def get_qualified_identifier(tokens):
 
 ### TRANSLATION FUNCTION(S)
 
-def pygments_token_to_sftoken(token):
+def pygments_token_to_cftoken(token):
     ttype, value = token
 
     # cases are alphabetical
     if ttype == Token.Comment.Multiline:
-        return SFToken(SFTokenKind.BLOCK_COMMENT, value)
+        return CFToken(CFTokenKind.BLOCK_COMMENT, value)
     elif ttype == Token.Comment.Single:
-        return SFToken(SFTokenKind.LINE_COMMENT, value)
+        return CFToken(CFTokenKind.LINE_COMMENT, value)
     elif ttype == Token.Keyword:
-        return SFToken(SFTokenKind.WORD, value)
+        return CFToken(CFTokenKind.WORD, value)
     elif ttype == Token.Literal.Number.Float:
-        return SFToken(SFTokenKind.LITERAL, value)
+        return CFToken(CFTokenKind.LITERAL, value)
     #elif ttype == Token.Literal.String.Name:
     #    pass
     elif ttype == Token.Literal.String.Single:
-        return SFToken(SFTokenKind.LITERAL, value)
+        return CFToken(CFTokenKind.LITERAL, value)
     elif ttype == Token.Name:
         if '"' in value or '`' in value:
-            return SFToken(SFTokenKind.LITERAL, value)
+            return CFToken(CFTokenKind.LITERAL, value)
         else:
-            return SFToken(SFTokenKind.WORD, value)
+            return CFToken(CFTokenKind.WORD, value)
     elif ttype == Token.Name.Builtin:
-        return SFToken(SFTokenKind.WORD, value)
+        return CFToken(CFTokenKind.WORD, value)
     elif ttype == Token.Operator:
-        return SFToken(SFTokenKind.SYMBOL, value)
+        return CFToken(CFTokenKind.SYMBOL, value)
     elif ttype == Token.Punctuation:
-        return SFToken(SFTokenKind.SYMBOL, value)
+        return CFToken(CFTokenKind.SYMBOL, value)
     elif ttype == Token.Error and value == "$":
-        return SFToken(SFTokenKind.SYMBOL, value)
+        return CFToken(CFTokenKind.SYMBOL, value)
     elif ttype == Token.Text.Whitespace:
         if value == "\n":
-            return SFToken(SFTokenKind.NEWLINE, "\n")
+            return CFToken(CFTokenKind.NEWLINE, "\n")
         elif all([c == " " for c in value]):
-            return SFToken(SFTokenKind.SPACES, value)
+            return CFToken(CFTokenKind.SPACES, value)
         else:
             raise ValueError(f"mixed/illegal whitespace value: '{value}'")
     else:
@@ -455,8 +455,8 @@ def retokenize2(tokens):
     return out
 
 
-def sftokenize(tokens):
-    return [pygments_token_to_sftoken(t) for t in tokens]
+def cftokenize(tokens):
+    return [pygments_token_to_cftoken(t) for t in tokens]
 
 
 def tokens_for_cli_output(unformatted_code, func_name):
@@ -476,8 +476,8 @@ def tokens_for_cli_output(unformatted_code, func_name):
     if func_name == "retokenize2":
         return tokens
 
-    tokens = sftokenize(tokens)
-    if func_name == "sftokenize":
+    tokens = cftokenize(tokens)
+    if func_name == "Cftokenize":
         return tokens
 
     raise ValueError(f"unknown func_name: {func_name}")
@@ -485,7 +485,7 @@ def tokens_for_cli_output(unformatted_code, func_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("Rough CLI for exercising retokenize.py (pass input on STDIN)")
-    parser.add_argument("--function", required=True, choices=["initial_lex", "pre_process_tokens", "retokenize1", "retokenize2", "sftokenize"], help="stage at which to stop and print output")
+    parser.add_argument("--function", required=True, choices=["initial_lex", "pre_process_tokens", "retokenize1", "retokenize2", "cftokenize"], help="stage at which to stop and print output")
     args = parser.parse_args()
     ##########################
 

@@ -3,7 +3,7 @@ import pytest
 from pygments.token import Token
 
 import retokenize
-from sftoken import SFToken, SFTokenKind
+from cftoken import CFToken, CFTokenKind
 
 
 ### FIRST PASS
@@ -322,56 +322,56 @@ def test_qualified_identifier_with_mixed_quotes():
 
 def test_translation_of_integer_literal():
     token = (Token.Literal.Number.Float, "42")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LITERAL, "42")
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LITERAL, "42")
     assert expected == actual
 
 def test_translation_of_ordinary_float_literal():
     token = (Token.Literal.Number.Float, "3.14")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LITERAL, "3.14")
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LITERAL, "3.14")
     assert expected == actual
 
 def test_translation_of_scientific_float_literal():
     token = (Token.Literal.Number.Float, "1e6")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LITERAL, "1e6")
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LITERAL, "1e6")
     assert expected == actual
 
 def test_translation_of_string_literal():
     token = (Token.Literal.String.Single, "'string literal'")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LITERAL, "'string literal'")
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LITERAL, "'string literal'")
     assert expected == actual
 
 def test_translation_of_unquoted_single_qualified_identifier():
     token = (Token.Name, "foo.bar")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.WORD, "foo.bar")
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.WORD, "foo.bar")
     assert expected == actual
 
 def test_translation_of_quoted_single_qualified_identifier():
     token = (Token.Name, '"foo"."bar"')
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LITERAL, '"foo"."bar"')
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LITERAL, '"foo"."bar"')
     assert expected == actual
 
 def test_translation_of_unquoted_double_qualified_identifier():
     token = (Token.Name, "foo.bar.baz")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.WORD, "foo.bar.baz")
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.WORD, "foo.bar.baz")
     assert expected == actual
 
 def test_translation_of_quoted_double_qualified_identifier():
     token = (Token.Name, '"foo"."bar"."baz"')
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LITERAL, '"foo"."bar"."baz"')
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LITERAL, '"foo"."bar"."baz"')
     assert expected == actual
 
 def test_translation_of_mixed_quoted_single_qualified_identifier():
     token = (Token.Name, 'foo."bar"')
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LITERAL, 'foo."bar"')
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LITERAL, 'foo."bar"')
     assert expected == actual
 
 
@@ -420,8 +420,8 @@ def test_translation_of_operators():
         (Token.Operator, '~='),
         # there are more...
     ]:
-        actual = retokenize.pygments_token_to_sftoken(token)
-        expected = SFToken(SFTokenKind.SYMBOL, token[1])
+        actual = retokenize.pygments_token_to_cftoken(token)
+        expected = CFToken(CFTokenKind.SYMBOL, token[1])
         assert expected == actual
 
 def test_translation_of_punctuation():
@@ -437,8 +437,8 @@ def test_translation_of_punctuation():
         (Token.Punctuation, '{'),
         (Token.Punctuation, '}'),
     ]:
-        actual = retokenize.pygments_token_to_sftoken(token)
-        expected = SFToken(SFTokenKind.SYMBOL, token[1])
+        actual = retokenize.pygments_token_to_cftoken(token)
+        expected = CFToken(CFTokenKind.SYMBOL, token[1])
         assert expected == actual
 
 def test_translation_of_spaces():
@@ -449,26 +449,26 @@ def test_translation_of_spaces():
         (Token.Text.Whitespace, "    "),
         # you get the point
     ]:
-        actual = retokenize.pygments_token_to_sftoken(token)
-        expected = SFToken(SFTokenKind.SPACES, token[1])
+        actual = retokenize.pygments_token_to_cftoken(token)
+        expected = CFToken(CFTokenKind.SPACES, token[1])
         assert expected == actual
 
 def test_translation_of_newline():
     token = (Token.Text.Whitespace, "\n")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.NEWLINE, token[1])
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.NEWLINE, token[1])
     assert expected == actual
 
 def test_translation_of_block_comment():
     token = (Token.Comment.Multiline, "/* block comment */")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.BLOCK_COMMENT, token[1])
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.BLOCK_COMMENT, token[1])
     assert expected == actual
 
 def test_translation_of_line_comment():
     token = (Token.Comment.Single, "--line comment\n")
-    actual = retokenize.pygments_token_to_sftoken(token)
-    expected = SFToken(SFTokenKind.LINE_COMMENT, token[1])
+    actual = retokenize.pygments_token_to_cftoken(token)
+    expected = CFToken(CFTokenKind.LINE_COMMENT, token[1])
     assert expected == actual
 
 

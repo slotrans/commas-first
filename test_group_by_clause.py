@@ -1,14 +1,14 @@
 import pytest
 
-import sf_flags
-from sftoken import SFToken
-from sftoken import SFTokenKind
+import cf_flags
+from cftoken import CFToken
+from cftoken import CFTokenKind
 from clause_formatter import GroupByClause
 
 
 # pytest magic
 def setup_module():
-    sf_flags.reset_to_defaults()
+    cf_flags.reset_to_defaults()
 
 
 class TestGroupByClause:
@@ -21,7 +21,7 @@ class TestGroupByClause:
 
 
     def test_render_zero_expressions(self):
-        clause = GroupByClause(tokens=[SFToken(SFTokenKind.WORD, "group by")])
+        clause = GroupByClause(tokens=[CFToken(CFTokenKind.WORD, "group by")])
 
         expected = " group by"
         actual = clause.render(indent=0)
@@ -32,9 +32,9 @@ class TestGroupByClause:
     def test_render_single_expression(self):
         # "group by foo"
         clause = GroupByClause(tokens=[
-            SFToken(SFTokenKind.WORD, "group by"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.WORD, "group by"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
         ])
 
         expected = (
@@ -49,15 +49,15 @@ class TestGroupByClause:
     def test_render_simple_expressions(self):
         # "group by foo, bar, baz"
         clause = GroupByClause(tokens=[
-            SFToken(SFTokenKind.WORD, "group by"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "baz"),
+            CFToken(CFTokenKind.WORD, "group by"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "baz"),
         ])
 
         expected = (

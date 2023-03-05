@@ -1,6 +1,6 @@
 import re
 
-from sftoken import SFToken, SFTokenKind, Symbols
+from cftoken import CFToken, CFTokenKind, Symbols
 
 
 SINGLE_QUOTE = "'"
@@ -75,7 +75,7 @@ def lex(input_string):
 
         # newline
         if "\n" == input_string[i]:
-            tokens.append(SFToken(SFTokenKind.NEWLINE, "\n"))
+            tokens.append(CFToken(CFTokenKind.NEWLINE, "\n"))
             i += 1
             continue
 
@@ -83,7 +83,7 @@ def lex(input_string):
         match_res = RE_SPACES.match(input_string[i:])
         if match_res:
             string_of_spaces = match_res[0]
-            tokens.append(SFToken(SFTokenKind.SPACES, string_of_spaces))
+            tokens.append(CFToken(CFTokenKind.SPACES, string_of_spaces))
             i += len(string_of_spaces)
             continue
 
@@ -102,7 +102,7 @@ def lex(input_string):
             match_res = RE_DOLLAR_QUOTED_STRING.match(input_string[i:])
         if match_res:
             string_literal = match_res[0]
-            tokens.append(SFToken(SFTokenKind.LITERAL, string_literal))
+            tokens.append(CFToken(CFTokenKind.LITERAL, string_literal))
             i += len(string_literal)
             continue
 
@@ -110,7 +110,7 @@ def lex(input_string):
         match_res = RE_LINE_COMMENT.match(input_string[i:])
         if match_res:
             line_comment = match_res[0]
-            tokens.append(SFToken(SFTokenKind.LINE_COMMENT, line_comment))
+            tokens.append(CFToken(CFTokenKind.LINE_COMMENT, line_comment))
             i += len(line_comment)
             continue
 
@@ -118,7 +118,7 @@ def lex(input_string):
         match_res = RE_BLOCK_COMMENT.match(input_string[i:])
         if match_res:
             block_comment = match_res[0]
-            tokens.append(SFToken(SFTokenKind.BLOCK_COMMENT, block_comment))
+            tokens.append(CFToken(CFTokenKind.BLOCK_COMMENT, block_comment))
             i += len(block_comment)
             continue
 
@@ -130,7 +130,7 @@ def lex(input_string):
             match_res = RE_TWO_WORD_KEYPHRASE.match(input_string[i:])
         if match_res:
             keyphrase = match_res[0]
-            tokens.append(SFToken(SFTokenKind.WORD, keyphrase))
+            tokens.append(CFToken(CFTokenKind.WORD, keyphrase))
             i += len(keyphrase)
             continue
 
@@ -140,7 +140,7 @@ def lex(input_string):
         match_res = RE_ALPHANUMERIC_WORD.match(input_string[i:])
         if match_res:
             word = match_res[0]
-            tokens.append(SFToken(SFTokenKind.WORD, word))
+            tokens.append(CFToken(CFTokenKind.WORD, word))
             i += len(word)
             continue
 
@@ -159,26 +159,26 @@ def lex(input_string):
                     break
                 j += 1
             numeric_word = input_string[i:j]
-            tokens.append(SFToken(SFTokenKind.WORD, numeric_word))
+            tokens.append(CFToken(CFTokenKind.WORD, numeric_word))
             i = j
             continue
 
         # symbol
         #   this is our dumping ground... if we haven't matched anything else, it must(?) be a symbol, which in practice means
         #   actual symbols, control characters, plus most weird unicode stuff if it appears outside of quotes
-        tokens.append(SFToken(SFTokenKind.SYMBOL, input_string[i]))
+        tokens.append(CFToken(CFTokenKind.SYMBOL, input_string[i]))
         i += 1
         continue
 
     return tokens
 
 
-# TODO: should this be a method on SFToken???
+# TODO: should this be a method on CFToken???
 def is_potential_identifier(token):
-    if token.kind == SFTokenKind.WORD:
+    if token.kind == CFTokenKind.WORD:
         return True
 
-    if token.kind == SFTokenKind.LITERAL and token.value[0] != SINGLE_QUOTE:
+    if token.kind == CFTokenKind.LITERAL and token.value[0] != SINGLE_QUOTE:
         return True
 
     return False
@@ -202,11 +202,11 @@ def get_qualified_identifier(tokens):
         consumed.append(tokens[j+1])
         j += 2
 
-    if any([t.kind == SFTokenKind.LITERAL for t in consumed]):
-        out_kind = SFTokenKind.LITERAL
+    if any([t.kind == CFTokenKind.LITERAL for t in consumed]):
+        out_kind = CFTokenKind.LITERAL
     else:
-        out_kind = SFTokenKind.WORD    
-    assembled_token = SFToken(out_kind, ''.join([t.value for t in consumed]))
+        out_kind = CFTokenKind.WORD    
+    assembled_token = CFToken(out_kind, ''.join([t.value for t in consumed]))
     return (assembled_token, len(consumed))
 
 

@@ -1,9 +1,9 @@
 import sys
 import argparse
 
-import sf_flags
-import sflexer
-from retokenize import pre_process_tokens, initial_lex, retokenize1, retokenize2, sftokenize
+import cf_flags
+import cflexer
+from retokenize import pre_process_tokens, initial_lex, retokenize1, retokenize2, cftokenize
 from clause_formatter import CompoundStatement
 
 
@@ -20,10 +20,10 @@ def get_renderable(unformatted_code, lexer_impl):
         pre_processed_tokens = pre_process_tokens(initial_tokens)
         tokens_after_first_pass = retokenize1(pre_processed_tokens)
         tokens_after_second_pass = retokenize2(tokens_after_first_pass)
-        final_tokens = sftokenize(tokens_after_second_pass)
-    elif lexer_impl == "sflexer":
-        tokens = sflexer.lex(unformatted_code)
-        final_tokens = sflexer.collapse_identifiers(tokens)
+        final_tokens = cftokenize(tokens_after_second_pass)
+    elif lexer_impl == "cflexer":
+        tokens = cflexer.lex(unformatted_code)
+        final_tokens = cflexer.collapse_identifiers(tokens)
     else:
         raise ValueError(f"unknown lexer_impl {lexer_impl}")
 
@@ -33,7 +33,7 @@ def get_renderable(unformatted_code, lexer_impl):
 
 
 def do_format(unformatted_code):
-    renderable = get_renderable(unformatted_code, "sflexer")
+    renderable = get_renderable(unformatted_code, "cflexer")
     rendered = renderable.render(indent=0)
     trimmed = trim_trailing_whitespace_from_lines(rendered)
     return trimmed
@@ -42,11 +42,11 @@ def do_format(unformatted_code):
 def main(args):
     # set global flags
     if args.trim_leading_whitespace:
-        sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
+        cf_flags.FORMAT_MODE = cf_flags.FormatMode.TRIM_LEADING_WHITESPACE
     elif args.compact_expressions:
-        sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
+        cf_flags.FORMAT_MODE = cf_flags.FormatMode.COMPACT_EXPRESSIONS
     else:
-        sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
+        cf_flags.FORMAT_MODE = cf_flags.FormatMode.DEFAULT
 
     # read
     unformatted_code = sys.stdin.read()

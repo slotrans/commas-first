@@ -1,14 +1,14 @@
 import pytest
 
-import sf_flags
-from sftoken import SFToken
-from sftoken import SFTokenKind
+import cf_flags
+from cftoken import CFToken
+from cftoken import CFTokenKind
 from clause_formatter import LimitOffsetClause
 
 
 # pytest magic
 def setup_module():
-    sf_flags.reset_to_defaults()
+    cf_flags.reset_to_defaults()
 
 
 class TestLimitOffsetClause:
@@ -21,7 +21,7 @@ class TestLimitOffsetClause:
 
 
     def test_render_limit_zero_expressions(self):
-        clause = LimitOffsetClause(tokens=[SFToken(SFTokenKind.WORD, "limit")])
+        clause = LimitOffsetClause(tokens=[CFToken(CFTokenKind.WORD, "limit")])
 
         expected = " limit"
         actual = clause.render(indent=0)
@@ -30,7 +30,7 @@ class TestLimitOffsetClause:
 
 
     def test_render_offset_zero_expressions(self):
-        clause = LimitOffsetClause(tokens=[SFToken(SFTokenKind.WORD, "offset")])
+        clause = LimitOffsetClause(tokens=[CFToken(CFTokenKind.WORD, "offset")])
 
         expected = "offset"
         actual = clause.render(indent=0)
@@ -40,9 +40,9 @@ class TestLimitOffsetClause:
 
     def test_render_limit_with_number(self):
         clause = LimitOffsetClause(tokens=[
-            SFToken(SFTokenKind.WORD, "limit"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "5"),
+            CFToken(CFTokenKind.WORD, "limit"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "5"),
         ])
 
         expected = " limit 5"
@@ -53,9 +53,9 @@ class TestLimitOffsetClause:
 
     def test_render_offset_with_number(self):
         clause = LimitOffsetClause(tokens=[
-            SFToken(SFTokenKind.WORD, "offset"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "5"),
+            CFToken(CFTokenKind.WORD, "offset"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "5"),
         ])
 
         expected = "offset 5"
@@ -66,13 +66,13 @@ class TestLimitOffsetClause:
 
     def test_render_limit_offset_with_numbers(self):
         clause = LimitOffsetClause(tokens=[
-            SFToken(SFTokenKind.WORD, "limit"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "offset"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.WORD, "limit"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "offset"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
         ])
 
         expected = (
@@ -86,13 +86,13 @@ class TestLimitOffsetClause:
 
     def test_render_offset_limit_with_numbers(self):
         clause = LimitOffsetClause(tokens=[
-            SFToken(SFTokenKind.WORD, "offset"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "limit"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.WORD, "offset"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "limit"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
         ])
 
         expected = (
@@ -107,21 +107,21 @@ class TestLimitOffsetClause:
     def test_render_limit_offset_with_extra_garbage(self):
         # limit foo bar baz offset 2 + 3
         clause = LimitOffsetClause(tokens=[
-            SFToken(SFTokenKind.WORD, "limit"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "baz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "offset"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "+"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "3"),
+            CFToken(CFTokenKind.WORD, "limit"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "baz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "offset"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "+"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "3"),
         ])
 
         expected = (
@@ -137,17 +137,17 @@ class TestLimitOffsetClause:
         # limit 1 --one
         #offset 2 --two
         clause = LimitOffsetClause(tokens=[
-            SFToken(SFTokenKind.WORD, "limit"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.LINE_COMMENT, "--one\n"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "offset"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.LINE_COMMENT, "--two\n"),
+            CFToken(CFTokenKind.WORD, "limit"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.LINE_COMMENT, "--one\n"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "offset"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.LINE_COMMENT, "--two\n"),
         ])
 
         expected = (
@@ -164,18 +164,18 @@ class TestLimitOffsetClause:
         # limit 1 /* one */
         #offset 2 /* two */
         clause = LimitOffsetClause(tokens=[
-            SFToken(SFTokenKind.WORD, "limit"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.BLOCK_COMMENT, "/* one */"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "offset"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.BLOCK_COMMENT, "/* two */"),
+            CFToken(CFTokenKind.WORD, "limit"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.BLOCK_COMMENT, "/* one */"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "offset"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.BLOCK_COMMENT, "/* two */"),
         ])
 
         expected = (

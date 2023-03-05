@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "sqlformatter"
-version = "1"
+name = "commas-first"
+version = "2"
 description = "Noah's opinionated SQL formatter"
 authors = ["Noah Yetter <nyetter@gmail.com>"]
 license = "MIT"

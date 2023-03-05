@@ -2,13 +2,13 @@ import pytest
 
 from pathlib import Path
 
-import sf_flags
+import cf_flags
 from formatter2 import do_format
 
 
 # pytest magic
 def setup_module():
-    sf_flags.reset_to_defaults()
+    cf_flags.reset_to_defaults()
 
 
 class QueriesForTest:
@@ -865,7 +865,7 @@ select whatever
     ids=qft.get_ids()
 )
 def test_do_format__default(test_input, expected_output):
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.DEFAULT
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
@@ -878,7 +878,7 @@ def test_do_format__default(test_input, expected_output):
     ids=qft.get_ids()
 )
 def test_do_format__trim_leading_whitespace(test_input, expected_output):
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.TRIM_LEADING_WHITESPACE
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))
@@ -891,7 +891,7 @@ def test_do_format__trim_leading_whitespace(test_input, expected_output):
     ids=qft.get_ids()
 )
 def test_do_format__compact_expressions(test_input, expected_output):
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.COMPACT_EXPRESSIONS
     actual_output = do_format(test_input)
     print(actual_output)
     #print(actual_output.replace(" ", "⦁"))

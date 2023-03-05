@@ -1,9 +1,9 @@
 import pytest
 
-import sf_flags
-from sftoken import (
-    SFToken,
-    SFTokenKind,
+import cf_flags
+from cftoken import (
+    CFToken,
+    CFTokenKind,
     Whitespace,
 )
 from clause_formatter import (
@@ -17,7 +17,7 @@ from clause_formatter import (
 
 # pytest magic
 def setup_module():
-    sf_flags.reset_to_defaults()
+    cf_flags.reset_to_defaults()
 
 
 class TestTrimTrailingWhitespace:
@@ -29,9 +29,9 @@ class TestTrimTrailingWhitespace:
 
     def test_no_whitespace(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens
@@ -42,10 +42,10 @@ class TestTrimTrailingWhitespace:
 
     def test_one_spaces_token(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
-            SFToken(SFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.SPACES, " "),
         ]
 
         expected = tokens[0:3]
@@ -56,10 +56,10 @@ class TestTrimTrailingWhitespace:
 
     def test_one_newline_token(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
         ]
 
         expected = tokens[0:3]
@@ -70,11 +70,11 @@ class TestTrimTrailingWhitespace:
 
     def test_multiple(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
         ]
 
         expected = tokens[0:3]
@@ -92,9 +92,9 @@ class TestTrimLeadingWhitespace:
 
     def test_no_whitespace(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens
@@ -105,10 +105,10 @@ class TestTrimLeadingWhitespace:
 
     def test_one_spaces_token(self):
         tokens = [
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens[1:]
@@ -119,10 +119,10 @@ class TestTrimLeadingWhitespace:
 
     def test_one_newline_token(self):
         tokens = [
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens[1:]
@@ -140,9 +140,9 @@ class TestTrimOneLeadingSpace:
 
     def test_no_whitespace(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens
@@ -153,10 +153,10 @@ class TestTrimOneLeadingSpace:
 
     def test_one_spaces_token(self):
         tokens = [
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens[1:]
@@ -167,15 +167,15 @@ class TestTrimOneLeadingSpace:
 
     def test_many_spaces_token(self):
         for i in range(2, 10): # enough examples to prove the point
-            token_with_i_spaces = SFToken(SFTokenKind.SPACES, " "*i)
+            token_with_i_spaces = CFToken(CFTokenKind.SPACES, " "*i)
             tokens = [
                 token_with_i_spaces,
-                SFToken(SFTokenKind.WORD, "x"),
-                SFToken(SFTokenKind.SYMBOL, "="),
-                SFToken(SFTokenKind.WORD, "y"),
+                CFToken(CFTokenKind.WORD, "x"),
+                CFToken(CFTokenKind.SYMBOL, "="),
+                CFToken(CFTokenKind.WORD, "y"),
             ]
 
-            one_space_shorter = SFToken(SFTokenKind.SPACES, " "*(i-1))
+            one_space_shorter = CFToken(CFTokenKind.SPACES, " "*(i-1))
             expected = [one_space_shorter] + tokens[1:]
             actual = trim_one_leading_space(tokens)
 
@@ -184,10 +184,10 @@ class TestTrimOneLeadingSpace:
 
     def test_one_newline_token(self):
         tokens = [
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens
@@ -198,11 +198,11 @@ class TestTrimOneLeadingSpace:
 
     def test_mixed_whitespace_starting_with_newline(self):
         tokens = [
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens
@@ -213,11 +213,11 @@ class TestTrimOneLeadingSpace:
 
     def test_mixed_whitespace_starting_with_one_space(self):
         tokens = [
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "x"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "y"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "x"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "y"),
         ]
 
         expected = tokens[1:]
@@ -234,15 +234,15 @@ class TestGetParenBlock:
 
     def test_inappropriate_input(self):
         with pytest.raises(ValueError):
-            get_paren_block([SFToken(SFTokenKind.WORD, "foo")])
+            get_paren_block([CFToken(CFTokenKind.WORD, "foo")])
 
 
     def test_incomplete_block(self):
         tokens = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
         ]
 
         actual = get_paren_block(tokens)
@@ -253,19 +253,19 @@ class TestGetParenBlock:
     def test_select_block(self):
         # (select foo from bar) extra tokens
         tokens = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "from"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "extra"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "tokens"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "from"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "extra"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "tokens"),
         ]
 
         expected = tokens[0:9]
@@ -277,25 +277,25 @@ class TestGetParenBlock:
     def test_select_block_with_function_call(self):
         # (select coalesce(foo, -1) from bar) extra tokens
         tokens = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "coalesce"),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "-1"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "from"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "extra"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "tokens"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "coalesce"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "-1"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "from"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "extra"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "tokens"),
         ]
 
         expected = tokens[0:15]
@@ -313,15 +313,15 @@ class TestMakeCompact:
 
     def test_one_space(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -329,15 +329,15 @@ class TestMakeCompact:
 
     def test_only_spaces(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -345,15 +345,15 @@ class TestMakeCompact:
 
     def test_only_newline(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -361,16 +361,16 @@ class TestMakeCompact:
 
     def test_spaces_then_newline(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -378,16 +378,16 @@ class TestMakeCompact:
 
     def test_newline_then_spaces(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -395,17 +395,17 @@ class TestMakeCompact:
 
     def test_spaces_around_newline(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -413,17 +413,17 @@ class TestMakeCompact:
 
     def test_newlines_around_spaces(self):
         tokens = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.WORD, "a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "b"),
+            CFToken(CFTokenKind.WORD, "a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "b"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -431,12 +431,12 @@ class TestMakeCompact:
 
     def test_left_paren_then_space(self):
         tokens = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, " "),
         ]
 
         expected = [
-            SFToken(SFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SYMBOL, "("),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -444,12 +444,12 @@ class TestMakeCompact:
 
     def test_space_then_right_paren(self):
         tokens = [
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
 
         expected = [
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -457,12 +457,12 @@ class TestMakeCompact:
 
     def test_space_then_comma(self):
         tokens = [
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
         ]
 
         expected = [
-            SFToken(SFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SYMBOL, ","),
         ]
         actual = make_compact(tokens)
         assert expected == actual
@@ -472,24 +472,24 @@ class TestMakeCompact:
     def test_packed_list(self):
         # (1,2,3)
         tokens = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.WORD, "3"),
-            SFToken(SFTokenKind.SYMBOL, ")")
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.WORD, "3"),
+            CFToken(CFTokenKind.SYMBOL, ")")
         ]
 
         # (1,2,3)
         expected = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.WORD, "3"),
-            SFToken(SFTokenKind.SYMBOL, ")")
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.WORD, "3"),
+            CFToken(CFTokenKind.SYMBOL, ")")
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -500,25 +500,25 @@ class TestMakeCompact:
     def test_spaces_in_list(self):
         # ( 1 , 2 )
         tokens = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ")")
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ")")
         ]
 
         # (1, 2)
         expected = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SYMBOL, ")")
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SYMBOL, ")")
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -529,27 +529,27 @@ class TestMakeCompact:
     def test_spaces_around_list(self):
         # ` ( 1 , 2 ) `
         tokens = [
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ")"),
-            SFToken(SFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, " "),
         ]
 
         # (1, 2)
         expected = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -564,50 +564,50 @@ class TestMakeCompact:
         #   else 0
         # end
         tokens = [
-            SFToken(SFTokenKind.WORD, "case"),
+            CFToken(CFTokenKind.WORD, "case"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ">"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ">"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "1"),
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "else"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "1"),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "else"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.WORD, "end"),
+            CFToken(CFTokenKind.WORD, "end"),
         ]
 
         # case when foo > 0 then 1 else 0 end
         expected = [
-            SFToken(SFTokenKind.WORD, "case"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ">"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "else"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "end"),
+            CFToken(CFTokenKind.WORD, "case"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ">"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "else"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "end"),
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -621,43 +621,43 @@ class TestMakeCompact:
         #     on foo.id = bar.foo_id
         #     and bar.active
         tokens = [
-            SFToken(SFTokenKind.WORD, "join"),
+            CFToken(CFTokenKind.WORD, "join"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "bar"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "on"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.id"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.foo_id"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "on"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.id"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.foo_id"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.active"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.active"),
         ]
 
         # join bar on foo.id = bar.foo_id and bar.active
         expected = [
-            SFToken(SFTokenKind.WORD, "join"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "on"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.id"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.foo_id"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.active"),
+            CFToken(CFTokenKind.WORD, "join"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "on"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.id"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.foo_id"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.active"),
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -672,35 +672,35 @@ class TestMakeCompact:
         #     0
         # )
         tokens = [
-            SFToken(SFTokenKind.WORD, "coalesce"),
-            SFToken(SFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "coalesce"),
+            CFToken(CFTokenKind.SYMBOL, "("),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ","),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
 
         # coalesce(foo, bar, 0)
         expected = [
-            SFToken(SFTokenKind.WORD, "coalesce"),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.WORD, "coalesce"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -715,38 +715,38 @@ class TestMakeCompact:
         #     0
         #  )
         tokens = [
-            SFToken(SFTokenKind.WORD, "coalesce"),
-            SFToken(SFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "coalesce"),
+            CFToken(CFTokenKind.SYMBOL, "("),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
 
         # coalesce(foo, bar, 0)
         expected = [
-            SFToken(SFTokenKind.WORD, "coalesce"),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.WORD, "coalesce"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -765,81 +765,81 @@ class TestMakeCompact:
         #  +
         # round ( baz , 2 )
         tokens = [
-            SFToken(SFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SYMBOL, "("),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.WORD, "case"),
+            CFToken(CFTokenKind.WORD, "case"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ">"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ">"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "1"),
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "else"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "1"),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "else"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.WORD, "end"),
+            CFToken(CFTokenKind.WORD, "end"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "+"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "+"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.WORD, "round"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "baz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.WORD, "round"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "baz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
 
         # (case when foo > 0 then 1 else 0 end) + round(baz, 2)
         expected = [
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "case"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ">"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "else"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "end"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "+"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "round"),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "baz"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "case"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ">"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "else"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "end"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "+"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "round"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "baz"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -850,21 +850,21 @@ class TestMakeCompact:
     def test_function_call_with_space(self):
         # max ( foo )
         tokens = [
-            SFToken(SFTokenKind.WORD, "max"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.WORD, "max"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
 
         # max(foo)
         expected = [
-            SFToken(SFTokenKind.WORD, "max"),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.WORD, "max"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ]
         actual = make_compact(tokens)
         for t in actual:
@@ -875,40 +875,40 @@ class TestMakeCompact:
     def test_in_list_special_case(self):
         # foo in ( 1 , 2 , 3 )
         tokens = [
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "in"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "3"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, ")")
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "in"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "3"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ")")
         ]
 
         # foo in (1, 2, 3)
         expected = [
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "in"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "3"),
-            SFToken(SFTokenKind.SYMBOL, ")")
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "in"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "3"),
+            CFToken(CFTokenKind.SYMBOL, ")")
         ]
         actual = make_compact(tokens)
         for t in actual:

@@ -1,32 +1,32 @@
 import pytest
 
-import sf_flags
-from sftoken import SFToken
-from sftoken import SFTokenKind
-from sftoken import Symbols
-from sftoken import Whitespace
+import cf_flags
+from cftoken import CFToken
+from cftoken import CFTokenKind
+from cftoken import Symbols
+from cftoken import Whitespace
 from clause_formatter import SelectClause
 from clause_formatter import CompoundStatement
 
 
 # pytest magic
 def setup_module():
-    sf_flags.reset_to_defaults()
+    cf_flags.reset_to_defaults()
 
 
 @pytest.fixture
 def mode__default():
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.DEFAULT
 
 
 @pytest.fixture
 def mode__trim_leading_whitespace():
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.TRIM_LEADING_WHITESPACE
 
 
 @pytest.fixture
 def mode__compact_expressions():
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.COMPACT_EXPRESSIONS
 
 
 def test_creation_fails_on_empty_input():
@@ -38,7 +38,7 @@ def test_creation_fails_on_empty_input():
 
 
 def test_render_zero_expressions():
-    clause = SelectClause(tokens=[SFToken(SFTokenKind.WORD, "select")])
+    clause = SelectClause(tokens=[CFToken(CFTokenKind.WORD, "select")])
 
     expected = "select"
     actual = clause.render(indent=0)
@@ -49,15 +49,15 @@ def test_render_zero_expressions():
 def test_render_simple_expressions_no_qualifier():
     # "select foo, bar, baz"
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -77,21 +77,21 @@ def test_render_simple_expressions_line_comment_no_qualifier():
     #     --LINE COMMENT
     #     , baz
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.LINE_COMMENT, "--LINE COMMENT\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.LINE_COMMENT, "--LINE COMMENT\n"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -113,22 +113,22 @@ def test_render_simple_expressions_block_comment_no_qualifier():
     #        COMMENT */
     #     , baz
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.BLOCK_COMMENT, "/* BLOCK\n        COMMENT */"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.BLOCK_COMMENT, "/* BLOCK\n        COMMENT */"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -151,21 +151,21 @@ def test_render_simple_expressions_block_comment_no_qualifier2():
     #   COMMENT */
     #     , baz
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.BLOCK_COMMENT, "/* BLOCK\n   COMMENT */"),
+        CFToken(CFTokenKind.BLOCK_COMMENT, "/* BLOCK\n   COMMENT */"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -193,102 +193,102 @@ def test_render_complex_expressions_no_qualifier():
     #        or boop > 0
     #       ) as BEEP_BOOP
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "coalesce"),
-        SFToken(SFTokenKind.SYMBOL, "("),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "0"),
-        SFToken(SFTokenKind.SYMBOL, ")"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "coalesce"),
+        CFToken(CFTokenKind.SYMBOL, "("),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "0"),
+        CFToken(CFTokenKind.SYMBOL, ")"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "case"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "when"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "active"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "case"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "when"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "active"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "            "),
-        SFToken(SFTokenKind.WORD, "then"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "1"),
+        CFToken(CFTokenKind.SPACES, "            "),
+        CFToken(CFTokenKind.WORD, "then"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "1"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "            "),
-        SFToken(SFTokenKind.WORD, "else"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "0"),
+        CFToken(CFTokenKind.SPACES, "            "),
+        CFToken(CFTokenKind.WORD, "else"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "0"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "             "),
-        SFToken(SFTokenKind.WORD, "end"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "as"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "ACTIVE_INT"),
+        CFToken(CFTokenKind.SPACES, "             "),
+        CFToken(CFTokenKind.WORD, "end"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "as"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "ACTIVE_INT"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "lag"),
-        SFToken(SFTokenKind.SYMBOL, "("),
-        SFToken(SFTokenKind.WORD, "blergh"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.WORD, "1"),
-        SFToken(SFTokenKind.SYMBOL, ")"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "over"),
-        SFToken(SFTokenKind.SYMBOL, "("),
-        SFToken(SFTokenKind.WORD, "partition"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "by"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "order"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "by"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ")"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "as"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "PREV_BLERGH"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "lag"),
+        CFToken(CFTokenKind.SYMBOL, "("),
+        CFToken(CFTokenKind.WORD, "blergh"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.WORD, "1"),
+        CFToken(CFTokenKind.SYMBOL, ")"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "over"),
+        CFToken(CFTokenKind.SYMBOL, "("),
+        CFToken(CFTokenKind.WORD, "partition"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "by"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "order"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "by"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ")"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "as"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "PREV_BLERGH"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.SYMBOL, "("),
-        SFToken(SFTokenKind.SPACES, "   "),
-        SFToken(SFTokenKind.WORD, "beep"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.SYMBOL, ">"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "0"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.SYMBOL, "("),
+        CFToken(CFTokenKind.SPACES, "   "),
+        CFToken(CFTokenKind.WORD, "beep"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.SYMBOL, ">"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "0"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "        "),
-        SFToken(SFTokenKind.WORD, "or"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "boop"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.SYMBOL, ">"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "0"),
+        CFToken(CFTokenKind.SPACES, "        "),
+        CFToken(CFTokenKind.WORD, "or"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "boop"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.SYMBOL, ">"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "0"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "       "),
-        SFToken(SFTokenKind.SYMBOL, ")"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "as"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "BEEP_BOOP"),
+        CFToken(CFTokenKind.SPACES, "       "),
+        CFToken(CFTokenKind.SYMBOL, ")"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "as"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "BEEP_BOOP"),
     ])
 
     expected = (
@@ -312,15 +312,15 @@ def test_render_complex_expressions_no_qualifier():
 def test_render_simple_expressions_no_qualifier_indented():
     # "select foo, bar, baz"
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -338,7 +338,7 @@ def test_render_simple_expressions_no_qualifier_indented():
 class TestRenderSimpleExpressionsCrappyIndentation():
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     #select
     #    foo,
@@ -347,18 +347,18 @@ class TestRenderSimpleExpressionsCrappyIndentation():
     @pytest.fixture
     def tokens(self):
         return [
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "baz"),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "baz"),
         ]
 
     # this is kind of a silly test in that this behavior is not particularly _desirable_,
@@ -408,17 +408,17 @@ def test_render_simple_expressions_no_indentation():
     #, bar
     #, baz
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -435,17 +435,17 @@ def test_render_simple_expressions_no_indentation():
 def test_render_simple_expressions_distinct_qualifier():
     # "select distinct foo, bar, baz"
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "distinct"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "distinct"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -466,22 +466,22 @@ def test_render_simple_expressions_distinct_qualifier_preformatted():
     #      , bar
     #      , baz
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "distinct"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "distinct"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "       "),
-        SFToken(SFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SPACES, "       "),
+        CFToken(CFTokenKind.WORD, "foo"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -502,22 +502,22 @@ def test_render_simple_expressions_distinct_qualifier_preformatted_leading_space
     #      ,  yz
     #      , xyz
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "distinct"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "distinct"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "         "),
-        SFToken(SFTokenKind.WORD, "z"),
+        CFToken(CFTokenKind.SPACES, "         "),
+        CFToken(CFTokenKind.WORD, "z"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, "  "),
-        SFToken(SFTokenKind.WORD, "yz"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, "  "),
+        CFToken(CFTokenKind.WORD, "yz"),
         Whitespace.NEWLINE,
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "xyz"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "xyz"),
     ])
 
     expected = (
@@ -535,17 +535,17 @@ def test_render_simple_expressions_distinct_qualifier_preformatted_leading_space
 def test_render_simple_expressions_all_qualifier():
     # "select all foo, bar, baz"
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "all"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "all"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -563,20 +563,20 @@ def test_render_simple_expressions_all_qualifier():
 def test_render_simple_expressions_distinct_on_qualifier():
     # "select distinct on(foo) foo, bar, baz"
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "distinct on"),
-        SFToken(SFTokenKind.SYMBOL, "("),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ")"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "distinct on"),
+        CFToken(CFTokenKind.SYMBOL, "("),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SYMBOL, ")"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
     ])
 
     expected = (
@@ -594,9 +594,9 @@ def test_render_simple_expressions_distinct_on_qualifier():
 def test_render_qualifier_only():
     # "select distinct"
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "distinct"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "distinct"),
     ])
 
     expected = "select distinct"
@@ -609,9 +609,9 @@ def test_render_qualifier_only():
 def test_render_qualifier_only2():
     # "select all"
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "all"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "all"),
     ])
 
     expected = "select all"
@@ -624,7 +624,7 @@ def test_render_qualifier_only2():
 class TestCustomSpacing:
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     #select foo
     #     ,   l7
@@ -633,24 +633,24 @@ class TestCustomSpacing:
     @pytest.fixture
     def tokens(self):
         return [
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "l7"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "l30"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "l182"),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "l7"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "l30"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "l182"),
         ]
 
     def test_default(self, tokens, mode__default):
@@ -703,50 +703,50 @@ def test_hand_formatted_case():
     #             end as BLERGH
     #     , stuff
     clause = SelectClause(tokens=[
-        SFToken(SFTokenKind.WORD, "select"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "foo"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "case"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "when"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "bar"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "            "),
-        SFToken(SFTokenKind.WORD, "then"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "1"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "            "),
-        SFToken(SFTokenKind.WORD, "when"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "baz"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "            "),
-        SFToken(SFTokenKind.WORD, "then"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "2"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "            "),
-        SFToken(SFTokenKind.WORD, "else"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "3"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "             "),
-        SFToken(SFTokenKind.WORD, "end"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "as"),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "BLERGH"),
-        SFToken(SFTokenKind.NEWLINE, "\n"),
-        SFToken(SFTokenKind.SPACES, "     "),
-        SFToken(SFTokenKind.SYMBOL, ","),
-        SFToken(SFTokenKind.SPACES, " "),
-        SFToken(SFTokenKind.WORD, "stuff"),
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.NEWLINE, "\n"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "case"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "when"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.NEWLINE, "\n"),
+        CFToken(CFTokenKind.SPACES, "            "),
+        CFToken(CFTokenKind.WORD, "then"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "1"),
+        CFToken(CFTokenKind.NEWLINE, "\n"),
+        CFToken(CFTokenKind.SPACES, "            "),
+        CFToken(CFTokenKind.WORD, "when"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
+        CFToken(CFTokenKind.NEWLINE, "\n"),
+        CFToken(CFTokenKind.SPACES, "            "),
+        CFToken(CFTokenKind.WORD, "then"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "2"),
+        CFToken(CFTokenKind.NEWLINE, "\n"),
+        CFToken(CFTokenKind.SPACES, "            "),
+        CFToken(CFTokenKind.WORD, "else"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "3"),
+        CFToken(CFTokenKind.NEWLINE, "\n"),
+        CFToken(CFTokenKind.SPACES, "             "),
+        CFToken(CFTokenKind.WORD, "end"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "as"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "BLERGH"),
+        CFToken(CFTokenKind.NEWLINE, "\n"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "stuff"),
     ])
 
     expected = (
@@ -768,7 +768,7 @@ def test_hand_formatted_case():
 class TestPoorlyFormattedCase():
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     #select foo
     #     , case when bar
@@ -781,45 +781,45 @@ class TestPoorlyFormattedCase():
     @pytest.fixture
     def tokens(self):
         return [
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "case"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "baz"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "2"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "else"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "3"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.WORD, "end"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "as"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "BLERGH"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "stuff"),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "case"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "baz"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "2"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "else"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "3"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.WORD, "end"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "as"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "BLERGH"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "stuff"),
         ]
 
     def test_default(self, tokens, mode__default):
@@ -872,7 +872,7 @@ class TestPoorlyFormattedCase():
 class TestMultipleExpressionsPerLine():
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     #select
     #    foo, bar,
@@ -881,27 +881,27 @@ class TestMultipleExpressionsPerLine():
     @pytest.fixture
     def tokens(self):
         return [
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "l7"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "l28"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "l91"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.NEWLINE, "\n"),
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "stuff"),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "l7"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "l28"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "l91"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.NEWLINE, "\n"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "stuff"),
         ]
 
     # again this result is not exactly desirable but nevertheless it's what you get
@@ -958,40 +958,40 @@ class TestMultipleExpressionsPerLine():
 class TestRenderScalarSubquery():
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     # "select foo, (select count(1) from bar where 1=1), baz"
     @pytest.fixture
     def tokens(self):
         return [
-            SFToken(SFTokenKind.WORD, "select"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
             Symbols.LEFT_PAREN,
             CompoundStatement([
-                SFToken(SFTokenKind.WORD, "select"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "count"),
+                CFToken(CFTokenKind.WORD, "select"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "count"),
                 Symbols.LEFT_PAREN,
-                SFToken(SFTokenKind.WORD, "1"),
+                CFToken(CFTokenKind.WORD, "1"),
                 Symbols.RIGHT_PAREN,
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "from"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "bar"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "where"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "1"),
-                SFToken(SFTokenKind.SYMBOL, "="),
-                SFToken(SFTokenKind.WORD, "1"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "from"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "bar"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "where"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "1"),
+                CFToken(CFTokenKind.SYMBOL, "="),
+                CFToken(CFTokenKind.WORD, "1"),
             ]),
             Symbols.RIGHT_PAREN,
-            SFToken(SFTokenKind.SYMBOL, ","),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "baz"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "baz"),
         ]
 
     # formatting mode doesn't affect this one

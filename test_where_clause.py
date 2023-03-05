@@ -1,16 +1,16 @@
 import pytest
 
-import sf_flags
-from sftoken import SFToken
-from sftoken import SFTokenKind
-from sftoken import Whitespace
+import cf_flags
+from cftoken import CFToken
+from cftoken import CFTokenKind
+from cftoken import Whitespace
 from clause_formatter import WhereClause
 from clause_formatter import CompoundStatement
 
 
 # pytest magic
 def setup_module():
-    sf_flags.reset_to_defaults()
+    cf_flags.reset_to_defaults()
 
 
 class TestWhereClause:
@@ -19,11 +19,11 @@ class TestWhereClause:
     def test_render_one_equals_one(self):
         # "where 1=1"
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
         ])
 
         expected = " where 1=1"
@@ -36,11 +36,11 @@ class TestWhereClause:
     def test_render_one_equals_one_indented(self):
         # "where 1=1"
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
         ])
 
         # first line, so indent has no effect
@@ -55,13 +55,13 @@ class TestWhereClause:
         # "where 1 = 1"
         # Not my preference, but if this is how it's written it's how we should render it
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
         ])
 
         expected = " where 1 = 1"
@@ -74,21 +74,21 @@ class TestWhereClause:
     def test_render_two_expressions_ANDed(self):
         # "where foo.abc = bar.abc and foo.xyz = bar.xyz"
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.xyz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.xyz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.xyz"),
         ])
 
         expected = (
@@ -105,21 +105,21 @@ class TestWhereClause:
         #where foo.abc = bar.abc
         #and foo.xyz = bar.xyz"
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.abc"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.abc"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.xyz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.xyz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.xyz"),
         ])
 
         expected = (
@@ -135,21 +135,21 @@ class TestWhereClause:
     def test_render_two_expressions_ANDed_indented(self):
         # "where foo.abc = bar.abc and foo.xyz = bar.xyz"
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.xyz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.xyz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.xyz"),
         ])
 
         expected = (
@@ -169,37 +169,37 @@ class TestWhereClause:
         #   and  foo.ab =  bar.ab
         #   and foo.abc = bar.abc
         clause = WhereClause(tokens=[
-            #SFToken(SFTokenKind.SPACES, " "), # that leading space is there, but won't be passed into the construction of a WhereClause
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "1"),
+            #CFToken(CFTokenKind.SPACES, " "), # that leading space is there, but won't be passed into the construction of a WhereClause
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "foo.a"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "bar.a"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "foo.a"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "bar.a"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "foo.ab"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "bar.ab"),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "foo.ab"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "bar.ab"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.abc"),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.abc"),
         ])
 
         expected = (
@@ -220,27 +220,27 @@ class TestWhereClause:
         #        or another_thing
         #       )
         clause = WhereClause(tokens=[
-            #SFToken(SFTokenKind.SPACES, " "), # that leading space is there, but won't be passed into the construction of a WhereClause
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "1"),
+            #CFToken(CFTokenKind.SPACES, " "), # that leading space is there, but won't be passed into the construction of a WhereClause
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "("),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "something"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "something"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "        "),
-            SFToken(SFTokenKind.WORD, "or"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "another_thing"),
+            CFToken(CFTokenKind.SPACES, "        "),
+            CFToken(CFTokenKind.WORD, "or"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "another_thing"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "       "),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SPACES, "       "),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ])
 
         expected = (
@@ -259,37 +259,37 @@ class TestWhereClause:
         # where 1=1
         #   and foo_id in (select id from foo where 1=1)
         clause = WhereClause(tokens=[
-            #SFToken(SFTokenKind.SPACES, " "), # that leading space is there, but won't be passed into the construction of a WhereClause
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.WORD, "1"),
+            #CFToken(CFTokenKind.SPACES, " "), # that leading space is there, but won't be passed into the construction of a WhereClause
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo_id"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "in"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo_id"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "in"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "("),
             CompoundStatement([
-                SFToken(SFTokenKind.WORD, "select"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "id"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "from"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "foo"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "where"),
-                SFToken(SFTokenKind.SPACES, " "),
-                SFToken(SFTokenKind.WORD, "1"),
-                SFToken(SFTokenKind.SYMBOL, "="),
-                SFToken(SFTokenKind.WORD, "1"),
+                CFToken(CFTokenKind.WORD, "select"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "id"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "from"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "foo"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "where"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "1"),
+                CFToken(CFTokenKind.SYMBOL, "="),
+                CFToken(CFTokenKind.WORD, "1"),
             ]),
-            SFToken(SFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
         ])
 
         expected = (
@@ -311,33 +311,33 @@ class TestWhereClause:
         #   --comment
         #   and foo.qrs = bar.qrs
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.abc"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.abc"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.xyz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.xyz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.xyz"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.LINE_COMMENT, "--comment1\n"),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.qrs"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.qrs"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.LINE_COMMENT, "--comment1\n"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.qrs"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.qrs"),
         ])
 
         expected = (
@@ -357,32 +357,32 @@ class TestWhereClause:
         #   and foo.xyz = bar.xyz --comment2
         #   and foo.qrs = bar.qrs
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.abc"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.abc"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.xyz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.xyz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.LINE_COMMENT, "--comment2\n"),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.qrs"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.qrs"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.xyz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.xyz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.LINE_COMMENT, "--comment2\n"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.qrs"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.qrs"),
         ])
 
         expected = (
@@ -402,32 +402,32 @@ class TestWhereClause:
         #--comment3
         #   and foo.qrs = bar.qrs
         clause = WhereClause(tokens=[
-            SFToken(SFTokenKind.WORD, "where"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.abc"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.abc"),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.abc"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.abc"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.xyz"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.xyz"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.xyz"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.xyz"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.LINE_COMMENT, "--comment3\n"),
-            SFToken(SFTokenKind.SPACES, "   "),
-            SFToken(SFTokenKind.WORD, "and"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo.qrs"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "bar.qrs"),
+            CFToken(CFTokenKind.LINE_COMMENT, "--comment3\n"),
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo.qrs"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.qrs"),
         ])
 
         expected = (

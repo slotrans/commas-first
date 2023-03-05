@@ -1,37 +1,37 @@
 import pytest
 
-import sf_flags
-from sftoken import SFToken
-from sftoken import SFTokenKind
-from sftoken import Symbols
-from sftoken import Whitespace
+import cf_flags
+from cftoken import CFToken
+from cftoken import CFTokenKind
+from cftoken import Symbols
+from cftoken import Whitespace
 from clause_formatter import Expression
 
 
 # pytest magic
 def setup_module():
-    sf_flags.reset_to_defaults()
+    cf_flags.reset_to_defaults()
 
 
 @pytest.fixture
 def mode__default():
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.DEFAULT
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.DEFAULT
 
 
 @pytest.fixture
 def mode__trim_leading_whitespace():
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.TRIM_LEADING_WHITESPACE
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.TRIM_LEADING_WHITESPACE
 
 
 @pytest.fixture
 def mode__compact_expressions():
-    sf_flags.FORMAT_MODE = sf_flags.FormatMode.COMPACT_EXPRESSIONS
+    cf_flags.FORMAT_MODE = cf_flags.FormatMode.COMPACT_EXPRESSIONS
 
 
 class SameAnyWay:
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     def actual_test(self):
         raise NotImplementedError
@@ -56,11 +56,11 @@ class TestEmpty(SameAnyWay):
 class TestLiterals(SameAnyWay):
     def actual_test(self):
         literals = [
-            SFToken(SFTokenKind.LITERAL, "'foo'"),
-            SFToken(SFTokenKind.WORD, "42"),
-            SFToken(SFTokenKind.WORD, "3.14"),
-            SFToken(SFTokenKind.WORD, "true"),
-            SFToken(SFTokenKind.WORD, "null"),
+            CFToken(CFTokenKind.LITERAL, "'foo'"),
+            CFToken(CFTokenKind.WORD, "42"),
+            CFToken(CFTokenKind.WORD, "3.14"),
+            CFToken(CFTokenKind.WORD, "true"),
+            CFToken(CFTokenKind.WORD, "null"),
         ]
         for lit in literals:
             actual = Expression([lit]).render(indent=0)
@@ -72,13 +72,13 @@ class TestBasicCompoundExpressions(SameAnyWay):
     def actual_test(self):
         token_sequences = [
             #a + b
-            [SFToken(SFTokenKind.WORD, "a"), Whitespace.ONE_SPACE, SFToken(SFTokenKind.SYMBOL, "+"), Whitespace.ONE_SPACE, SFToken(SFTokenKind.WORD, "b")],
+            [CFToken(CFTokenKind.WORD, "a"), Whitespace.ONE_SPACE, CFToken(CFTokenKind.SYMBOL, "+"), Whitespace.ONE_SPACE, CFToken(CFTokenKind.WORD, "b")],
             #(1 + 2)
-            [Symbols.LEFT_PAREN, SFToken(SFTokenKind.WORD, "1"), Whitespace.ONE_SPACE, SFToken(SFTokenKind.SYMBOL, "+"), Whitespace.ONE_SPACE, SFToken(SFTokenKind.WORD, "2"), Symbols.RIGHT_PAREN],
+            [Symbols.LEFT_PAREN, CFToken(CFTokenKind.WORD, "1"), Whitespace.ONE_SPACE, CFToken(CFTokenKind.SYMBOL, "+"), Whitespace.ONE_SPACE, CFToken(CFTokenKind.WORD, "2"), Symbols.RIGHT_PAREN],
             #trunc(foo)
-            [SFToken(SFTokenKind.WORD, "trunc"), Symbols.LEFT_PAREN, SFToken(SFTokenKind.WORD, "foo"), Symbols.RIGHT_PAREN],
+            [CFToken(CFTokenKind.WORD, "trunc"), Symbols.LEFT_PAREN, CFToken(CFTokenKind.WORD, "foo"), Symbols.RIGHT_PAREN],
             #round(foo, 0)
-            [SFToken(SFTokenKind.WORD, "round"), Symbols.LEFT_PAREN, SFToken(SFTokenKind.WORD, "foo"), Symbols.COMMA, SFToken(SFTokenKind.SPACES, " "), SFToken(SFTokenKind.WORD, "0"), Symbols.RIGHT_PAREN],
+            [CFToken(CFTokenKind.WORD, "round"), Symbols.LEFT_PAREN, CFToken(CFTokenKind.WORD, "foo"), Symbols.COMMA, CFToken(CFTokenKind.SPACES, " "), CFToken(CFTokenKind.WORD, "0"), Symbols.RIGHT_PAREN],
             #
         ]
         for tseq in token_sequences:
@@ -91,7 +91,7 @@ class TestBasicCompoundExpressions(SameAnyWay):
 class TestCaseWithNewlines:
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     @pytest.fixture
     def tokens(self):
@@ -102,46 +102,46 @@ class TestCaseWithNewlines:
         #     else 'more'
         #      end as HOW_MANY
         return [
-            SFToken(SFTokenKind.WORD, "case"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.WORD, "case"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.LITERAL, "'zero'"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.LITERAL, "'zero'"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.WORD, "when"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.SYMBOL, "="),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.WORD, "then"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.LITERAL, "'one'"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.LITERAL, "'one'"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "     "),
-            SFToken(SFTokenKind.WORD, "else"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.LITERAL, "'more'"),
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.WORD, "else"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.LITERAL, "'more'"),
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "      "),
-            SFToken(SFTokenKind.WORD, "end"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "as"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "HOW_MANY"),
+            CFToken(CFTokenKind.SPACES, "      "),
+            CFToken(CFTokenKind.WORD, "end"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "as"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "HOW_MANY"),
         ]
 
     def test_default(self, tokens, mode__default):
@@ -182,14 +182,14 @@ class TestCaseWithNewlines:
 class TestExpressionWhitespaceTrimmingTrivial:
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     @pytest.fixture
     def tokens(self):
         return [
-            SFToken(SFTokenKind.SPACES, "  "),
-            SFToken(SFTokenKind.WORD, "sysdate"),
-            SFToken(SFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "sysdate"),
+            CFToken(CFTokenKind.SPACES, " "),
         ]
 
     def test_default(self, tokens, mode__default):
@@ -211,18 +211,18 @@ class TestExpressionWhitespaceTrimmingTrivial:
 class TestExpressionWhitespaceTrimmingTrailingComma:
     @classmethod
     def teardown_class(cls):
-        sf_flags.reset_to_defaults()
+        cf_flags.reset_to_defaults()
 
     @pytest.fixture
     def tokens(self):
         return [
             Whitespace.NEWLINE,
-            SFToken(SFTokenKind.SPACES, "    "),
-            SFToken(SFTokenKind.WORD, "foo"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "as"),
-            SFToken(SFTokenKind.SPACES, " "),
-            SFToken(SFTokenKind.WORD, "BAR"),
+            CFToken(CFTokenKind.SPACES, "    "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "as"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "BAR"),
         ]
 
     def test_default(self, tokens, mode__default):

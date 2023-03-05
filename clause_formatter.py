@@ -1,7 +1,7 @@
 import enum
 
-import sf_flags
-from sftoken import SFToken, SFTokenKind, Keywords, Symbols, Whitespace
+import cf_flags
+from cftoken import CFToken, CFTokenKind, Keywords, Symbols, Whitespace
 
 
 def next_real_token(tokens):
@@ -96,7 +96,7 @@ def trim_one_leading_space(tokens):
         return tokens
 
     first_token = tokens[0]
-    if first_token.kind != SFTokenKind.SPACES:
+    if first_token.kind != CFTokenKind.SPACES:
         return tokens
 
     if first_token.value == " ":
@@ -105,7 +105,7 @@ def trim_one_leading_space(tokens):
     else:
         # for multiple spaces, replace it with a token having 1 fewer spaces
         length = len(first_token.value)
-        one_shorter = SFToken(SFTokenKind.SPACES, " "*(length-1))
+        one_shorter = CFToken(CFTokenKind.SPACES, " "*(length-1))
         return [one_shorter] + tokens[1:]
 
 
@@ -133,13 +133,13 @@ def make_compact(tokens):
 
         # skip non-tokens (e.g. CompoundStatement)
         # this check is repeated in the multi-token blocks
-        if type(tok) is not SFToken:
+        if type(tok) is not CFToken:
             i += 1
             continue
 
 
         # shrink all strings of spaces down to 1
-        if tok.kind == SFTokenKind.SPACES and len(tok.value) > 1:
+        if tok.kind == CFTokenKind.SPACES and len(tok.value) > 1:
             tok = Whitespace.ONE_SPACE
             out[i] = tok
 
@@ -149,14 +149,14 @@ def make_compact(tokens):
             next_tok = out[i+1]
             after_next_tok = out[i+2]
 
-            if type(after_next_tok) is not SFToken:
+            if type(after_next_tok) is not CFToken:
                 i += 1
                 continue
 
             # "word", " ", "("
             # EXCEPT if the word is "in": we want to treat `in (...)` differently from `func(...)`
-            if (    tok.kind == SFTokenKind.WORD
-                and next_tok.kind == SFTokenKind.SPACES
+            if (    tok.kind == CFTokenKind.WORD
+                and next_tok.kind == CFTokenKind.SPACES
                 and after_next_tok.value == "("
                 and tok.value.lower() != "in"
                 ):
@@ -168,40 +168,40 @@ def make_compact(tokens):
         if i+1 < len(out):
             next_tok = out[i+1]
 
-            if type(next_tok) is not SFToken:
+            if type(next_tok) is not CFToken:
                 i += 1
                 continue
 
             # " ", "\n"
-            if tok.kind == SFTokenKind.SPACES and next_tok.kind == SFTokenKind.NEWLINE:
+            if tok.kind == CFTokenKind.SPACES and next_tok.kind == CFTokenKind.NEWLINE:
                 out.pop(i+1)
                 continue
 
             # "\n", " "
-            if tok.kind == SFTokenKind.NEWLINE and next_tok.kind == SFTokenKind.SPACES:
+            if tok.kind == CFTokenKind.NEWLINE and next_tok.kind == CFTokenKind.SPACES:
                 out.pop(i)
                 i = max(i - 1, 0)
                 continue
 
             # " ", " "  (doesn't occur naturally but this process can create it as an intermediate state)
-            if tok.kind == SFTokenKind.SPACES and next_tok.kind == SFTokenKind.SPACES:
+            if tok.kind == CFTokenKind.SPACES and next_tok.kind == CFTokenKind.SPACES:
                 out.pop(i)
                 i = max(i - 1, 0)
                 continue
 
             # "(", " "
-            if tok.value == "(" and next_tok.kind == SFTokenKind.SPACES:
+            if tok.value == "(" and next_tok.kind == CFTokenKind.SPACES:
                 out.pop(i+1)
                 continue
 
             # " ", ")"
-            if tok.kind == SFTokenKind.SPACES and next_tok.value == ")":
+            if tok.kind == CFTokenKind.SPACES and next_tok.value == ")":
                 out.pop(i)
                 i = max(i - 1, 0)
                 continue
 
             # " ", ","
-            if tok.kind == SFTokenKind.SPACES and next_tok.value == ",":
+            if tok.kind == CFTokenKind.SPACES and next_tok.value == ",":
                 out.pop(i)
                 i = max(i - 1, 0)
                 continue
@@ -209,7 +209,7 @@ def make_compact(tokens):
 
 
         # replace any newlines left (not caught by sequence matches) with a single space
-        if tok.kind == SFTokenKind.NEWLINE:
+        if tok.kind == CFTokenKind.NEWLINE:
             out[i] = Whitespace.ONE_SPACE
             i = max(i - 1, 0)
             continue
@@ -250,12 +250,12 @@ class Expression:
     def _parse(self, tokens):
         temp = trim_trailing_whitespace(tokens)
 
-        if sf_flags.FORMAT_MODE == sf_flags.FormatMode.TRIM_LEADING_WHITESPACE:
+        if cf_flags.FORMAT_MODE == cf_flags.FormatMode.TRIM_LEADING_WHITESPACE:
             temp2 = trim_leading_whitespace(temp)
         else:
             temp2 = trim_one_leading_space(temp)
 
-        if sf_flags.FORMAT_MODE == sf_flags.FormatMode.COMPACT_EXPRESSIONS:
+        if cf_flags.FORMAT_MODE == cf_flags.FormatMode.COMPACT_EXPRESSIONS:
             temp3 = make_compact(temp2)
         else:
             temp3 = temp2
@@ -272,13 +272,13 @@ class Expression:
             next_e = self.elements[i+1] if i+1 < len(self.elements) else None
 
             if immediately_after_newline:
-                if e.kind == SFTokenKind.NEWLINE:
+                if e.kind == CFTokenKind.NEWLINE:
                     # we should probably collapse consecutive newlines, but if they do happen, no indentation is needed
                     pass
-                elif e.kind == SFTokenKind.SPACES:
+                elif e.kind == CFTokenKind.SPACES:
                     # if the newline IS followed by spaces, but not enough spaces to reach the indent, add more so that it will
                     # UNLESS the next token is a comment!
-                    if next_e is not None and next_e.kind in (SFTokenKind.LINE_COMMENT, SFTokenKind.BLOCK_COMMENT):
+                    if next_e is not None and next_e.kind in (CFTokenKind.LINE_COMMENT, CFTokenKind.BLOCK_COMMENT):
                         pass
                     else:
                         extra_spaces = indent - len(e.value)
@@ -295,7 +295,7 @@ class Expression:
             out += fragment
             effective_indent += len(fragment)
 
-            if e == Whitespace.NEWLINE or e.kind == SFTokenKind.LINE_COMMENT:
+            if e == Whitespace.NEWLINE or e.kind == CFTokenKind.LINE_COMMENT:
                 #PONDER: what if we made the newline itself responsible for adding the indent, in render()?
                 immediately_after_newline = True
             elif e == Symbols.LEFT_PAREN and is_parenthesized_subquery(self.elements[i:i+3]):
@@ -323,7 +323,7 @@ class WithClause:
         "statements",
         "after_stuff", # SEARCH clause for recursive CTEs, rarely used. Also used to capture broken syntax
     )
-    STARTING_DELIMITER = SFToken(SFTokenKind.WORD, "with")
+    STARTING_DELIMITER = CFToken(CFTokenKind.WORD, "with")
     OTHER_DELIMITERS = set([Symbols.COMMA])
     CTE_INDENT_SPACES = 4
 
