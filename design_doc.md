@@ -648,3 +648,21 @@ select foo
 - Next step would be to go into `formatter2` and replace `retokenize` with `sflexer` and see what breaks!
     - if that works, we can drop the dependency on Pygments, and all the support code around it
     - it would also be possible to extend SFToken to track source text location, though I'm not 100% sure this would be valuable
+
+
+### 2023-03-05
+- Merged my lexer!
+- All the code built on Pygments is still there and the two lexers can be toggled with a quick change in `formatter2.py`. I intend to leave it there until I'm very, very sure that my lexer doesn't have any major bugs.
+    - in theory once I get to that point, the Pygments code can be removed and Pygments itself can be removed as a dependency, which would leave this code _completely_ dependency-free (not counting dev tools like pytest).
+
+- next up: rename the repo, and ideally publish my editorial on formatting (though it's honestly not super close to finished...)
+
+- future items
+    - building "server mode" and leaving it running in AWS would give me a way of calling it from anywhere without installing it
+    - a Nuitka or PyOxidizer build would give me a single-binary deployable which would be a convenient tool
+    - while I've been working on this, https://github.com/tobymao/sqlglot has appeared
+        - sqlglot has a very powerful and flexible parser, that can produce a SQL AST that can be manipulated
+        - this opens the door for (optional) deeper formatting on certain kinds of expressions like CASE and compound booleans
+        - also the potential to fiddle with aliases in a structured way
+        - all this requires the input SQL to be syntactically valid, at least locally (an expression), but of course it usually will be and if it isn't the error is easily caught
+        - what's not great is this adds a dependency, however sqlglot itself has no dependencies so it's only one
