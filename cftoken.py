@@ -73,6 +73,13 @@ class CFToken:
         return NotImplemented
 
 
+    def __hash__(self):
+        if self.kind == CFTokenKind.WORD:
+            return hash((self.kind, self.value.lower()))
+        else:
+            return hash((self.kind, self.value))
+
+
     def __str__(self):
         return f"CFToken({self.kind.name}, '{self.value}', {self.is_whitespace})"
 

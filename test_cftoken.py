@@ -8,9 +8,19 @@ def test_word_equality():
     assert CFToken(CFTokenKind.WORD, "foo") == CFToken(CFTokenKind.WORD, "FOO")
 
 
+def test_word_hash():
+    assert hash(CFToken(CFTokenKind.WORD, "foo")) == hash(CFToken(CFTokenKind.WORD, "foo"))
+    assert hash(CFToken(CFTokenKind.WORD, "foo")) == hash(CFToken(CFTokenKind.WORD, "FOO"))
+
+
 def test_literal_equality():
     assert CFToken(CFTokenKind.LITERAL, "foo") == CFToken(CFTokenKind.LITERAL, "foo")
     assert CFToken(CFTokenKind.LITERAL, "foo") != CFToken(CFTokenKind.LITERAL, "FOO")
+
+
+def test_literal_hash():
+    assert hash(CFToken(CFTokenKind.LITERAL, "foo")) == hash(CFToken(CFTokenKind.LITERAL, "foo"))
+    assert hash(CFToken(CFTokenKind.LITERAL, "foo")) != hash(CFToken(CFTokenKind.LITERAL, "FOO"))
 
 
 def test_line_comment_equality():
