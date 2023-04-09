@@ -402,3 +402,48 @@ class TestWithClause:
 
         print(actual)
         assert expected == actual
+
+
+    def test_single_cte_distinct(self):
+        # with cte1 as (select distinct foo from bar where 1=1)
+        clause = WithClause(tokens=[
+            CFToken(CFTokenKind.WORD, 'with'),
+            CFToken(CFTokenKind.SPACES, ' '),
+            CFToken(CFTokenKind.WORD, 'cte1'),
+            CFToken(CFTokenKind.SPACES, ' '),
+            CFToken(CFTokenKind.WORD, 'as'),
+            CFToken(CFTokenKind.SPACES, ' '),
+            CFToken(CFTokenKind.SYMBOL, '('),
+            CompoundStatement([
+                CFToken(CFTokenKind.WORD, 'select'),
+                CFToken(CFTokenKind.SPACES, ' '),
+                CFToken(CFTokenKind.WORD, 'distinct'),
+                CFToken(CFTokenKind.SPACES, ' '),
+                CFToken(CFTokenKind.WORD, 'foo'),
+                CFToken(CFTokenKind.SPACES, ' '),
+                CFToken(CFTokenKind.WORD, 'from'),
+                CFToken(CFTokenKind.SPACES, ' '),
+                CFToken(CFTokenKind.WORD, 'bar'),
+                CFToken(CFTokenKind.SPACES, ' '),
+                CFToken(CFTokenKind.WORD, 'where'),
+                CFToken(CFTokenKind.SPACES, ' '),
+                CFToken(CFTokenKind.LITERAL, '1'),
+                CFToken(CFTokenKind.SYMBOL, '='),
+                CFToken(CFTokenKind.LITERAL, '1'),
+            ]),
+            CFToken(CFTokenKind.SYMBOL, ')'),
+        ])
+
+        expected = (
+            "with cte1 as\n"
+            "(\n"
+            "    select distinct\n"
+            "           foo\n"
+            "      from bar\n"
+            "     where 1=1\n"
+            ")"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual

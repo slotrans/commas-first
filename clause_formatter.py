@@ -390,7 +390,7 @@ class WithClause:
 
     def _parse(self, tokens):
         i = 1 # we already know token 0 is the starting delimiter
-        delimiters = [self.STARTING_DELIMITER]
+        delimiters = [tokens[0]]
         before_stuff = []
         statements = []
         after_stuff = []
@@ -682,7 +682,7 @@ class SelectClause:
                 parts.append(self.qualifier.render(indent))
                 if not self.expressions[0].is_empty():
                     parts.append("\n")
-                    parts.append(" " * 6)
+                    parts.append(" " * effective_indent)
 
             if not self.expressions[i].is_empty(): # don't render the expr at all if it's empty
                 # always print one space after the delimiter
@@ -693,7 +693,7 @@ class SelectClause:
                 if i == 0 and self.qualifier:
                     # when there's a qualifier, we add a newline and indentation (see above), but if the input was already
                     # formatted correctly, then that's redundant and we need to back it out
-                    expr_fragment = expr_fragment.removeprefix("\n" + " " * 7)
+                    expr_fragment = expr_fragment.removeprefix("\n" + " " * effective_indent)
                 parts.append(expr_fragment)
 
                 if expr_fragment.endswith("\n"): # happens when an Expression ends with a line comment

@@ -638,6 +638,96 @@ class TestStatement:
         assert expected == actual
 
 
+    def test_select_inlist_subquery_with_qualifier2(self):
+        #select foo
+        #     , (type, id) in (select distinct
+        #                             bar_type
+        #                           , bar_id
+        #                        from baz
+        #                       where 1=1
+        #                     ) as INLIST_SUBQUERY
+        #  from bar
+        # where 1=1
+        statement = Statement(tokens=[
+            CFToken(CFTokenKind.WORD, "select"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "     "),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CFToken(CFTokenKind.WORD, "type"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "id"),
+            Symbols.RIGHT_PAREN,
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "in"),
+            CFToken(CFTokenKind.SPACES, " "),
+            Symbols.LEFT_PAREN,
+            CompoundStatement([
+                CFToken(CFTokenKind.WORD, "select"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "distinct"),
+                Whitespace.NEWLINE,
+                CFToken(CFTokenKind.SPACES, "                             "),
+                CFToken(CFTokenKind.WORD, "bar_type"),
+                Whitespace.NEWLINE,
+                CFToken(CFTokenKind.SPACES, "                           "),
+                CFToken(CFTokenKind.SYMBOL, ","),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "bar_id"),
+                Whitespace.NEWLINE,
+                CFToken(CFTokenKind.SPACES, "                        "),
+                CFToken(CFTokenKind.WORD, "from"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "baz"),
+                Whitespace.NEWLINE,
+                CFToken(CFTokenKind.SPACES, "                       "),
+                CFToken(CFTokenKind.WORD, "where"),
+                CFToken(CFTokenKind.SPACES, " "),
+                CFToken(CFTokenKind.WORD, "1"),
+                CFToken(CFTokenKind.SYMBOL, "="),
+                CFToken(CFTokenKind.WORD, "1"),
+                CFToken(CFTokenKind.SPACES, "                     "),
+            ]),
+            Symbols.RIGHT_PAREN,
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "as"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "INLIST_SUBQUERY"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "  "),
+            CFToken(CFTokenKind.WORD, "from"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
+        ])
+
+        expected = (
+            "select foo\n"
+            "     , (type, id) in (select distinct\n"
+            "                             bar_type\n"
+            "                           , bar_id\n"
+            "                        from baz\n"
+            "                       where 1=1\n"
+            "                     ) as INLIST_SUBQUERY\n"
+            "  from bar\n"
+            " where 1=1"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
     def test_subquery_in_where(self):
         #select foo
         #  from bar
@@ -1108,6 +1198,51 @@ class TestStatement:
             "select foo\n"
             "     , bar\n"
             "     , baz"
+        )
+        actual = statement.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_select_from_where_group_order_uppercase(self):
+        # SELECT FOO, COUNT(1) FROM TABLE1 WHERE 1=1 GROUP BY FOO ORDER BY FOO
+        statement = Statement(tokens=[
+            CFToken(CFTokenKind.WORD, "SELECT"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "FOO"),
+            CFToken(CFTokenKind.SYMBOL, ","),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "COUNT"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
+            CFToken(CFTokenKind.WORD, "FROM"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "TABLE1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "WHERE"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "GROUP BY"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "FOO"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "ORDER BY"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "FOO"),
+        ])
+
+        expected = (
+            "SELECT FOO\n"
+            "     , COUNT(1)\n"
+            "  FROM TABLE1\n"
+            " WHERE 1=1\n"
+            " GROUP BY FOO\n"
+            " ORDER BY FOO"
         )
         actual = statement.render(indent=0)
 

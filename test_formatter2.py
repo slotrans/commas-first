@@ -858,6 +858,106 @@ select whatever
 """,
 )
 
+qft.bigqueryisms = dict(
+input="""\
+WITH foo as (
+SELECT
+  DISTINCT base.FOO_KEY_HASH AS FOO_KEY_HASH,
+FROM
+  `project-with-dashes`.`schema_name`.`table_name` AS base
+WHERE
+  ( base.tiger = "striped" )
+  AND ( base.zebra = "also_striped" )
+  AND ( base.buffalo = "1" )
+  AND ( ( base.SOMEDATE >= "2022-02-28"
+  AND base.SOMEDATE <= "2023-04-03" ) )
+)
+
+SELECT
+    ARRAY_AGG( DISTINCT STRUCT(rawBar.bar_key AS barKey,
+        rawBar.bar_value AS barValue) IGNORE NULLS) AS dimensions,
+    rawBar.foo_key AS foo_key
+  FROM
+  `project-with-dashes.different_schema.different_table` rawBar
+  where rawBar.foo_key_hash IN (SELECT FOO_KEY_HASH from foo)
+  GROUP BY
+    rawBar.foo_key
+""",
+
+default="""\
+WITH foo as
+(
+    SELECT DISTINCT
+           base.FOO_KEY_HASH AS FOO_KEY_HASH
+         ,
+      FROM
+           `project-with-dashes`.`schema_name`.`table_name` AS base
+     WHERE
+           ( base.tiger = "striped" )
+       AND ( base.zebra = "also_striped" )
+       AND ( base.buffalo = "1" )
+       AND ( ( base.SOMEDATE >= "2022-02-28"
+           AND base.SOMEDATE <= "2023-04-03" ) )
+)
+SELECT
+       ARRAY_AGG( DISTINCT STRUCT(rawBar.bar_key AS barKey,
+        rawBar.bar_value AS barValue) IGNORE NULLS) AS dimensions
+     ,
+       rawBar.foo_key AS foo_key
+  FROM
+       `project-with-dashes.different_schema.different_table` rawBar
+ where rawBar.foo_key_hash IN (SELECT FOO_KEY_HASH
+                                 from foo
+                              )
+ GROUP BY
+          rawBar.foo_key
+""",
+
+trim_leading_whitespace="""\
+WITH foo as
+(
+    SELECT DISTINCT
+           base.FOO_KEY_HASH AS FOO_KEY_HASH
+         ,
+      FROM `project-with-dashes`.`schema_name`.`table_name` AS base
+     WHERE ( base.tiger = "striped" )
+       AND ( base.zebra = "also_striped" )
+       AND ( base.buffalo = "1" )
+       AND ( ( base.SOMEDATE >= "2022-02-28"
+           AND base.SOMEDATE <= "2023-04-03" ) )
+)
+SELECT ARRAY_AGG( DISTINCT STRUCT(rawBar.bar_key AS barKey,
+        rawBar.bar_value AS barValue) IGNORE NULLS) AS dimensions
+     , rawBar.foo_key AS foo_key
+  FROM `project-with-dashes.different_schema.different_table` rawBar
+ where rawBar.foo_key_hash IN (SELECT FOO_KEY_HASH
+                                 from foo
+                              )
+ GROUP BY rawBar.foo_key
+""",
+
+compact_expressions="""\
+WITH foo as
+(
+    SELECT DISTINCT
+           base.FOO_KEY_HASH AS FOO_KEY_HASH
+         ,
+      FROM `project-with-dashes`.`schema_name`.`table_name` AS base
+     WHERE (base.tiger = "striped")
+       AND (base.zebra = "also_striped")
+       AND (base.buffalo = "1")
+       AND ((base.SOMEDATE >= "2022-02-28" AND base.SOMEDATE <= "2023-04-03"))
+)
+SELECT ARRAY_AGG(DISTINCT STRUCT(rawBar.bar_key AS barKey, rawBar.bar_value AS barValue) IGNORE NULLS) AS dimensions
+     , rawBar.foo_key AS foo_key
+  FROM `project-with-dashes.different_schema.different_table` rawBar
+ where rawBar.foo_key_hash IN (SELECT FOO_KEY_HASH
+                                 from foo
+                              )
+ GROUP BY rawBar.foo_key
+""",
+)
+
 
 @pytest.mark.parametrize(
     "test_input,expected_output",

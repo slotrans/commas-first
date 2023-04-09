@@ -460,6 +460,34 @@ def test_render_simple_expressions_distinct_qualifier():
     assert expected == actual
 
 
+def test_render_simple_expressions_distinct_qualifier_indented():
+    # "select distinct foo, bar, baz"
+    clause = SelectClause(tokens=[
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "distinct"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
+    ])
+
+    expected = (
+            "select distinct\n"
+        "           foo\n"
+        "         , bar\n"
+        "         , baz"
+    )
+    actual = clause.render(indent=4)
+
+    print(actual)
+    assert expected == actual
+
+
 def test_render_simple_expressions_distinct_qualifier_preformatted():
     # select distinct
     #        foo
