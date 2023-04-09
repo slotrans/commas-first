@@ -511,7 +511,7 @@ class BasicClause:
 
     def _parse(self, tokens):
         i = 1 # we already know token 0 is the starting delimiter
-        delimiters = [self.STARTING_DELIMITER]
+        delimiters = [tokens[0]]
         expressions = []
         paren_depth = 0
         buffer = []
@@ -607,7 +607,7 @@ class SelectClause:
 
     def _parse(self, tokens):
         i = 1
-        delimiters = [self.STARTING_DELIMITER]
+        delimiters = [tokens[0]]
 
         # check for ALL, DISTINCT, DISTINCT ON(...)
         qualifier = None
