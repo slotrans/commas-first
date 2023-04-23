@@ -101,6 +101,7 @@ Keywords = SimpleNamespace(
     FULL_JOIN          = CFToken(CFTokenKind.WORD, "full join"),
     FULL_OUTER_JOIN    = CFToken(CFTokenKind.WORD, "full outer join"),
     GROUP_BY           = CFToken(CFTokenKind.WORD, "group by"),
+    HAVING             = CFToken(CFTokenKind.WORD, "having"),
     INNER_JOIN         = CFToken(CFTokenKind.WORD, "inner join"),
     INTERSECT          = CFToken(CFTokenKind.WORD, "intersect"),
     INTERSECT_ALL      = CFToken(CFTokenKind.WORD, "intersect all"),

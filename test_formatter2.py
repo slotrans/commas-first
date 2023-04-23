@@ -959,6 +959,72 @@ SELECT ARRAY_AGG(DISTINCT STRUCT(rawBar.bar_key AS barKey, rawBar.bar_value AS b
 )
 
 
+qft.group_having_order = dict(
+input="""\
+select foo, bar, baz, count(1)
+from table1 join table2 on(table1.id = table2.table1_id)
+where 1=1 and foo > bar
+group by foo, bar, baz
+having count(1) >= 2
+order by foo, bar, count(1) desc
+""",
+
+default="""\
+select foo
+     , bar
+     , baz
+     , count(1)
+  from table1
+  join table2 on(table1.id = table2.table1_id)
+ where 1=1
+   and foo > bar
+ group by foo
+        , bar
+        , baz
+having count(1) >= 2
+ order by foo
+        , bar
+        , count(1) desc
+""",
+
+trim_leading_whitespace="""\
+select foo
+     , bar
+     , baz
+     , count(1)
+  from table1
+  join table2 on(table1.id = table2.table1_id)
+ where 1=1
+   and foo > bar
+ group by foo
+        , bar
+        , baz
+having count(1) >= 2
+ order by foo
+        , bar
+        , count(1) desc
+""",
+
+compact_expressions="""\
+select foo
+     , bar
+     , baz
+     , count(1)
+  from table1
+  join table2 on(table1.id = table2.table1_id)
+ where 1=1
+   and foo > bar
+ group by foo
+        , bar
+        , baz
+having count(1) >= 2
+ order by foo
+        , bar
+        , count(1) desc
+""",
+)
+
+
 @pytest.mark.parametrize(
     "test_input,expected_output",
     zip(qft.get_inputs(), qft.get_outputs__default()),

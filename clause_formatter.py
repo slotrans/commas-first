@@ -746,6 +746,15 @@ class GroupByClause(BasicClause):
     PADDING = 9
 
 
+class HavingClause(BasicClause):
+    STARTING_DELIMITER = Keywords.HAVING
+    OTHER_DELIMITERS = set([
+        Keywords.AND,
+        Keywords.OR
+    ])
+    PADDING = 6
+
+
 class OrderByClause(BasicClause):
     STARTING_DELIMITER = Keywords.ORDER_BY
     OTHER_DELIMITERS = set([Symbols.COMMA])
@@ -845,7 +854,7 @@ class ClauseScope(enum.IntEnum):
     FROM = 4
     WHERE = 5
     GROUP_BY = 6
-    #HAVING = 7 #NYI
+    HAVING = 7
     #WINDOW = 8 #NYI
     ORDER_BY = 9
     LIMIT_OFFSET = 10
@@ -858,7 +867,7 @@ KEYWORD_SCOPE_MAP = {
     Keywords.FROM: ClauseScope.FROM,
     Keywords.WHERE: ClauseScope.WHERE,
     Keywords.GROUP_BY: ClauseScope.GROUP_BY,
-    #Keywords.HAVING: ClauseScope.HAVING,
+    Keywords.HAVING: ClauseScope.HAVING,
     #Keywords.WINDOW: ClauseScope.WINDOW,
     Keywords.ORDER_BY: ClauseScope.ORDER_BY,
     Keywords.LIMIT: ClauseScope.LIMIT_OFFSET,
@@ -873,7 +882,7 @@ SCOPE_CLAUSE_MAP = {
     ClauseScope.FROM: FromClause,
     ClauseScope.WHERE: WhereClause,
     ClauseScope.GROUP_BY: GroupByClause,
-    #ClauseScope.HAVING: HavingClause,
+    ClauseScope.HAVING: HavingClause,
     #ClauseScope.WINDOW: WindowClause,
     ClauseScope.ORDER_BY: OrderByClause,
     ClauseScope.LIMIT_OFFSET: LimitOffsetClause,
