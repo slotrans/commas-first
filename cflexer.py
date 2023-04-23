@@ -30,6 +30,7 @@ THREE_WORD_PHRASES = [
 TWO_WORD_PHRASES = [
     'cross join',
     'distinct on',
+    'inner join',
     'left join',
     'right join',
     'group by',

@@ -675,6 +675,38 @@ class TestFromClause:
         assert expected == actual
 
 
+    # arguably we should just discard "inner"...
+    def test_render_inner_join(self):
+        # "from foo inner join bar on(foo.x = bar.x)"
+        clause = FromClause(tokens=[
+            CFToken(CFTokenKind.WORD, "from"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "inner join"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "on"),
+            CFToken(CFTokenKind.SYMBOL, "("),
+            CFToken(CFTokenKind.WORD, "foo.x"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar.x"),
+            CFToken(CFTokenKind.SYMBOL, ")"),
+        ])
+
+        expected = (
+            "  from foo\n"
+            "  inner join bar on(foo.x = bar.x)"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual        
+
+
     def test_render_join_with_dbt_templating(self):
         # "from foo join {{ ref('__bar') }} bar on(foo.x = bar.x) join baz on(bar.y = baz.y)"
         clause = FromClause(tokens=[

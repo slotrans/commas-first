@@ -228,6 +228,7 @@ def test_two_word_key_phrases():
     phrases = [
         'cross join',
         'distinct on',
+        'inner join',
         'left join',
         'right join',
         'group by',
