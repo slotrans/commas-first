@@ -1,5 +1,6 @@
 import re
 
+import cf_flags
 from cftoken import CFToken, CFTokenKind, Symbols
 
 
@@ -131,6 +132,7 @@ def lex(input_string):
             match_res = RE_TWO_WORD_KEYPHRASE.match(input_string[i:])
         if match_res:
             keyphrase = match_res[0]
+            keyphrase = keyphrase.lower() if cf_flags.LOWER_CASE else keyphrase
             tokens.append(CFToken(CFTokenKind.WORD, keyphrase))
             i += len(keyphrase)
             continue
@@ -141,6 +143,7 @@ def lex(input_string):
         match_res = RE_ALPHANUMERIC_WORD.match(input_string[i:])
         if match_res:
             word = match_res[0]
+            word = word.lower() if cf_flags.LOWER_CASE else word
             tokens.append(CFToken(CFTokenKind.WORD, word))
             i += len(word)
             continue

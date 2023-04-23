@@ -12,8 +12,12 @@ class FormatMode(enum.Enum):
 
 
 FORMAT_MODE = FormatMode.DEFAULT
+LOWER_CASE = False
 
 
 def reset_to_defaults():
     global FORMAT_MODE
     FORMAT_MODE = FormatMode.DEFAULT
+
+    global LOWER_CASE
+    LOWER_CASE = False

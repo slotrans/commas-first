@@ -48,6 +48,11 @@ def main(args):
     else:
         cf_flags.FORMAT_MODE = cf_flags.FormatMode.DEFAULT
 
+    if args.lower_case:
+        cf_flags.LOWER_CASE = True
+    else:
+        cf_flags.LOWER_CASE = False
+
     # read
     unformatted_code = sys.stdin.read()
 
@@ -66,6 +71,8 @@ if __name__ == "__main__":
     mx_group = parser.add_mutually_exclusive_group(required=False)
     mx_group.add_argument("--trim-leading-whitespace", action="store_true", help="Trim leading whitespace from expressions")
     mx_group.add_argument("--compact-expressions", action="store_true", help="Remove most internal space from expressions (strictly more aggressive than --trim-leading-whitespace)")
+
+    parser.add_argument("--lower-case", action="store_true", help="Lower-case everything that's not a literal")
 
     args = parser.parse_args()
 
