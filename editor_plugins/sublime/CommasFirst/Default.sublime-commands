@@ -1,0 +1,17 @@
+[
+  {
+    "caption": "CommasFirst",
+    "command": "commas_first_formatter",
+    "args": {"mode": "DEFAULT"}
+  },
+  {
+    "caption": "CommasFirst mode=TRIM_TRAILING_WHITESPACE",
+    "command": "commas_first_formatter",
+    "args": {"mode": "TRIM_TRAILING_WHITESPACE"}
+  },
+  {
+    "caption": "CommasFirst mode=COMPACT_EXPRESSIONS",
+    "command": "commas_first_formatter",
+    "args": {"mode": "COMPACT_EXPRESSIONS"}
+  }
+]
