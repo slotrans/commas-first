@@ -440,3 +440,97 @@ class TestWhereClause:
 
         print(actual)
         assert expected == actual
+
+
+    def test_render_between(self):
+        # where 1=1
+        #   and foo between 0 and 9
+        clause = WhereClause(tokens=[
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "between"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "9"),
+        ])
+
+        expected = (
+            " where 1=1\n"
+            "   and foo between 0 and 9"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
+
+
+    def test_render_case(self):
+        # where 1=1
+        #   and case when foo > 0
+        #             and bar > 0
+        #            then true
+        #            else false
+        #             end
+        clause = WhereClause(tokens=[
+            CFToken(CFTokenKind.WORD, "where"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "1"),
+            CFToken(CFTokenKind.SYMBOL, "="),
+            CFToken(CFTokenKind.WORD, "1"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "   "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "case"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "when"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "foo"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ">"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "            "),
+            CFToken(CFTokenKind.WORD, "and"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "bar"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.SYMBOL, ">"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "0"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "           "),
+            CFToken(CFTokenKind.WORD, "then"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "true"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "           "),
+            CFToken(CFTokenKind.WORD, "else"),
+            CFToken(CFTokenKind.SPACES, " "),
+            CFToken(CFTokenKind.WORD, "false"),
+            Whitespace.NEWLINE,
+            CFToken(CFTokenKind.SPACES, "            "),
+            CFToken(CFTokenKind.WORD, "end"),
+        ])
+
+        expected = (
+            " where 1=1\n"
+            "   and foo between 0 and 9"
+        )
+        actual = clause.render(indent=0)
+
+        print(actual)
+        assert expected == actual
