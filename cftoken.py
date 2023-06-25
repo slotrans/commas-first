@@ -91,9 +91,12 @@ class CFToken:
 Keywords = SimpleNamespace(
     ALL                = CFToken(CFTokenKind.WORD, "all"),
     AND                = CFToken(CFTokenKind.WORD, "and"),
+    BETWEEN            = CFToken(CFTokenKind.WORD, "between"),
+    CASE               = CFToken(CFTokenKind.WORD, "case"),
     CROSS_JOIN         = CFToken(CFTokenKind.WORD, "cross join"),
     DISTINCT           = CFToken(CFTokenKind.WORD, "distinct"),
     DISTINCT_ON        = CFToken(CFTokenKind.WORD, "distinct on"),
+    END                = CFToken(CFTokenKind.WORD, "end"),
     EXCEPT             = CFToken(CFTokenKind.WORD, "except"),
     EXCEPT_ALL         = CFToken(CFTokenKind.WORD, "except all"),
     EXCEPT_DISTINCT    = CFToken(CFTokenKind.WORD, "except distinct"),

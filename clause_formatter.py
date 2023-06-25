@@ -739,6 +739,52 @@ class WhereClause(BasicClause):
     ])
     PADDING = 6
 
+    # this is pasted from BasicClause! keep them in sync! (or figure out how to merge them)
+    def _parse(self, tokens):
+        i = 1 # we already know token 0 is the starting delimiter
+        delimiters = [tokens[0]]
+        expressions = []
+        paren_depth = 0
+        between_depth = 0
+        case_depth = 0
+        buffer = []
+        while i < len(tokens):
+            if (
+                paren_depth == 0
+                and tokens[i] in self.OTHER_DELIMITERS
+                # if we're inside BETWEEN or CASE, don't treat AND/OR as delimiters
+                and (
+                    tokens[i] not in (Keywords.AND, Keywords.OR)
+                    or (between_depth == 0 and case_depth == 0)
+                )
+            ):
+                delimiters.append(tokens[i])
+                expressions.append(Expression(buffer))
+                buffer = []
+            else:
+                if tokens[i] == Symbols.LEFT_PAREN:
+                    paren_depth += 1
+                elif tokens[i] == Symbols.RIGHT_PAREN:
+                    #TODO: detect unbalanced parens
+                    paren_depth -= 1
+                elif tokens[i] == Keywords.BETWEEN:
+                    between_depth += 1
+                elif tokens[i] == Keywords.AND and between_depth > 0:
+                    between_depth -= 1
+                elif tokens[i] == Keywords.CASE:
+                    case_depth += 1
+                elif tokens[i] == Keywords.END:
+                    case_depth -= 1
+                buffer.append(tokens[i])
+            i += 1
+        # one final expression, empty in the weird/broken case where the final token was JOIN or etc
+        if len(buffer) > 0 or len(delimiters) > len(expressions):
+            expressions.append(Expression(buffer))
+
+        assert len(delimiters) == len(expressions)
+
+        return (delimiters, expressions)
+
 
 class GroupByClause(BasicClause):
     STARTING_DELIMITER = Keywords.GROUP_BY

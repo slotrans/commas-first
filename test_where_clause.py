@@ -503,7 +503,7 @@ class TestWhereClause:
             CFToken(CFTokenKind.SPACES, " "),
             CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            CFToken(CFTokenKind.SPACES, "            "),
+            CFToken(CFTokenKind.SPACES, "             "),
             CFToken(CFTokenKind.WORD, "and"),
             CFToken(CFTokenKind.SPACES, " "),
             CFToken(CFTokenKind.WORD, "bar"),
@@ -512,23 +512,27 @@ class TestWhereClause:
             CFToken(CFTokenKind.SPACES, " "),
             CFToken(CFTokenKind.WORD, "0"),
             Whitespace.NEWLINE,
-            CFToken(CFTokenKind.SPACES, "           "),
+            CFToken(CFTokenKind.SPACES, "            "),
             CFToken(CFTokenKind.WORD, "then"),
             CFToken(CFTokenKind.SPACES, " "),
             CFToken(CFTokenKind.WORD, "true"),
             Whitespace.NEWLINE,
-            CFToken(CFTokenKind.SPACES, "           "),
+            CFToken(CFTokenKind.SPACES, "            "),
             CFToken(CFTokenKind.WORD, "else"),
             CFToken(CFTokenKind.SPACES, " "),
             CFToken(CFTokenKind.WORD, "false"),
             Whitespace.NEWLINE,
-            CFToken(CFTokenKind.SPACES, "            "),
+            CFToken(CFTokenKind.SPACES, "             "),
             CFToken(CFTokenKind.WORD, "end"),
         ])
 
         expected = (
             " where 1=1\n"
-            "   and foo between 0 and 9"
+            "   and case when foo > 0\n"
+            "             and bar > 0\n"
+            "            then true\n"
+            "            else false\n"
+            "             end"
         )
         actual = clause.render(indent=0)
 

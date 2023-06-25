@@ -1025,6 +1025,100 @@ having count(1) >= 2
 )
 
 
+qft.between_in_where = dict(
+input="""\
+select foo
+  from bar
+ where 1=1
+   and baz between 1000
+               and 9999
+   and something > else
+""",
+
+default="""\
+select foo
+  from bar
+ where 1=1
+   and baz between 1000
+               and 9999
+   and something > else
+""",
+
+trim_leading_whitespace="""\
+select foo
+  from bar
+ where 1=1
+   and baz between 1000
+               and 9999
+   and something > else
+""",
+
+compact_expressions="""\
+select foo
+  from bar
+ where 1=1
+   and baz between 1000 and 9999
+   and something > else
+""",
+)
+
+
+qft.case_in_where = dict(
+input="""\
+select foo
+  from bar
+ where 1=1
+   and case when foo > 0
+             and bar > 0
+            then 'both positive'
+            when foo < 0
+             and bar < 0
+            then 'both negative'
+            else 'who cares'
+             end like 'both%'
+   and something > else
+""",
+
+default="""\
+select foo
+  from bar
+ where 1=1
+   and case when foo > 0
+             and bar > 0
+            then 'both positive'
+            when foo < 0
+             and bar < 0
+            then 'both negative'
+            else 'who cares'
+             end like 'both%'
+   and something > else
+""",
+
+trim_leading_whitespace="""\
+select foo
+  from bar
+ where 1=1
+   and case when foo > 0
+             and bar > 0
+            then 'both positive'
+            when foo < 0
+             and bar < 0
+            then 'both negative'
+            else 'who cares'
+             end like 'both%'
+   and something > else
+""",
+
+compact_expressions="""\
+select foo
+  from bar
+ where 1=1
+   and case when foo > 0 and bar > 0 then 'both positive' when foo < 0 and bar < 0 then 'both negative' else 'who cares' end like 'both%'
+   and something > else
+""",
+)
+
+
 @pytest.mark.parametrize(
     "test_input,expected_output",
     zip(qft.get_inputs(), qft.get_outputs__default()),
