@@ -285,6 +285,9 @@ class Expression:
                         if extra_spaces > 0:
                             out += " " * extra_spaces
                             effective_indent = extra_spaces
+                elif e.kind in (CFTokenKind.LINE_COMMENT, CFTokenKind.BLOCK_COMMENT):
+                    # if a newline is immediately followed by a comment, don't add any spaces
+                    pass
                 else:
                     # otherwise, add enough spaces to reach the indent
                     out += " " * indent

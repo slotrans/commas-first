@@ -106,6 +106,40 @@ def test_render_simple_expressions_line_comment_no_qualifier():
     assert expected == actual
 
 
+def test_render_simple_expressions_line_comment_no_qualifier2():
+    #select foo
+    #     , bar
+    #--LINE COMMENT
+    #     , baz
+    clause = SelectClause(tokens=[
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        Whitespace.NEWLINE,
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        Whitespace.NEWLINE,
+        CFToken(CFTokenKind.LINE_COMMENT, "--LINE COMMENT\n"),
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
+    ])
+
+    expected = (
+        "select foo\n"
+        "     , bar\n"
+        "--LINE COMMENT\n"
+        "     , baz"
+    )
+    actual = clause.render(indent=0)
+
+    print(actual)
+    assert expected == actual
+
+
 def test_render_simple_expressions_block_comment_no_qualifier():
     #select foo
     #     , bar
@@ -173,6 +207,41 @@ def test_render_simple_expressions_block_comment_no_qualifier2():
         "     , bar\n"
         "/* BLOCK\n"
         "   COMMENT */\n"
+        "     , baz"
+    )
+    actual = clause.render(indent=0)
+
+    print(actual)
+    assert expected == actual
+
+
+def test_render_simple_expressions_block_comment_no_qualifier3():
+    #select foo
+    #     , bar /* BLOCK
+    #              COMMENT */
+    #     , baz
+    clause = SelectClause(tokens=[
+        CFToken(CFTokenKind.WORD, "select"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "foo"),
+        Whitespace.NEWLINE,
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "bar"),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.BLOCK_COMMENT, "/* BLOCK\n              COMMENT */"),
+        Whitespace.NEWLINE,
+        CFToken(CFTokenKind.SPACES, "     "),
+        CFToken(CFTokenKind.SYMBOL, ","),
+        CFToken(CFTokenKind.SPACES, " "),
+        CFToken(CFTokenKind.WORD, "baz"),
+    ])
+
+    expected = (
+        "select foo\n"
+        "     , bar /* BLOCK\n"
+        "              COMMENT */\n"
         "     , baz"
     )
     actual = clause.render(indent=0)
