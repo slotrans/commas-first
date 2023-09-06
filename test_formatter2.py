@@ -437,6 +437,57 @@ select foo
 """,
 )
 
+qft.union_all_in_cte = dict(
+input="""\
+with ctename as (select foo, bar from table1 union all select foo, bar from table2) select * from ctename
+""",
+
+default="""\
+with ctename as
+(
+    select foo
+         , bar
+      from table1
+    union all
+    select foo
+         , bar
+      from table2
+)
+select *
+  from ctename
+""",
+
+trim_leading_whitespace="""\
+with ctename as
+(
+    select foo
+         , bar
+      from table1
+    union all
+    select foo
+         , bar
+      from table2
+)
+select *
+  from ctename
+""",
+
+compact_expressions="""\
+with ctename as
+(
+    select foo
+         , bar
+      from table1
+    union all
+    select foo
+         , bar
+      from table2
+)
+select *
+  from ctename
+""",
+)
+
 qft.window_function = dict(
 input="""\
 select foo, lead(foo, 1) over(order by event_datetime) as NEXT_FOO from bar where 1=1
