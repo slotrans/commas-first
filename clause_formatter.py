@@ -1059,11 +1059,24 @@ class CompoundStatement:
         set_operations = []
         buffer = []
         seeking_statement_start = True
-        for i, tok in enumerate(tokens):
+        i = 0
+        while i < len(tokens):
+            tok = tokens[i]
             # TODO: "(statement) set_op (statement)" is allowed so some paren-awareness is needed
             if seeking_statement_start is True and tok.is_whitespace:
                 # drop any whitespace that precedes SELECT/WITH
                 pass
+            elif tok == Symbols.LEFT_PAREN and next_real_token(tokens[i+1:]) in [Keywords.SELECT, Keywords.WITH]:
+                subquery_tokens = get_paren_block(tokens[i:])
+                if subquery_tokens is None:
+                    # unbalanced parens
+                    pass
+                else:
+                    buffer.append(Symbols.LEFT_PAREN)
+                    buffer.append(CompoundStatement(subquery_tokens[1:-1]))
+                    buffer.append(Symbols.RIGHT_PAREN)
+                    i += len(subquery_tokens)
+                    continue
             elif tok in self.SET_OP_KEYWORDS:
                 statements.append(Statement(buffer))
                 set_operations.append(tok)
@@ -1073,6 +1086,9 @@ class CompoundStatement:
                 buffer.append(tok)
                 if tok in (Keywords.SELECT, Keywords.WITH):
                     seeking_statement_start = False
+
+            i += 1
+
         # final statement
         if len(buffer) > 0:
             statements.append(Statement(buffer))
